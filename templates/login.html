@@ -1,0 +1,43 @@
+{% extends "non_angular.html" %}
+
+{% block title %} Login {% endblock %}
+
+{% block content %}
+<div class="span4 offset4">
+  <form class="form-horizontal">
+    <div class="row">
+      <div class="span4">
+        <div class="control-group">
+          <input type="text" value="" placeholder="Username" class="span4" />
+          <i class="input-icon fui-user"></i>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="span4">
+        <div class="control-group">
+          <input type="password" value="" placeholder="Password" class="span4" />
+          <i class="input-icon fui-lock"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="span3 offset1">
+        <label class="checkbox" for="checkbox1">
+          <input type="checkbox" value="" id="checkbox1" data-toggle="checkbox">
+          Remember me
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="span3 offset1">
+        <button type="submit" class="btn brn-large btn-block btn-primary">Sign in
+        </button>
+      </div>
+    </div>
+
+  </form>
+</div>
+{% endblock %}

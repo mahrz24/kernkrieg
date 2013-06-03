@@ -1,0 +1,43 @@
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+
+.kernkrieg-headline {
+  padding: 0px 0 110px;
+  text-align: center;
+}
+.kernkrieg-logo {
+  font-size: 90px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 100px;
+}
+.kernkrieg-logo .logo {
+  background: url(../images/kernkrieg/logo-mask.png) center 0 no-repeat;
+  background-size: 256px 186px;
+  height: 186px;
+  margin: 0 auto 26px;
+  overflow: hidden;
+  text-indent: -9999em;
+  width: 256px;
+}
+
+.kernkrieg-logo small {
+  color: rgba(52, 73, 94, 0.30000000000000004);
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  padding-top: 5px;
+}
+
+
+
+
+
+
+
+
