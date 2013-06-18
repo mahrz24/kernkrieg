@@ -5,29 +5,28 @@ from flask import render_template
 # Flask Login
 from flask.ext.login import *
 
+# Forms
+from forms import LoginForm
+
 # Database & Models
-from models import (db, User)
-
-# Hashes
-from flask.ext.bcrypt import Bcrypt
+from models import (db, bcrypt, User)
 
 
-
-
-app = Flask(__name__, static_url_path='')
+app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 app.config['SECRET_KEY'] = "KERNKRIEGFTW"
 
 login_manager = LoginManager()
-bcrypt = Bcrypt(app)
+
 db.init_app(app)
 login_manager.init_app(app)
+bcrypt.init_app(app)
 
 
 # User management
 login_manager.login_view = "login"
 login_manager.login_message = u"Please log in to access this page."
-login_manager.refresh_view = "reauth"
+login_manager.refresh_view = "index"
 
 
 @login_manager.user_loader
@@ -52,26 +51,31 @@ def reset_db():
 
 @app.route('/')
 @login_required
-def hello_world():
-    print(len(bcrypt.generate_password_hash('hunter2')))
+def index():
     return render_template('demo.html')
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST" and "username" in request.form:
-        username = request.form["username"]
-        users = User.query.filter_by(name=username)
-        if users:
-            remember = request.form.get("remember", "no") == "yes"
-            if login_user(users.first().id, remember=remember):
-                flash("Logged in!")
-                return redirect(request.args.get("next") or url_for("index"))
-            else:
-                flash("Sorry, but you could not log in.")
+    form = LoginForm()
+    if form.validate_on_submit():
+        if login_user(form.user, remember=form.remember):
+            print("Logged in!")
+            print(url_for("index"))
+            flash("Logged in!")
+            return redirect(request.args.get("next") or url_for("index"))
         else:
-            flash(u"Invalid username.")
-    return render_template("login.html")
+            flash("Sorry, but you could not log in.")
+
+    return render_template("login.html", form=form)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash(u"Logged out")
+    return redirect(url_for("login", next=url_for("index")))
 
 
 if __name__ == '__main__':

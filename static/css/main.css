@@ -16,10 +16,10 @@
   line-height: 100px;
 }
 .kernkrieg-logo .logo {
-  background: url(../images/kernkrieg/logo-mask.png) center 0 no-repeat;
-  background-size: 256px 186px;
-  height: 186px;
-  margin: 0 auto 26px;
+  background: url(../img/logo.png) center 0 no-repeat;
+  background-size: 128px 128px;
+  height: 128px;
+  margin: 0 auto 70px;
   overflow: hidden;
   text-indent: -9999em;
   width: 256px;

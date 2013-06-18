@@ -3,36 +3,55 @@
 {% block title %} Login {% endblock %}
 
 {% block content %}
+
 <div class="span4 offset4">
-  <form class="form-horizontal">
+
+  {% if messages %}
+  <div class="well">
+    <ul class=flashes>
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <form class="form-horizontal" action="" method=post>
+    {{ form.csrf_token }}
     <div class="row">
       <div class="span4">
-        <div class="control-group">
-          <input type="text" value="" placeholder="Username" class="span4" />
+        <div class="control-group {% if form.username.errors %}error{% endif %}">
+          <input type="text" value="{% if form.username.data %}{{form.username.data}}{% endif %}" name="username" placeholder="Username" class="span4" {% if form.errors %}
+         data-toggle="tooltip" title="{% for error in form.username.errors %}{{error}}{% endfor %}"
+        {% endif %} />
           <i class="input-icon fui-user"></i>
         </div>
+
       </div>
     </div>
     <div class="row">
+
       <div class="span4">
-        <div class="control-group">
-          <input type="password" value="" placeholder="Password" class="span4" />
+        <div class="control-group {% if form.password.errors %}error{% endif %}" >
+          <input type="password" value="" name="password" placeholder="Password" class="span4" {% if form.errors %}
+         data-toggle="tooltip" title="{% for error in form.password.errors %}{{error}}{% endfor %}"
+        {% endif %}/>
           <i class="input-icon fui-lock"></i>
         </div>
       </div>
     </div>
 
     <div class="row">
-      <div class="span3 offset1">
+      <div class="span2 offset2">
         <label class="checkbox" for="checkbox1">
-          <input type="checkbox" value="" id="checkbox1" data-toggle="checkbox">
+          <input type="checkbox" value="" name="remember" id="checkbox1" data-toggle="checkbox">
           Remember me
         </label>
       </div>
     </div>
 
     <div class="row">
-      <div class="span3 offset1">
+      <div class="span2 offset2">
         <button type="submit" class="btn brn-large btn-block btn-primary">Sign in
         </button>
       </div>
@@ -40,4 +59,6 @@
 
   </form>
 </div>
+
+
 {% endblock %}
