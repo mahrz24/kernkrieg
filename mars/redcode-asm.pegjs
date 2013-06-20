@@ -7,33 +7,53 @@
 // * { } address modes
 // seq snq nop ldp stp opcoces
 
+{
+
+    function Instruction(labels,operation,aexpr,bexpr)
+    {
+        this.labels = labels;
+        this.opcode = operation.opcode;
+        this.modifier = operation.modifier;
+        this.aexpression = aexpr;
+        this.bexpression = bexpr;
+    }
+
+}
+
 assembly_file = list
 
 list = line list / line
 
-line = (comment / instruction) "\n"
+line = l:(c:comment { return [[], c]} /
+          i:instruction { return [i.instruction,[i.comment]]})
+       "\n"
+    { return l; }
 
-comment = ";" [^\n]*
+comment = ";" cmt:[^\n]* { return cmt.join(""); }
 
 instruction = lbl:label? " "* op:operation " "
-                aexp:mode_expr
-                bexp:("," " "* bexp:mode_expr {return bexp;})?
-                cmt:comment? { return { "labels" : JSON.stringify(lbl),
-                                        "opcode" : op,
-                                        "aexp" : aexp,
-                                        "bexp" : bexp,
-                                        "cmt" : cmt }; }
+                aexpr:mode_expr
+                bexpr:("," " "* expr:mode_expr {return expr;})?
+                cmt:comment?
+    { return { instruction: new Instruction(lbl,
+                                            op,
+                                            aexpr,
+                                            bexpr),
+                comment: cmt }; }
 
 label = lbls:label_list ":" { return lbls; }
 
 label_list = lhd:label_name
              lbls:((" "+ l:label_list) { return l;} /
                    ("\n" l:label_list) { return l;} /
-                   " "* { return new Array(); } ) { return lbls.concat([lhd]); }
+                   " "* { return new Array(); } )
+    { return lbls.concat([lhd]); }
 
-label_name = lbl:([a-zA-Z] [a-zA-Z0-9]*) { return { "label" : lbl[0] + lbl[1].join("")}; }
+label_name = lbl:([a-zA-Z] [a-zA-Z0-9]*)
+    { return lbl[0] + lbl[1].join(""); }
 
-operation = opcode "." modifier / opcode
+operation = opc:opcode mod:("." m:modifier {return m;})?
+    { return { opcode: opc, modifier: mod}; }
 
 opcode = "dat"i / "mov"i / "add"i / "sub"i / "mul"i / "div"i / "mod"i
          "jmp"i / "jmz"i / "jmn"i / "djn"i / "cmp"i / "slt"i / "spl"i

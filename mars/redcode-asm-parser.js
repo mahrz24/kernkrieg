@@ -135,12 +135,27 @@ module.exports = (function(){
       
       function parse_line() {
         var result0, result1;
-        var pos0;
+        var pos0, pos1, pos2;
         
         pos0 = pos;
+        pos1 = pos;
+        pos2 = pos;
         result0 = parse_comment();
+        if (result0 !== null) {
+          result0 = (function(offset, c) { return [[], c]})(pos2, result0);
+        }
         if (result0 === null) {
+          pos = pos2;
+        }
+        if (result0 === null) {
+          pos2 = pos;
           result0 = parse_instruction();
+          if (result0 !== null) {
+            result0 = (function(offset, i) { return [i.instruction,[i.comment]]})(pos2, result0);
+          }
+          if (result0 === null) {
+            pos = pos2;
+          }
         }
         if (result0 !== null) {
           if (input.charCodeAt(pos) === 10) {
@@ -156,10 +171,16 @@ module.exports = (function(){
             result0 = [result0, result1];
           } else {
             result0 = null;
-            pos = pos0;
+            pos = pos1;
           }
         } else {
           result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, l) { return l; })(pos0, result0[0]);
+        }
+        if (result0 === null) {
           pos = pos0;
         }
         return result0;
@@ -167,9 +188,10 @@ module.exports = (function(){
       
       function parse_comment() {
         var result0, result1, result2;
-        var pos0;
+        var pos0, pos1;
         
         pos0 = pos;
+        pos1 = pos;
         if (input.charCodeAt(pos) === 59) {
           result0 = ";";
           pos++;
@@ -206,10 +228,16 @@ module.exports = (function(){
             result0 = [result0, result1];
           } else {
             result0 = null;
-            pos = pos0;
+            pos = pos1;
           }
         } else {
           result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, cmt) { return cmt.join(""); })(pos0, result0[1]);
+        }
+        if (result0 === null) {
           pos = pos0;
         }
         return result0;
@@ -312,7 +340,7 @@ module.exports = (function(){
                     pos = pos3;
                   }
                   if (result5 !== null) {
-                    result5 = (function(offset, bexp) {return bexp;})(pos2, result5[2]);
+                    result5 = (function(offset, expr) {return expr;})(pos2, result5[2]);
                   }
                   if (result5 === null) {
                     pos = pos2;
@@ -352,11 +380,11 @@ module.exports = (function(){
           pos = pos1;
         }
         if (result0 !== null) {
-          result0 = (function(offset, lbl, op, aexp, bexp, cmt) { return { "labels" : JSON.stringify(lbl),
-                                                "opcode" : op,
-                                                "aexp" : aexp,
-                                                "bexp" : bexp,
-                                                "cmt" : cmt }; })(pos0, result0[0], result0[2], result0[4], result0[5], result0[6]);
+          result0 = (function(offset, lbl, op, aexpr, bexpr, cmt) { return { instruction: new Instruction(lbl,
+                                                    op,
+                                                    aexpr,
+                                                    bexpr),
+                        comment: cmt }; })(pos0, result0[0], result0[2], result0[4], result0[5], result0[6]);
         }
         if (result0 === null) {
           pos = pos0;
@@ -584,7 +612,7 @@ module.exports = (function(){
           pos = pos1;
         }
         if (result0 !== null) {
-          result0 = (function(offset, lbl) { return { "label" : lbl[0] + lbl[1].join("")}; })(pos0, result0);
+          result0 = (function(offset, lbl) { return lbl[0] + lbl[1].join(""); })(pos0, result0);
         }
         if (result0 === null) {
           pos = pos0;
@@ -594,11 +622,14 @@ module.exports = (function(){
       
       function parse_operation() {
         var result0, result1, result2;
-        var pos0;
+        var pos0, pos1, pos2, pos3;
         
         pos0 = pos;
+        pos1 = pos;
         result0 = parse_opcode();
         if (result0 !== null) {
+          pos2 = pos;
+          pos3 = pos;
           if (input.charCodeAt(pos) === 46) {
             result1 = ".";
             pos++;
@@ -611,21 +642,37 @@ module.exports = (function(){
           if (result1 !== null) {
             result2 = parse_modifier();
             if (result2 !== null) {
-              result0 = [result0, result1, result2];
+              result1 = [result1, result2];
             } else {
-              result0 = null;
-              pos = pos0;
+              result1 = null;
+              pos = pos3;
             }
           } else {
+            result1 = null;
+            pos = pos3;
+          }
+          if (result1 !== null) {
+            result1 = (function(offset, m) {return m;})(pos2, result1[1]);
+          }
+          if (result1 === null) {
+            pos = pos2;
+          }
+          result1 = result1 !== null ? result1 : "";
+          if (result1 !== null) {
+            result0 = [result0, result1];
+          } else {
             result0 = null;
-            pos = pos0;
+            pos = pos1;
           }
         } else {
           result0 = null;
-          pos = pos0;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, opc, mod) { return { opcode: opc, modifier: mod}; })(pos0, result0[0], result0[1]);
         }
         if (result0 === null) {
-          result0 = parse_opcode();
+          pos = pos0;
         }
         return result0;
       }
@@ -1443,6 +1490,18 @@ module.exports = (function(){
         
         return { line: line, column: column };
       }
+      
+      
+      
+          function Instruction(labels,operation,aexpr,bexpr)
+          {
+              this.labels = labels;
+              this.opcode = operation.opcode;
+              this.modifier = operation.modifier;
+              this.aexpression = aexpr;
+              this.bexpression = bexpr;
+          }
+      
       
       
       var result = parseFunctions[startRule]();
