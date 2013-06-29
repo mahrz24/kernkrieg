@@ -1,5 +1,6 @@
-var redcode = require('./redcode-asm-parser.js');
+var redcode = require('./redcode-asm.js');
 
 console.log("Kernkrieg MARS Simulator Started");
 
-console.log(JSON.stringify(redcode.parse(";test \nstep start: equ (4+4);test comment\ntarget: dat.f #0, #0\n")));
+
+console.log(JSON.stringify(redcode.loadFile("./sample.rdc")));

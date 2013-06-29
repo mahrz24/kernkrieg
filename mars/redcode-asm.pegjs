@@ -18,15 +18,21 @@
         this.bexpression = bexpr;
     }
 
+    function ArithmeticOp(op,lhs,rhs)
+    {
+        this.op = op;
+        this.lhs = lhs;
+        this.rhs = rhs;
+    }
+
 }
 
 assembly_file = list
 
-list = line list / line
+list = line "\n" list / line "\n"?
 
 line = l:(c:comment { return [[], c]} /
           i:instruction { return [i.instruction,[i.comment]]})
-       "\n"
     { return l; }
 
 comment = ";" cmt:[^\n]* { return cmt.join(""); }
@@ -70,10 +76,11 @@ expr = term "*" expr / term "/" expr /
        term "+" expr / term "-" expr /
        term "%" expr / term
 
-term =  "(" expr ")" / label_name / number
+term =  "(" e:expr ")" { return e; } / label_name / number
 
-number = signed_integer / whole_number
+number = signed_integer / natural_number
 
-signed_integer = "+" whole_number / "-" whole_number
+signed_integer = "+" num:natural_number { return num; }
+  / "-" num:natural_number { return -num; }
 
-whole_number = [0-9]+
+natural_number = num:([0-9]+) { return parseInt(num.join(""), 10); }

@@ -53,7 +53,7 @@ module.exports = (function(){
         "term": parse_term,
         "number": parse_number,
         "signed_integer": parse_signed_integer,
-        "whole_number": parse_whole_number
+        "natural_number": parse_natural_number
       };
       
       if (startRule !== undefined) {
@@ -110,53 +110,11 @@ module.exports = (function(){
       }
       
       function parse_list() {
-        var result0, result1;
+        var result0, result1, result2;
         var pos0;
         
         pos0 = pos;
         result0 = parse_line();
-        if (result0 !== null) {
-          result1 = parse_list();
-          if (result1 !== null) {
-            result0 = [result0, result1];
-          } else {
-            result0 = null;
-            pos = pos0;
-          }
-        } else {
-          result0 = null;
-          pos = pos0;
-        }
-        if (result0 === null) {
-          result0 = parse_line();
-        }
-        return result0;
-      }
-      
-      function parse_line() {
-        var result0, result1;
-        var pos0, pos1, pos2;
-        
-        pos0 = pos;
-        pos1 = pos;
-        pos2 = pos;
-        result0 = parse_comment();
-        if (result0 !== null) {
-          result0 = (function(offset, c) { return [[], c]})(pos2, result0);
-        }
-        if (result0 === null) {
-          pos = pos2;
-        }
-        if (result0 === null) {
-          pos2 = pos;
-          result0 = parse_instruction();
-          if (result0 !== null) {
-            result0 = (function(offset, i) { return [i.instruction,[i.comment]]})(pos2, result0);
-          }
-          if (result0 === null) {
-            pos = pos2;
-          }
-        }
         if (result0 !== null) {
           if (input.charCodeAt(pos) === 10) {
             result1 = "\n";
@@ -168,17 +126,74 @@ module.exports = (function(){
             }
           }
           if (result1 !== null) {
-            result0 = [result0, result1];
+            result2 = parse_list();
+            if (result2 !== null) {
+              result0 = [result0, result1, result2];
+            } else {
+              result0 = null;
+              pos = pos0;
+            }
           } else {
             result0 = null;
-            pos = pos1;
+            pos = pos0;
           }
         } else {
           result0 = null;
+          pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          result0 = parse_line();
+          if (result0 !== null) {
+            if (input.charCodeAt(pos) === 10) {
+              result1 = "\n";
+              pos++;
+            } else {
+              result1 = null;
+              if (reportFailures === 0) {
+                matchFailed("\"\\n\"");
+              }
+            }
+            result1 = result1 !== null ? result1 : "";
+            if (result1 !== null) {
+              result0 = [result0, result1];
+            } else {
+              result0 = null;
+              pos = pos0;
+            }
+          } else {
+            result0 = null;
+            pos = pos0;
+          }
+        }
+        return result0;
+      }
+      
+      function parse_line() {
+        var result0;
+        var pos0, pos1;
+        
+        pos0 = pos;
+        pos1 = pos;
+        result0 = parse_comment();
+        if (result0 !== null) {
+          result0 = (function(offset, c) { return [[], c]})(pos1, result0);
+        }
+        if (result0 === null) {
           pos = pos1;
         }
+        if (result0 === null) {
+          pos1 = pos;
+          result0 = parse_instruction();
+          if (result0 !== null) {
+            result0 = (function(offset, i) { return [i.instruction,[i.comment]]})(pos1, result0);
+          }
+          if (result0 === null) {
+            pos = pos1;
+          }
+        }
         if (result0 !== null) {
-          result0 = (function(offset, l) { return l; })(pos0, result0[0]);
+          result0 = (function(offset, l) { return l; })(pos0, result0);
         }
         if (result0 === null) {
           pos = pos0;
@@ -1303,9 +1318,10 @@ module.exports = (function(){
       
       function parse_term() {
         var result0, result1, result2;
-        var pos0;
+        var pos0, pos1;
         
         pos0 = pos;
+        pos1 = pos;
         if (input.charCodeAt(pos) === 40) {
           result0 = "(";
           pos++;
@@ -1331,14 +1347,20 @@ module.exports = (function(){
               result0 = [result0, result1, result2];
             } else {
               result0 = null;
-              pos = pos0;
+              pos = pos1;
             }
           } else {
             result0 = null;
-            pos = pos0;
+            pos = pos1;
           }
         } else {
           result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, e) { return e; })(pos0, result0[1]);
+        }
+        if (result0 === null) {
           pos = pos0;
         }
         if (result0 === null) {
@@ -1355,16 +1377,17 @@ module.exports = (function(){
         
         result0 = parse_signed_integer();
         if (result0 === null) {
-          result0 = parse_whole_number();
+          result0 = parse_natural_number();
         }
         return result0;
       }
       
       function parse_signed_integer() {
         var result0, result1;
-        var pos0;
+        var pos0, pos1;
         
         pos0 = pos;
+        pos1 = pos;
         if (input.charCodeAt(pos) === 43) {
           result0 = "+";
           pos++;
@@ -1375,19 +1398,26 @@ module.exports = (function(){
           }
         }
         if (result0 !== null) {
-          result1 = parse_whole_number();
+          result1 = parse_natural_number();
           if (result1 !== null) {
             result0 = [result0, result1];
           } else {
             result0 = null;
-            pos = pos0;
+            pos = pos1;
           }
         } else {
           result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, num) { return num; })(pos0, result0[1]);
+        }
+        if (result0 === null) {
           pos = pos0;
         }
         if (result0 === null) {
           pos0 = pos;
+          pos1 = pos;
           if (input.charCodeAt(pos) === 45) {
             result0 = "-";
             pos++;
@@ -1398,24 +1428,32 @@ module.exports = (function(){
             }
           }
           if (result0 !== null) {
-            result1 = parse_whole_number();
+            result1 = parse_natural_number();
             if (result1 !== null) {
               result0 = [result0, result1];
             } else {
               result0 = null;
-              pos = pos0;
+              pos = pos1;
             }
           } else {
             result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, num) { return -num; })(pos0, result0[1]);
+          }
+          if (result0 === null) {
             pos = pos0;
           }
         }
         return result0;
       }
       
-      function parse_whole_number() {
+      function parse_natural_number() {
         var result0, result1;
+        var pos0;
         
+        pos0 = pos;
         if (/^[0-9]/.test(input.charAt(pos))) {
           result1 = input.charAt(pos);
           pos++;
@@ -1441,6 +1479,12 @@ module.exports = (function(){
           }
         } else {
           result0 = null;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, num) { return parseInt(num.join(""), 10); })(pos0, result0);
+        }
+        if (result0 === null) {
+          pos = pos0;
         }
         return result0;
       }
@@ -1500,6 +1544,13 @@ module.exports = (function(){
               this.modifier = operation.modifier;
               this.aexpression = aexpr;
               this.bexpression = bexpr;
+          }
+      
+          function ArithmeticOp(op,lhs,rhs)
+          {
+              this.op = op;
+              this.lhs = lhs;
+              this.rhs = rhs;
           }
       
       
