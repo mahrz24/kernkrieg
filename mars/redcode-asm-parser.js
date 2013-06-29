@@ -293,16 +293,34 @@ module.exports = (function(){
             result2 = parse_operation();
             if (result2 !== null) {
               if (input.charCodeAt(pos) === 32) {
-                result3 = " ";
+                result4 = " ";
                 pos++;
               } else {
-                result3 = null;
+                result4 = null;
                 if (reportFailures === 0) {
                   matchFailed("\" \"");
                 }
               }
+              if (result4 !== null) {
+                result3 = [];
+                while (result4 !== null) {
+                  result3.push(result4);
+                  if (input.charCodeAt(pos) === 32) {
+                    result4 = " ";
+                    pos++;
+                  } else {
+                    result4 = null;
+                    if (reportFailures === 0) {
+                      matchFailed("\" \"");
+                    }
+                  }
+                }
+              } else {
+                result3 = null;
+              }
               if (result3 !== null) {
                 result4 = parse_mode_expr();
+                result4 = result4 !== null ? result4 : "";
                 if (result4 !== null) {
                   pos2 = pos;
                   pos3 = pos;

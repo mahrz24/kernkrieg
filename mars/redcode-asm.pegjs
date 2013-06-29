@@ -37,8 +37,8 @@ line = l:(c:comment { return [[], c]} /
 
 comment = ";" cmt:[^\n]* { return cmt.join(""); }
 
-instruction = lbl:label? " "* op:operation " "
-                aexpr:mode_expr
+instruction = lbl:label? " "* op:operation " "+ // Fix here
+                aexpr:mode_expr?
                 bexpr:("," " "* expr:mode_expr {return expr;})?
                 cmt:comment?
     { return { instruction: new Instruction(lbl,
