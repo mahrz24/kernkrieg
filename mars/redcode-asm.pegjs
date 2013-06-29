@@ -14,8 +14,8 @@
         this.labels = labels;
         this.opcode = operation.opcode;
         this.modifier = operation.modifier;
-        this.aexpression = aexpr;
-        this.bexpression = bexpr;
+        this.afield = aexpr;
+        this.bfield = bexpr;
     }
 
     function ArithmeticOp(op,lhs,rhs)
@@ -29,7 +29,8 @@
 
 assembly_file = list
 
-list = line "\n" list / line "\n"?
+list = (l:line "\n"+ lst:list) { return [l].concat(lst)} /
+    (l:line "\n"*) { return [l];}
 
 line = l:(c:comment { return [[], c]} /
           i:instruction { return [i.instruction,[i.comment]]})
@@ -37,8 +38,8 @@ line = l:(c:comment { return [[], c]} /
 
 comment = ";" cmt:[^\n]* { return cmt.join(""); }
 
-instruction = lbl:label? " "* op:operation " "+ // Fix here
-                aexpr:mode_expr?
+instruction = lbl:label? " "* op:operation
+                aexpr:(" " " "* expr:mode_expr {return expr;})?
                 bexpr:("," " "* expr:mode_expr {return expr;})?
                 cmt:comment?
     { return { instruction: new Instruction(lbl,
@@ -59,24 +60,29 @@ label_name = lbl:([a-zA-Z] [a-zA-Z0-9]*)
     { return lbl[0] + lbl[1].join(""); }
 
 operation = opc:opcode mod:("." m:modifier {return m;})?
-    { return { opcode: opc, modifier: mod}; }
+    { return { opcode: opc.toLowerCase(), modifier: mod.toLowerCase()}; }
 
-opcode = "dat"i / "mov"i / "add"i / "sub"i / "mul"i / "div"i / "mod"i
-         "jmp"i / "jmz"i / "jmn"i / "djn"i / "cmp"i / "slt"i / "spl"i
+opcode = "dat"i / "mov"i / "add"i / "sub"i / "mul"i / "div"i / "mod"i /
+         "jmp"i / "jmz"i / "jmn"i / "djn"i / "cmp"i / "slt"i / "spl"i /
          "seq"i / "snq"i / "nop"i / "ldp"i / "stp"i /
-         "org"i / "equ"i / "end"i /
+         "org"i / "equ"i / "end"i
 
-modifier = "a"i / "b"i / "ab"i / "ba"i / "f"i / "x"i / "i"i
+modifier = "ab"i / "ba"i / "a"i / "b"i  / "f"i / "x"i / "i"i
 
 mode_expr = mode? expr
 
 mode = "#" / "$" / "@" / "<" / ">" / "*" / "{" / "}"
 
-expr = term "*" expr / term "/" expr /
-       term "+" expr / term "-" expr /
-       term "%" expr / term
+expr = term "*" expr /
+       term "/" expr /
+       term "+" expr /
+       term "-" expr /
+       term "%" expr /
+       term
 
-term =  "(" e:expr ")" { return e; } / label_name / number
+
+
+term =  "(" e:expr ")" / label_name / number
 
 number = signed_integer / natural_number
 
