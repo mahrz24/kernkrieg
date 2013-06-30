@@ -6,7 +6,8 @@ console.log("Kernkrieg MARS Simulator Started");
 var prog = redcode.assembleFile("./sample.rdc");
 
 var mars = new MARS(
-    10,
+    20,
+    0,
     100,
     MARS.random,
     300,

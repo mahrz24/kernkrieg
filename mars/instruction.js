@@ -33,15 +33,15 @@ module.exports = (function(){
         {opcode: opcode, modifier: ""}, ["",0], ["",0]);
     }
 
-    Instruction.randomInstruction = function()
+    Instruction.randomInstruction = function(coreSize)
     {
         return new Instruction([],
             {opcode: Instruction.opcodes.randomElement(),
              modifier: Instruction.modifiers.randomElement()},
             [Instruction.addressModes.randomElement(),
-             Math.floor(Math.random()*MAX_INT)-MAX_INT/2],
+             Math.floor(Math.random()*coreSize)],
             [Instruction.addressModes.randomElement(),
-             Math.floor(Math.random()*MAX_INT)-MAX_INT/2]);
+             Math.floor(Math.random()*coreSize)]);
     }
 
     Instruction.opcodes = [
