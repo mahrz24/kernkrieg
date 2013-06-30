@@ -1,19 +1,13 @@
-;;redcode
-;name Imp
-;author A.K. Dewdney
-;strict94
-        org     imp
-step:   equ     imp+(1-1)
-        mov.i   (imp+1)
-imp:    mov.i   #imp, imp-step
-        dat     imp
-        dat     imp
-        end
-        mov.f   imp, step
 ;redcode
-;version 4
-org 0
-mov.ab #0, >0
-dat -5
-mov.f 1
-seq
+;name   Imp
+;author A.K.  Dewdney
+;strict94
+org imp
+step:   equ   imp+(1 - 1)
+        mov.i (imp + 1)
+imp:    mov.i #imp, imp-step
+        dat   imp
+        dat   imp
+        mov.x >imp, @3
+        end
+        mov.f imp, step

@@ -16,15 +16,20 @@
         this.modifier = operation.modifier;
         this.afield = aexpr;
         this.bfield = bexpr;
-    }
 
-    function ArithmeticOp(op,lhs,rhs)
-    {
-        this.op = op;
-        this.lhs = lhs;
-        this.rhs = rhs;
+        this.toString = function()
+        {
+            var res = this.opcode;
+            if(this.modifier)
+                res += "." + this.modifier;
+            res += " ";
+            if(this.afield)
+                res += this.afield.join("");
+            if(this.bfield)
+                res += ", " + this.bfield.join("");
+            return res;
+        };
     }
-
 }
 
 assembly_file = list
@@ -52,7 +57,6 @@ label = lbls:label_list ":" { return lbls; }
 
 label_list = lhd:label_name
              lbls:((" "+ l:label_list) { return l;} /
-                   ("\n" l:label_list) { return l;} /
                    " "* { return new Array(); } )
     { return lbls.concat([lhd]); }
 
@@ -73,14 +77,10 @@ mode_expr = mode? expr
 
 mode = "#" / "$" / "@" / "<" / ">" / "*" / "{" / "}"
 
-expr = term "*" expr /
-       term "/" expr /
-       term "+" expr /
-       term "-" expr /
-       term "%" expr /
+expr = term expr_op expr /
        term
 
-
+expr_op = " "* eop:("*" / "/" / "+" / "-" / "%") " "* { return eop; }
 
 term =  "(" e:expr ")" / label_name / number
 

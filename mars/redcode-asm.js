@@ -12,6 +12,18 @@ module.exports = (function(){
         this.strict94 = strict94;
         this.instructions = instructions;
         this.origin = origin;
+
+        this.loadFileString = function()
+        {
+            var lines = [";redcode", "org " + origin];
+
+            for(var i=0;i<this.instructions.length;i++)
+            {
+                lines.push(this.instructions[i].toString());
+            }
+
+            return lines.join("\n");
+        };
     }
 
     function reduceExpression(lineNum, labels, definitions, expression)
@@ -142,7 +154,6 @@ module.exports = (function(){
         // Check for each instruction whether:
         // * labels are empty
         // * fields are numeric
-        // * correct number of fields are used
         // * only valid load file opcodes are used
         _.forEach(program.instructions, function(inst)
         {
@@ -154,6 +165,9 @@ module.exports = (function(){
 
             if(typeof inst.bfield[1] != 'number' && typeof inst.bfield[1] != 'undefined')
                 throw new Error("Labels & expressions not allowed in load file.");
+
+            if(inst.bfield && !inst.afield)
+                throw new Error("B field given without A field.");
 
             switch(inst.opcode)
             {
@@ -179,20 +193,22 @@ module.exports = (function(){
                  break;
              case "org":
                  throw new Error("Org pseudoopcode should not reach validation. Contact the developer and file a bug report.");
-                 break;
              case "equ":
                  throw new Error("Equ pseudoopcode not allowed in load file.");
-                 break;
              case "end":
                  throw new Error("End pseudoopcode not allowed in load file.");
-                 break;
             }
-
 
             if(program.strict94)
             {
                 if(_.contains(["seq","snq","nop","ldp","stp"], inst.opcode))
                     throw new Error("Strict mode does not allow the opcode \"" + inst.opcode + "\"");
+
+                if(_.contains(["*","{", "}"], inst.afield[0]))
+                    throw new Error("Strict mode does not allow the address mode \"" + inst.afield[0] + "\"");
+
+                if(_.contains(["*","{", "}"], inst.bfield[0]))
+                    throw new Error("Strict mode does not allow the address mode \"" + inst.bfield[0] + "\"");
             }
         });
 
@@ -267,12 +283,13 @@ module.exports = (function(){
                 reduced = {origin: origin, instructions: instructions};
             }
 
+
+
             var strict94 = false;
             name = typeof name !== 'undefined' ? name : "Untitled";
             author = typeof author !== 'undefined' ? author : "Anonymous";
             version = typeof version !== 'undefined' ? version : "1";
             date = (new Date()).toDateString();
-            console.log(comments);
             // Parse metadata comments
             _.forEach(comments, function(cmt) {
                 if(cmt.toString().beginsWith("name "))
@@ -291,7 +308,6 @@ module.exports = (function(){
                 {
                     version = _.drop(cmt, "version ".length);
                 }
-                console.log(cmt);
                 if(cmt.toString() == "strict94")
                 {
                     strict94 = true;
