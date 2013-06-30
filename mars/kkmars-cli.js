@@ -5,11 +5,13 @@ console.log("Kernkrieg MARS Simulator Started");
 
 var prog = redcode.assembleFile("./sample.rdc");
 
+console.log(prog.loadFileString());
+
 var mars = new MARS(
     20,
     0,
     100,
-    MARS.random,
+    MARS.Instruction.directInstruction("dat"),
     300,
     64,
     5,
@@ -19,5 +21,7 @@ var mars = new MARS(
     2
     );
 
+mars.loadWarrior(prog);
+mars.loadWarrior(prog);
 
 console.log(mars.coreDump());

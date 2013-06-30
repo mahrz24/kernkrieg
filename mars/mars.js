@@ -1,6 +1,7 @@
 module.exports = (function(){
     var redcodeAsm = require('./redcode-asm.js');
     var redcodeParser = require('./redcode-asm-parser.js');
+    var _ = require('lodash')._;
     var Instruction = require("./instruction.js");
 
     var MARS = function(coreSize,
@@ -33,6 +34,7 @@ module.exports = (function(){
         this.writeDist = writeDist;
         this.warriors = warriors;
         this.loadedWarriors = 0;
+        this.loadedWarriorsLength = 0;
         this.activeWarriors = 0;
         this.currentWarrior = 0;
         this.taskQueues = [];
@@ -64,17 +66,59 @@ module.exports = (function(){
     MARS.prototype.reset = function()
     {
 
+    };
+
+    MARS.prototype.address = function(integer)
+    {
+        while(integer < 0)
+        {
+            integer += this.coreSize;
+        }
+        return integer % this.coreSize;
+    }
+
+    MARS.prototype.setCore = function(integer, instruction)
+    {
+        this.core[this.address(integer)] = instruction;
     }
 
     MARS.prototype.loadWarrior = function(program)
     {
+        var loadAddress = 0;
+        if(this.taskQueues.length)
+            loadAddress += _.last(this.taskQueues)[0];
 
-    }
+        if(this.initialSep == MARS.random)
+        {
+            loadAddress += this.minSep +
+                Math.floor(Math.random() * (this.coreSize-
+                    this.minSep-this.loadedWarriorsLength));
+        }
+        else
+        {
+            loadAddress += initialSep;
+        }
+
+        for(var i=0;i<program.instructions.length;i++)
+        {
+            var instruction = program.instructions[i];
+            if(instruction.aoperand)
+                instruction.aoperand[1] = this.address(instruction.aoperand[1]);
+            if(instruction.boperand)
+                instruction.boperand[1] = this.address(instruction.boperand[1]);
+            this.setCore(loadAddress + i, instruction);
+        }
+        this.loadedWarriors++;
+        this.activeWarriors++;
+
+        this.loadedWarriorsLength += program.instructions.length;
+        this.taskQueues.push([loadAddress]);
+    };
 
     MARS.prototype.cycle = function()
     {
 
-    }
+    };
 
     MARS.prototype.coreDump = function()
     {
