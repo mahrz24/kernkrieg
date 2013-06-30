@@ -89,14 +89,14 @@ module.exports = (function(){
             inst = instructions[i];
             if(inst.opcode == "org")
             {
-                origin = inst.afield[1];
+                origin = inst.aoperand[1];
             }
             else if(inst.opcode == "equ")
             {
-                if(inst.labels.length && inst.afield[1])
+                if(inst.labels.length && inst.aoperand[1])
                 {
                     _.forEach(inst.labels, function(lbl)
-                        { definitions[lbl] = inst.afield[1]; });
+                        { definitions[lbl] = inst.aoperand[1]; });
                 }
                 else
                 {
@@ -106,8 +106,8 @@ module.exports = (function(){
             }
             else if(inst.opcode == "end")
             {
-                if(inst.afield)
-                    origin = inst.afield[1];
+                if(inst.aoperand)
+                    origin = inst.aoperand[1];
                 break;
             }
             else
@@ -133,12 +133,12 @@ module.exports = (function(){
             instructions[i].labels = [];
 
             // Reduce the expressions
-            instructions[i].afield[1] =
+            instructions[i].aoperand[1] =
                 evaluateExpression(reduceExpression(i, labels, definitions,
-                    instructions[i].afield[1]));
-            instructions[i].bfield[1] =
+                    instructions[i].aoperand[1]));
+            instructions[i].boperand[1] =
                 evaluateExpression(reduceExpression(i, labels, definitions,
-                    instructions[i].bfield[1]));
+                    instructions[i].boperand[1]));
         }
 
         origin = reduceExpression(0, labels, definitions, origin);
@@ -160,13 +160,13 @@ module.exports = (function(){
             if(inst.labels.length)
                 throw new Error("Labels not allowed in load file.");
 
-            if(typeof inst.afield[1] != 'number' && typeof inst.afield[1] != 'undefined')
+            if(typeof inst.aoperand[1] != 'number' && typeof inst.aoperand[1] != 'undefined')
                 throw new Error("Labels & expressions not allowed in load file.");
 
-            if(typeof inst.bfield[1] != 'number' && typeof inst.bfield[1] != 'undefined')
+            if(typeof inst.boperand[1] != 'number' && typeof inst.boperand[1] != 'undefined')
                 throw new Error("Labels & expressions not allowed in load file.");
 
-            if(inst.bfield && !inst.afield)
+            if(inst.boperand && !inst.aoperand)
                 throw new Error("B field given without A field.");
 
             switch(inst.opcode)
@@ -204,11 +204,11 @@ module.exports = (function(){
                 if(_.contains(["seq","snq","nop","ldp","stp"], inst.opcode))
                     throw new Error("Strict mode does not allow the opcode \"" + inst.opcode + "\"");
 
-                if(_.contains(["*","{", "}"], inst.afield[0]))
-                    throw new Error("Strict mode does not allow the address mode \"" + inst.afield[0] + "\"");
+                if(_.contains(["*","{", "}"], inst.aoperand[0]))
+                    throw new Error("Strict mode does not allow the address mode \"" + inst.aoperand[0] + "\"");
 
-                if(_.contains(["*","{", "}"], inst.bfield[0]))
-                    throw new Error("Strict mode does not allow the address mode \"" + inst.bfield[0] + "\"");
+                if(_.contains(["*","{", "}"], inst.boperand[0]))
+                    throw new Error("Strict mode does not allow the address mode \"" + inst.boperand[0] + "\"");
             }
         });
 
@@ -245,14 +245,9 @@ module.exports = (function(){
 
             programString = lines.join("\n");
 
-            console.log(programString);
-
             var parsed = _.unzip(redcode.parser.parse(programString));
             var comments = _.filter(parsed[1], function(x) { return x != "";});
             var instructions = _.filter(parsed[0], function(x) { return x != "";});
-
-            console.log(JSON.stringify(instructions));
-
             // Reduce the instructions (remove labels & eval expressions)
             var reduced = {};
             if(!loadFile)
@@ -269,9 +264,9 @@ module.exports = (function(){
                     inst = instructions[i];
                     if(inst.opcode == "org")
                     {
-                        if(typeof inst.afield[1] != 'number')
+                        if(typeof inst.aoperand[1] != 'number')
                             throw new Error("Origin needs to be numeric.");
-                        origin = inst.afield[1];
+                        origin = inst.aoperand[1];
                     }
                     else
                     {

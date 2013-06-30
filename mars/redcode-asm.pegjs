@@ -8,28 +8,7 @@
 // seq snq nop ldp stp opcoces
 
 {
-
-    function Instruction(labels,operation,aexpr,bexpr)
-    {
-        this.labels = labels;
-        this.opcode = operation.opcode;
-        this.modifier = operation.modifier;
-        this.afield = aexpr;
-        this.bfield = bexpr;
-
-        this.toString = function()
-        {
-            var res = this.opcode;
-            if(this.modifier)
-                res += "." + this.modifier;
-            res += " ";
-            if(this.afield)
-                res += this.afield.join("");
-            if(this.bfield)
-                res += ", " + this.bfield.join("");
-            return res;
-        };
-    }
+    var Instruction = require("./instruction.js");
 }
 
 assembly_file = list
@@ -44,13 +23,13 @@ line = l:(c:comment { return [[], c]} /
 comment = ";" cmt:[^\n]* { return cmt.join(""); }
 
 instruction = lbl:label? " "* op:operation
-                aexpr:(" " " "* expr:mode_expr {return expr;})?
-                bexpr:("," " "* expr:mode_expr {return expr;})?
+                aoperand:(" " " "* expr:mode_expr {return expr;})?
+                boperand:("," " "* expr:mode_expr {return expr;})?
                 cmt:comment?
     { return { instruction: new Instruction(lbl,
                                             op,
-                                            aexpr,
-                                            bexpr),
+                                            aoperand,
+                                            boperand),
                 comment: cmt }; }
 
 label = lbls:label_list ":" { return lbls; }

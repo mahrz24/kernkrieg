@@ -481,10 +481,10 @@ module.exports = (function(){
           pos = pos1;
         }
         if (result0 !== null) {
-          result0 = (function(offset, lbl, op, aexpr, bexpr, cmt) { return { instruction: new Instruction(lbl,
+          result0 = (function(offset, lbl, op, aoperand, boperand, cmt) { return { instruction: new Instruction(lbl,
                                                     op,
-                                                    aexpr,
-                                                    bexpr),
+                                                    aoperand,
+                                                    boperand),
                         comment: cmt }; })(pos0, result0[0], result0[2], result0[3], result0[4], result0[5]);
         }
         if (result0 === null) {
@@ -1559,28 +1559,7 @@ module.exports = (function(){
       }
       
       
-      
-          function Instruction(labels,operation,aexpr,bexpr)
-          {
-              this.labels = labels;
-              this.opcode = operation.opcode;
-              this.modifier = operation.modifier;
-              this.afield = aexpr;
-              this.bfield = bexpr;
-      
-              this.toString = function()
-              {
-                  var res = this.opcode;
-                  if(this.modifier)
-                      res += "." + this.modifier;
-                  res += " ";
-                  if(this.afield)
-                      res += this.afield.join("");
-                  if(this.bfield)
-                      res += ", " + this.bfield.join("");
-                  return res;
-              };
-          }
+          var Instruction = require("./instruction.js");
       
       
       var result = parseFunctions[startRule]();
