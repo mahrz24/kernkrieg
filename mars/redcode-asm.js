@@ -155,7 +155,7 @@ module.exports = (function(){
         // * labels are empty
         // * fields are numeric
         // * only valid load file opcodes are used
-        _.forEach(program.instructions, function(inst)
+        program.instructions = _.map(program.instructions, function(inst)
         {
             if(inst.labels.length)
                 throw new Error("Labels not allowed in load file.");
@@ -172,6 +172,12 @@ module.exports = (function(){
             switch(inst.opcode)
             {
              case "dat":
+                 if(typeof inst.boperand[1] == 'undefined')
+                 {
+                    inst.boperand = inst.aoperand;
+                    inst.aoperand = ["#",0];
+                 }
+                 break;
              case "mov":
              case "add":
              case "sub":
@@ -186,17 +192,26 @@ module.exports = (function(){
              case "slt":
              case "spl":
              case "seq":
-             case "snq":
+             case "sne":
              case "nop":
              case "ldp":
              case "stp":
-                 break;
+                if(typeof inst.boperand[1] == 'undefined')
+                {
+                    inst.boperand = ["#",0];
+                }
+                break;
              case "org":
-                 throw new Error("Org pseudoopcode should not reach validation. Contact the developer and file a bug report.");
+                throw new Error("Org pseudoopcode should not reach validation. Contact the developer and file a bug report.");
              case "equ":
-                 throw new Error("Equ pseudoopcode not allowed in load file.");
+                throw new Error("Equ pseudoopcode not allowed in load file.");
              case "end":
-                 throw new Error("End pseudoopcode not allowed in load file.");
+                throw new Error("End pseudoopcode not allowed in load file.");
+            }
+
+            if(typeof inst.aoperand[1] == 'undefined')
+            {
+                inst.aoperand = ["#",0];
             }
 
             if(program.strict94)
@@ -210,6 +225,8 @@ module.exports = (function(){
                 if(_.contains(["*","{", "}"], inst.boperand[0]))
                     throw new Error("Strict mode does not allow the address mode \"" + inst.boperand[0] + "\"");
             }
+
+            return inst;
         });
 
         return program;

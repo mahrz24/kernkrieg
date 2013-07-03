@@ -47,7 +47,7 @@ operation = opc:opcode mod:("." m:modifier {return m;})?
 
 opcode = "dat"i / "mov"i / "add"i / "sub"i / "mul"i / "div"i / "mod"i /
          "jmp"i / "jmz"i / "jmn"i / "djn"i / "cmp"i / "slt"i / "spl"i /
-         "seq"i / "snq"i / "nop"i / "ldp"i / "stp"i /
+         "seq"i / "sne"i / "nop"i / "ldp"i / "stp"i /
          "org"i / "equ"i / "end"i
 
 modifier = "ab"i / "ba"i / "a"i / "b"i  / "f"i / "x"i / "i"i

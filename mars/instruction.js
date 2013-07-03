@@ -1,5 +1,5 @@
 module.exports = (function(){
-    var MAX_INT = 2^32;
+
     Array.prototype.randomElement = function()
     {
         return this[Math.floor(Math.random() * this.length)];
@@ -57,10 +57,10 @@ module.exports = (function(){
         "jmn",
         "djn",
         "cmp",
-        "slt",
         "spl",
         "seq",
-        "snq",
+        "sne",
+        "slt",
         "nop",
         "ldp",
         "stp"];

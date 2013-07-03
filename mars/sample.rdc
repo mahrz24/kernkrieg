@@ -5,7 +5,7 @@
 org imp
 step:   equ   imp+(1 - 1)
         mov.i (imp + 1)
-imp:    mov.i #imp, imp-step
+imp:    mov.i #imp+1, imp-step+1
         dat   imp
         dat   imp
         mov.x >imp, @3

@@ -22,6 +22,8 @@ var mars = new MARS(
     );
 
 mars.loadWarrior(prog);
-mars.loadWarrior(prog);
+//mars.loadWarrior(prog);
+console.log(mars.coreDump());
+mars.cycle();
 
 console.log(mars.coreDump());

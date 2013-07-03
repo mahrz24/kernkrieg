@@ -900,13 +900,13 @@ module.exports = (function(){
                                       }
                                     }
                                     if (result0 === null) {
-                                      if (input.substr(pos, 3).toLowerCase() === "snq") {
+                                      if (input.substr(pos, 3).toLowerCase() === "sne") {
                                         result0 = input.substr(pos, 3);
                                         pos += 3;
                                       } else {
                                         result0 = null;
                                         if (reportFailures === 0) {
-                                          matchFailed("\"snq\"");
+                                          matchFailed("\"sne\"");
                                         }
                                       }
                                       if (result0 === null) {
