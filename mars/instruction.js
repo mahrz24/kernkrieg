@@ -18,9 +18,12 @@ module.exports = (function(){
             var res = this.opcode;
             if(this.modifier)
                 res += "." + this.modifier;
+            else
+                res += "  ";
             res += " ";
             if(this.aoperand)
                 res += this.aoperand.join("");
+
             if(this.boperand)
                 res += ", " + this.boperand.join("");
             return res;

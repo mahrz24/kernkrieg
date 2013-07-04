@@ -2,12 +2,5 @@
 ;name   Imp
 ;author A.K.  Dewdney
 ;strict94
-org imp
-step:   equ   imp+(1 - 1)
-        mov.i (imp + 1)
-imp:    mov.i #imp+1, imp-step+1
-        dat   imp
-        dat   imp
-        mov.x >imp, @3
-        end
-        mov.f imp, step
+org start
+start: dat #1, #1

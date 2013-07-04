@@ -9,7 +9,7 @@ console.log(prog.loadFileString());
 
 var mars = new MARS(
     20,
-    0,
+    5,
     100,
     MARS.Instruction.directInstruction("dat"),
     300,
@@ -21,7 +21,7 @@ var mars = new MARS(
     2
     );
 
-mars.loadWarrior(prog);
+mars.loadWarrior(prog,0);
 //mars.loadWarrior(prog);
 console.log(mars.coreDump());
 mars.cycle();

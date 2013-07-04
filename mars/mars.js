@@ -2,7 +2,40 @@ module.exports = (function(){
     var redcodeAsm = require('./redcode-asm.js');
     var redcodeParser = require('./redcode-asm-parser.js');
     var _ = require('lodash')._;
+    var sprintf = require("sprintf-js").sprintf;
     var Instruction = require("./instruction.js");
+
+    var clone = function(obj) {
+        // Handle the 3 simple types, and null or undefined
+        if (null == obj || "object" != typeof obj) return obj;
+
+        // Handle Date
+        if (obj instanceof Date) {
+            var copy = new Date();
+            copy.setTime(obj.getTime());
+            return copy;
+        }
+
+        // Handle Array
+        if (obj instanceof Array) {
+            var copy = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                copy[i] = clone(obj[i]);
+            }
+            return copy;
+        }
+
+        // Handle Object
+        if (obj instanceof Object) {
+            var copy = {};
+            for (var attr in obj) {
+                if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+            }
+            return copy;
+        }
+
+        throw new Error("Unable to copy obj! Its type isn't supported.");
+    };
 
     var MARS = function(coreSize,
         pSpaceSize,
@@ -40,7 +73,7 @@ module.exports = (function(){
         this.taskQueues = [];
         this.pSpaces = [];
 
-        if(coreSize % pSpaceSize !== 0 && pSpaceSize !== 0)
+        if(coreSize % pSpaceSize !== 0)
             throw new Error("PSpace size needs two be a factor of the size of the Core");
 
         if(coreSize % readDist !== 0)
@@ -48,6 +81,8 @@ module.exports = (function(){
 
         if(coreSize % writeDist !== 0)
             throw new Error("Write distance needs two be a factor of the size of the Core");
+
+
 
         this.core = [];
         for(var i=0;i<coreSize;i++)
@@ -79,7 +114,7 @@ module.exports = (function(){
 
     MARS.prototype.setInstruction = function(adr, instruction)
     {
-        this.core[this.address(adr)] = instruction;
+        this.core[this.address(adr)] = clone(instruction);
     }
 
     MARS.prototype.setOperand = function(adr, isAValue, value)
@@ -101,7 +136,7 @@ module.exports = (function(){
 
     MARS.prototype.getInstruction = function(adr)
     {
-        return this.core[this.address(adr)];
+        return clone(this.core[this.address(adr)]);
     }
 
     MARS.prototype.incrementA = function(adr)
@@ -155,7 +190,10 @@ module.exports = (function(){
 
         this.loadedWarriorsLength += program.instructions.length;
         this.taskQueues.push([loadAddress]);
-        this.pSpaces.push(this.pSpaceSize*[pSpaceZero]);
+        var pSpace = [];
+        for(var i=0;i<this.pSpaceSize;i++)
+            pSpace.push(pSpaceZero);
+        this.pSpaces.push(pSpace);
     };
 
     MARS.prototype.evaluateOperand = function(pc, operand)
@@ -449,12 +487,49 @@ module.exports = (function(){
 
     MARS.prototype.coreDump = function()
     {
-        var dump = ["==== MARS CORE DUMP ===="];
+        var dump = ["======== MARS CORE DUMP ========"];
+        dump.push("Loaded Warriors: " + this.loadedWarriors);
+        dump.push("Active Warriors: " + this.activeWarriors);
+        dump.push("----------- PSPACES ------------");
+        for(var i=0;i<this.pSpaces.length;i++)
+        {
+            dump.push(i + ": " + this.pSpaces[i].join(" "));
+        }
+        dump.push("------------ CORE --------------");
         for(var i=0;i<this.coreSize;i++)
         {
-            dump.push(i + " " + this.core[i].toString());
+            var l = "";
+            for(var w=0;w<this.loadedWarriors;w++)
+            {
+                var warriorIsHere = false;
+                var tasks = [];
+                for(var t=0;t<this.taskQueues[w].length;t++)
+                {
+                    if(this.taskQueues[w][t] == i)
+                    {
+                        warriorIsHere = true;
+                        tasks.push(t);
+                    }
+                }
+                if(warriorIsHere)
+                {
+                    l += w + ":";
+                    for(var t=0;t<tasks.length;t++)
+                        l += tasks[t] + ">";
+
+                    for(var j=l.length;j<10;j++)
+                        l = " " + l;
+                }
+                else
+                {
+                    for(var j=0;j<10;j++)
+                        l += " ";
+                }
+            }
+
+            dump.push(sprintf("%s %03u %s", l, i, this.core[i].toString()));
         }
-        dump.push(["=== END OF CORE DUMP ==="]);
+        dump.push("======= END OF CORE DUMP =======");
         return dump.join("\n");
     };
 
