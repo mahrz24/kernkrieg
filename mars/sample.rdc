@@ -1,6 +1,7 @@
 ;redcode
 ;name   Imp
 ;author A.K.  Dewdney
-;strict94
+
 org start
-start: dat #1, #1
+start: add #1, -1
+       jmp start

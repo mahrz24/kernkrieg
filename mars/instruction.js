@@ -13,13 +13,35 @@ module.exports = (function(){
         this.aoperand = aoperand;
         this.boperand = boperand;
 
+        this.equal = function(other)
+        {
+            if(this.modifier !== other.modifier)
+                return false;
+            if(this.opcode !== other.opcode)
+                return false;
+
+            if(this.aoperand[0] !== other.aoperand[0])
+                return false;
+            if(this.boperand[0] !== other.boperand[0])
+                return false;
+
+            if(this.aoperand[1] !== other.aoperand[1])
+                return false;
+            if(this.boperand[1] !== other.boperand[1])
+                return false;
+            return true;
+        }
+
         this.toString = function()
         {
             var res = this.opcode;
-            if(this.modifier)
+            if(this.modifier == "ab" ||
+               this.modifier == "ba")
                 res += "." + this.modifier;
+            else if(this.modifier)
+                res += "." + this.modifier + " ";
             else
-                res += "  ";
+                res += "   ";
             res += " ";
             if(this.aoperand)
                 res += this.aoperand.join("");

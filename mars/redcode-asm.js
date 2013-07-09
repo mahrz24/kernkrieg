@@ -11,7 +11,7 @@ module.exports = (function(){
         this.version = version;
         this.strict94 = strict94;
         this.instructions = instructions;
-        this.origin = origin;
+        this.origin = evaluateExpression(origin);
 
         this.loadFileString = function()
         {
@@ -39,7 +39,7 @@ module.exports = (function(){
                 }
                 else if(_.has(labels, expression))
                 {
-                    return labels[expression]-lineNum;
+                    return ["(" + (labels[expression]-lineNum) + ")"];
                 }
                 else
                 {
@@ -216,7 +216,7 @@ module.exports = (function(){
 
             if(program.strict94)
             {
-                if(_.contains(["seq","snq","nop","ldp","stp"], inst.opcode))
+                if(_.contains(["snq","nop","ldp","stp"], inst.opcode))
                     throw new Error("Strict mode does not allow the opcode \"" + inst.opcode + "\"");
 
                 if(_.contains(["*","{", "}"], inst.aoperand[0]))

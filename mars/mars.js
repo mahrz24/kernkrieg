@@ -46,8 +46,7 @@ module.exports = (function(){
         minSep,
         initialSep,
         readDist,
-        writeDist,
-        warriors)
+        writeDist)
     {
         if(readDist == MARS.full)
             readDist = coreSize;
@@ -61,11 +60,11 @@ module.exports = (function(){
         this.initialInstruction = initialInstruction;
         this.instructionLimit = instructionLimit;
         this.maxTasks = maxTasks;
+        this.curMaxTasks = 0;
         this.minSep = minSep;
         this.initialSep = initialSep;
         this.readDist = readDist;
         this.writeDist = writeDist;
-        this.warriors = warriors;
         this.loadedWarriors = 0;
         this.loadedWarriorsLength = 0;
         this.activeWarriors = 0;
@@ -83,7 +82,7 @@ module.exports = (function(){
             throw new Error("Write distance needs two be a factor of the size of the Core");
 
 
-
+        this.coreOwner = [];
         this.core = [];
         for(var i=0;i<coreSize;i++)
         {
@@ -93,15 +92,121 @@ module.exports = (function(){
             }
             else
             {
-                this.core.push(initialInstruction);
+                this.core.push(clone(initialInstruction));
             }
+            this.coreOwner.push(-1);
         }
     };
+
+
 
     MARS.prototype.reset = function()
     {
 
     };
+
+    MARS.prototype.loadWarrior = function(program, pSpaceZero)
+    {
+        var loadAddress = 0;
+        if(this.taskQueues.length)
+            loadAddress += _.last(this.taskQueues)[0];
+
+
+        var loadLength = Math.min(this.instructionLimit, program.instructions.length);
+
+
+        if(this.initialSep == MARS.random)
+        {
+            loadAddress += this.minSep +
+                Math.floor(Math.random() * (this.coreSize-
+                    this.minSep-this.loadedWarriorsLength-loadLength));
+        }
+        else
+        {
+            loadAddress += this.initialSep;
+        }
+
+        this.currentWarrior = this.loadedWarriors;
+
+        for(var i=0;i<loadLength;i++)
+        {
+            var instruction = program.instructions[i];
+            if(instruction.aoperand)
+            {
+                instruction.aoperand[1] = this.address(instruction.aoperand[1]);
+                if(instruction.aoperand[0] == '$')
+                    instruction.aoperand[0] = '';
+            }
+            if(instruction.boperand)
+            {
+                instruction.boperand[1] = this.address(instruction.boperand[1]);
+                if(instruction.boperand[0] == '$')
+                    instruction.boperand[0] = '';
+            }
+            this.setInstruction(loadAddress + i, instruction);
+        }
+        this.loadedWarriors++;
+        this.activeWarriors++;
+
+        this.loadedWarriorsLength += program.instructions.length;
+        this.taskQueues.push([this.address(loadAddress+program.origin)]);
+
+        if(this.curMaxTasks == 0)
+            this.curMaxTasks = 1;
+
+        var pSpace = [];
+        for(var i=0;i<this.pSpaceSize;i++)
+            pSpace.push(pSpaceZero);
+        this.pSpaces.push(pSpace);
+    };
+
+    MARS.prototype.run = function(minWarriors, debugOutput, debugResolution)
+    {
+        var curCycle = 0;
+        while(curCycle < this.cyclesUntilTie && this.activeWarriors > minWarriors)
+        {
+            this.cycle();
+
+            if(curCycle % debugResolution == 0)
+            {
+                if(debugOutput == 1)
+                {
+                    console.log(sprintf("Cycle %u", curCycle));
+                    console.log(this.taskQueues);
+                }
+                if(debugOutput == 2)
+                {
+                    console.log(sprintf("################### Cycle %u ###################", curCycle));
+                    console.log(this.coreDump());
+                }
+            }
+
+            curCycle++;
+        }
+
+        if(debugOutput == 1)
+        {
+            console.log(sprintf("Cycle %u", curCycle));
+            console.log(this.taskQueues);
+        }
+        if(debugOutput == 2)
+        {
+            console.log(sprintf("################### Cycle %u ###################", curCycle));
+            console.log(this.coreDump());
+        }
+
+
+
+        if(curCycle == this.cyclesUntilTie)
+            return -1;
+
+        for(var w=0;w<this.loadedWarriors;w++)
+            if(this.taskQueues[w].length > 0)
+                return w;
+
+        return -2;
+    };
+
 
     MARS.prototype.address = function(integer)
     {
@@ -114,11 +219,13 @@ module.exports = (function(){
 
     MARS.prototype.setInstruction = function(adr, instruction)
     {
+        this.coreOwner[this.address(adr)] = this.currentWarrior;
         this.core[this.address(adr)] = clone(instruction);
     }
 
     MARS.prototype.setOperand = function(adr, isAValue, value)
     {
+        this.coreOwner[this.address(adr)] = this.currentWarrior;
         if(isAValue)
             this.core[this.address(adr)].aoperand[1] = this.address(value);
         else
@@ -128,6 +235,7 @@ module.exports = (function(){
 
     MARS.prototype.decrementOperand = function(adr, isAValue)
     {
+        this.coreOwner[this.address(adr)] = this.currentWarrior;
         if(isAValue)
             this.core[this.address(adr)].aoperand[1]--;
         else
@@ -141,60 +249,28 @@ module.exports = (function(){
 
     MARS.prototype.incrementA = function(adr)
     {
+        this.coreOwner[this.address(adr)] = this.currentWarrior;
         return this.core[this.address(adr)].aoperand[1]++;
     }
 
     MARS.prototype.incrementB = function(adr)
     {
+        this.coreOwner[this.address(adr)] = this.currentWarrior;
         return this.core[this.address(adr)].boperand[1]++;
     }
 
     MARS.prototype.decrementA = function(adr)
     {
+        this.coreOwner[this.address(adr)] = this.currentWarrior;
         return this.core[this.address(adr)].aoperand[1]--;
     }
 
     MARS.prototype.decrementB = function(adr)
     {
-        return this.core[this.address(integer)].boperand[1]--;
+        this.coreOwner[this.address(adr)] = this.currentWarrior;
+        return this.core[this.address(adr)].boperand[1]--;
     }
 
-    MARS.prototype.loadWarrior = function(program, pSpaceZero)
-    {
-        var loadAddress = 0;
-        if(this.taskQueues.length)
-            loadAddress += _.last(this.taskQueues)[0];
-
-        if(this.initialSep == MARS.random)
-        {
-            loadAddress += this.minSep +
-                Math.floor(Math.random() * (this.coreSize-
-                    this.minSep-this.loadedWarriorsLength));
-        }
-        else
-        {
-            loadAddress += initialSep;
-        }
-
-        for(var i=0;i<program.instructions.length;i++)
-        {
-            var instruction = program.instructions[i];
-            if(instruction.aoperand)
-                instruction.aoperand[1] = this.address(instruction.aoperand[1]);
-            if(instruction.boperand)
-                instruction.boperand[1] = this.address(instruction.boperand[1]);
-            this.setInstruction(loadAddress + i, instruction);
-        }
-        this.loadedWarriors++;
-        this.activeWarriors++;
-
-        this.loadedWarriorsLength += program.instructions.length;
-        this.taskQueues.push([loadAddress]);
-        var pSpace = [];
-        for(var i=0;i<this.pSpaceSize;i++)
-            pSpace.push(pSpaceZero);
-        this.pSpaces.push(pSpace);
-    };
 
     MARS.prototype.evaluateOperand = function(pc, operand)
     {
@@ -228,6 +304,7 @@ module.exports = (function(){
         }
     }
 
+
     MARS.prototype.cycle = function()
     {
         // Get the current task pointer
@@ -252,9 +329,9 @@ module.exports = (function(){
                 instruction.modifier = "f";
                 break;
             case "mov":
+            case "cmp":
             case "seq":
             case "sne":
-
                 if(instruction.aoperand[0] == "#")
                 {
                     instruction.modifier = "ab";
@@ -295,10 +372,10 @@ module.exports = (function(){
                 instruction.modifier = "b";
                 break;
             case "jmp":
+            case "spl":
             case "jmz":
             case "jmn":
             case "djn":
-            case "spl":
                 instruction.modifier = "b";
                 break;
             default:
@@ -381,75 +458,86 @@ module.exports = (function(){
             case "mov":
                 if(writeA[i] == "instruction")
                 {
-                    this.core[writePointer[i]] = avalue;
+                    this.core[this.address(writePointer[i])] = avalue;
+                    this.coreOwner[this.address(writePointer[i])] = cw;
                 }
                 else
                 {
-                    this.setOperand(writePointer[i],writeA[i], avalue);
+                    this.setOperand(writePointer[i],writeA[i], avalue[i]);
                 }
                 break;
             case "add":
-                this.setOperand(writePointer[i],writeA[i], avalue+bvalue);
+                this.setOperand(writePointer[i],writeA[i], avalue[i]+bvalue[i]);
                 break;
             case "sub":
-                this.setOperand(writePointer[i],writeA[i], avalue-bvalue);
+                this.setOperand(writePointer[i],writeA[i], bvalue[i]-avalue[i]);
                 break;
             case "mul":
-                this.setOperand(writePointer[i],writeA[i], avalue*bvalue);
+                this.setOperand(writePointer[i],writeA[i], avalue[i]*bvalue[i]);
                 break;
             case "div":
-                if(avalue === 0)
+                if(avalue[i] === 0)
                 {
                     pushToQueue = false;
                     break;
                 }
-                this.setOperand(writePointer[i],writeA[i], bvalue/avalue);
+                this.setOperand(writePointer[i],writeA[i], bvalue[i]/avalue[i]);
                 break;
             case "mod":
-                if(avalue === 0)
+                if(avalue[i] === 0)
                 {
                     pushToQueue = false;
                     break;
                 }
-                this.setOperand(writePointer[i],writeA[i], bvalue%avalue);
+                this.setOperand(writePointer[i],writeA[i], bvalue[i]%avalue[i]);
                 break;
             case "jmp":
-                newPC = pc+avalue;
+                newPC = apointer;
                 break;
             case "jmz":
-                if(bvalue===0 && (i==0 || newPC == pc+avalue))
-                    newPC = pc+avalue;
+                if(bvalue[i]===0 && (i==0 || newPC == apointer))
+                    newPC = apointer;
                 else
                     newPC = pc+1;
                 break;
             case "jmn":
-                if(bvalue!==0)
-                    newPC = pc+avalue;
+                if(bvalue[i]!==0)
+                    newPC = apointer;
                 break;
             case "djn":
-                bvalue--;
+                bvalue[i]--;
                 this.decrementOperand(writePointer[i],writeA[i]);
-                if(bvalue!==0)
-                    newPC = pc+avalue;
+                if(bvalue[i]!==0)
+                    newPC = apointer;
                 break;
             case "cmp":
             case "seq":
-                if(avalue == bvalue && (i==0 || newPC == pc+2))
-                    newPC = pc+2;
+                if(writeA[i] == "instruction")
+                {
+                    if(avalue.equal(bvalue))
+                        newPC = pc+2;
+                    else
+                        newPC = pc+1;
+                }
                 else
-                    newPC = 0;
+                {
+                    if(avalue[i] == bvalue[i] && (i==0 || newPC == pc+2))
+                        newPC = pc+2;
+                    else
+                        newPC = pc+1;
+                }
                 break;
             case "sne":
-                if(avalue !== bvalue)
+                if(avalue[i] !== bvalue[i])
                     newPC = pc+2;
                 break;
             case "slt":
-                if(avalue < bvalue)
+                if(avalue[i] < bvalue[i])
                     newPC = pc+2;
                 break;
             case "spl":
                 split = true;
-                splitPC = pc+avalue;
+                splitPC = apointer;
 
             case "nop":
                 break;
@@ -457,13 +545,13 @@ module.exports = (function(){
                 if(i==0)
                 {
                     this.setOperand(writePointer[i],writeA[i],
-                        this.pSpaces[cw][avalue%this.pSpaceSize]);
+                        this.pSpaces[cw][avalue[i]%this.pSpaceSize]);
                 }
                 break;
             case "stp":
-                if(i==0 && value != 0)
+                if(i==0 && bvalue[i] != 0)
                 {
-                    this.pSpaces[cw][bvalue%this.pSpaceSize] = avalue;
+                    this.pSpaces[cw][bvalue[i]%this.pSpaceSize] = avalue;
                 }
                 break;
             default:
@@ -473,16 +561,25 @@ module.exports = (function(){
 
         if(pushToQueue)
             this.taskQueues[cw].push(this.address(newPC));
+        else if(this.taskQueues[cw].length == this.curMaxTasks)
+            this.curMaxTasks--;
 
-        if(split)
+        if(split && this.taskQueues[cw].length < this.maxTasks)
+        {
             this.taskQueues[cw].push(this.address(splitPC));
+            if(this.taskQueues[cw].length > this.curMaxTasks)
+                this.curMaxTasks++;
+        }
 
         if(this.taskQueues[cw].length == 0)
             this.activeWarriors--;
 
-        this.currentWarrior++;
-        if(this.currentWarrior>this.loadedWarriors)
-            this.currentWarrior = 0;
+        do
+        {
+            this.currentWarrior++;
+            if(this.currentWarrior>=this.loadedWarriors)
+                this.currentWarrior = 0;
+        } while(this.taskQueues[this.currentWarrior].length == 0 && this.currentWarrior != cw);
     };
 
     MARS.prototype.coreDump = function()
@@ -490,6 +587,7 @@ module.exports = (function(){
         var dump = ["======== MARS CORE DUMP ========"];
         dump.push("Loaded Warriors: " + this.loadedWarriors);
         dump.push("Active Warriors: " + this.activeWarriors);
+        dump.push("Current Warrior: " + this.currentWarrior);
         dump.push("----------- PSPACES ------------");
         for(var i=0;i<this.pSpaces.length;i++)
         {
@@ -516,18 +614,13 @@ module.exports = (function(){
                     l += w + ":";
                     for(var t=0;t<tasks.length;t++)
                         l += tasks[t] + ">";
-
-                    for(var j=l.length;j<10;j++)
-                        l = " " + l;
-                }
-                else
-                {
-                    for(var j=0;j<10;j++)
-                        l += " ";
                 }
             }
 
-            dump.push(sprintf("%s %03u %s", l, i, this.core[i].toString()));
+            for(var j=l.length;j<(this.curMaxTasks*2+3)*this.activeWarriors;j++)
+                l = l + " ";
+
+            dump.push(sprintf("%s %03u (%2d) %s", l, i, this.coreOwner[i], this.core[i].toString()));
         }
         dump.push("======= END OF CORE DUMP =======");
         return dump.join("\n");

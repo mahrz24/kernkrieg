@@ -1,0 +1,8 @@
+;redcode
+org start
+bomb:   div #0,#1
+start:  mov bomb, (loop+1)
+        sne.b start, #bomb
+        mov.ab #(loop-start), start
+        add.ab #1, start
+loop:   jmp start
