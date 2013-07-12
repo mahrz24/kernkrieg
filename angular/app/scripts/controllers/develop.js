@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('kkApp')
-  .controller('MainCtrl', function ($scope) {
+  .controller('DevelopCtrl', function ($scope) {
     $scope.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',

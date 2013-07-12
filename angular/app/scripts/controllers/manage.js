@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('kkApp')
-  .controller('MainCtrl', function ($scope) {
+  .controller('ManageCtrl', function ($scope) {
     $scope.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',
       'Karma'
-    ]; })
+    ];});

@@ -75,10 +75,10 @@ js_base = Bundle(
     'bower_components/bootstrap-sass/js/bootstrap-scrollspy.js',
     'bower_components/bootstrap-sass/js/bootstrap-collapse.js',
     'bower_components/bootstrap-sass/js/bootstrap-tab.js',
-    'vendor/bootstrap-select.js',
-    'vendor/bootstrap-switch.js',
-    'vendor/flatui-checkbox.js',
-    'vendor/flatui-radio.js',
+    'bower_components/flatui/js/bootstrap-select.js',
+    'bower_components/flatui/js/bootstrap-switch.js',
+    'bower_components/flatui/js/flatui-checkbox.js',
+    'bower_components/flatui/js/flatui-radio.js',
     #filters='jsmin',
     output='gen/packed_base.js')
 assets.register('js_base', js_base)
@@ -92,15 +92,19 @@ assets.register('js_ie9', js_ie9)
 
 js_angular = Bundle(
     'bower_components/angular/angular.js',
+    'scripts/directives/navbar.js',
     'scripts/app.js',
     'scripts/controllers/main.js',
+    'scripts/controllers/manage.js',
+    'scripts/controllers/develop.js',
+
     #filters='jsmin',
     output='gen/packed_angular.js')
 assets.register('js_angular', js_angular)
 
 css_base = Bundle(
-    'styles/bootstrap.css',
-    'styles/flat-ui.css',
+    'bower_components/flatui/bootstrap/css/bootstrap.css',
+    'bower_components/flatui/css/flat-ui.css',
     filters='cssmin',
     output='gen/packed_base.css')
 assets.register('css_base', css_base)

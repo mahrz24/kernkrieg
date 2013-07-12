@@ -1,15 +1,19 @@
 'use strict';
 
-angular.module('angularApp', [])
+angular.module('kkApp', ['kkNavbar'])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {
         templateUrl: '/app/views/main.html',
         controller: 'MainCtrl'
       })
-      .when('/ui/bla', {
+      .when('/manage', {
         templateUrl: '/app/views/main.html',
-        controller: 'MainCtrl'
+        controller: 'ManageCtrl'
+      })
+      .when('/develop', {
+        templateUrl: '/app/views/main.html',
+        controller: 'DevelopCtrl'
       })
       .otherwise({
         redirectTo: '/'
