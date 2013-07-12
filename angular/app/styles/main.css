@@ -1,9 +1,19 @@
+.hero-unit {
+    margin: 50px auto 0 auto;
+    width: 300px;
+    font-size: 18px;
+    font-weight: 200;
+    line-height: 30px;
+    background-color: #eee;
+    border-radius: 6px;
+    padding: 60px;
+}
 
-
-/* ==========================================================================
-   Author's custom styles
-   ========================================================================== */
-
+.hero-unit h1 {
+    font-size: 60px;
+    line-height: 1;
+    letter-spacing: -1px;
+}
 
 .kernkrieg-headline {
   padding: 0px 0 110px;
@@ -33,11 +43,6 @@
   letter-spacing: -1px;
   padding-top: 5px;
 }
-
-
-
-
-
 
 
 

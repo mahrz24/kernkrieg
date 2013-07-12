@@ -20,13 +20,15 @@ var argv = require('optimist')
     .default('dres', 500)
     .argv
 ;
+if(argv.debug > 0)
+    console.log("Kernkrieg MARS Simulator Started");
 
-console.log("Kernkrieg MARS Simulator Started");
 var warriors = [];
 
 _.each(argv._, function(file)
     {
-        console.log("Loading warrior: " + file)
+        if(argv.debug > 0)
+            console.log("Loading warrior: " + file)
         warriors.push(redcode.assembleFile(file));
     });
 

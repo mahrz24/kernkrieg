@@ -12,7 +12,7 @@ from forms import LoginForm
 from models import (db, bcrypt, User)
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder = 'angular/app/')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 app.config['SECRET_KEY'] = "KERNKRIEGFTW"
 
