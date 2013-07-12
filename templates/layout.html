@@ -6,100 +6,38 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  {% block header %}{% endblock %}
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width">
+  <title>  {% block title %}{% endblock %} </title>
+  {% block header %}{% endblock %}
 
-  <link rel="stylesheet" href="styles/bootstrap.css">
-  <link rel="stylesheet" href="styles/main.css">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  {% assets "css_base" %}
+      <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+
+  {% assets "css_main" %}
+      <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
 </head>
-  <body ng-app="angularApp">
+  <body {% block angular %}{% endblock %}>
     <!--[if lt IE 7]>
       <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
     <![endif]-->
 
     <!--[if lt IE 9]>
-      <script src="bower_components/es5-shim/es5-shim.js"></script>
-      <script src="bower_components/json3/lib/json3.min.js"></script>
+      {% assets "js_ie9" %}
+        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+      {% endassets %}
     <![endif]-->
 
     {% with messages = get_flashed_messages() %}
     {% endwith %}
     {% block site %}{% endblock %}
 
-    <script src="bower_components/angular/angular.js"></script>
-
-    <script src="scripts/app.js"></script>
-    <script src="scripts/controllers/main.js"></script>
-
-    <script src="bower_components/jquery/jquery.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-affix.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-alert.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-dropdown.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-tooltip.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-modal.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-transition.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-button.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-popover.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-typeahead.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-carousel.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-scrollspy.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-collapse.js"></script>
-    <script src="bower_components/bootstrap-sass/js/bootstrap-tab.js"></script>
-
-    <script src="bower_components/angular-resource/angular-resource.js"></script>
-    <script src="bower_components/angular-cookies/angular-cookies.js"></script>
-    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    {% assets "js_base" %}
+        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
     {% block scripts %}{% endblock %}
-</body>
-</html>
-
-
-
-<!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Kernkrieg - {% block title %}{% endblock %}</title>
-  <meta name="description" content="">
-  <meta name="viewport" content="width=device-width">
-
-  <link rel="stylesheet" href="static/styles/bootstrap.css">
-  <style>
-    body {
-      padding-top: 60px;
-      padding-bottom: 40px;
-    }
-  </style>
-  <link rel="stylesheet" href="/styles/flat-ui.css">
-  <link rel="stylesheet" href="/styles/main.css">
-
-
-
-  <script src="static/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
-</head>
-<body>
-        <!--[if lt IE 7]>
-            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
-            <![endif]-->
-
-  {% with messages = get_flashed_messages() %}
-
-  {% endwith %}
-
-  {% block site %}{% endblock %}
-
-  <script src="/static/vendor/jquery-1.9.1.min.js"></script>
-  <script src="/static/vendor/bootstrap.min.js"></script>
-  <script src="/static/vendor/bootstrap-select.js"></script>
-  <script src="/static/vendor/bootstrap-switch.js"></script>
-  <script src="/static/vendor/flatui-checkbox.js"></script>
-  <script src="/static/vendor/flatui-radio.js"></script>
-  <script src="/static/main.js"></script>
-  {% block scripts %}{% endblock %}
 </body>
 </html>

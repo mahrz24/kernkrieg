@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %} Kernkrieg {% endblock %}
+{% block angular %} ng-app="angularApp" {% endblock %}
+{% block scripts %}
+    {% assets "js_angular" %}
+        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
+{% endblock %}
+
+{% block site %}
+    <div class="container" ng-view=""></div>
+{% endblock %}
