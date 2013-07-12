@@ -1,5 +1,7 @@
+# App
+from app import (app, db, bcrypt)
+
 # Flask
-from flask import Flask
 from flask import render_template
 
 # Flask Login
@@ -9,23 +11,48 @@ from flask.ext.login import *
 from forms import LoginForm
 
 # Assets
-from flask.ext.assets import Environment, Bundle
+from flask.ext.assets import (Environment, Bundle)
 
 # Database & Models
-from models import (db, bcrypt, User)
+from models import (User)
 
-app = Flask(__name__, static_folder = './angular/app', static_url_path='/app')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
-app.config['SECRET_KEY'] = "KERNKRIEGFTW"
+# REST API
+from flask.ext.restless import *
 
 login_manager = LoginManager()
 
-db.init_app(app)
 login_manager.init_app(app)
 bcrypt.init_app(app)
 
 assets = Environment()
 assets.init_app(app)
+
+db.create_all()
+
+manager = APIManager(app, flask_sqlalchemy_db=db)
+
+# Create the REST API
+def check_auth(instance_id=None, **kw):
+    if not current_user.is_authenticated():
+        raise ProcessingException(message='Not Authorized',
+                                  status_code=401)
+
+
+def check_admin(instance_id=None, **kw):
+    if not current_user.is_authenticated():
+        raise ProcessingException(message='Not Authorized',
+                                  status_code=401)
+    if not current_user.admin:
+        raise ProcessingException(message='Not Authorized',
+                                  status_code=401)
+
+manager.create_api(User, methods=['GET', 'POST', 'DELETE'],
+                        preprocessors={'GET_SINGLE': [check_auth],
+                                       'GET_MANY' : [check_auth],
+                                       'PATCH_SINGLE': [check_admin],
+                                       'PATCH_MANY' : [check_admin],
+                                       'POST': [check_admin],
+                                       'DELETE' : [check_admin]})
 
 # User management
 login_manager.login_view = "login"
@@ -97,9 +124,10 @@ def load_user(userid):
 def reset_db():
     db.drop_all()
     db.create_all()
-    admin = User("admin",
-                 "admin@localhost",
-                 bcrypt.generate_password_hash("admin"))
+    admin = User(username = "admin",
+                 email = "admin@localhost",
+                 passwd_hash = bcrypt.generate_password_hash("admin"),
+                 admin = True)
     db.session.add(admin)
     db.session.commit()
     return "Done"

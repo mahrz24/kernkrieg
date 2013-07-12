@@ -1,21 +1,12 @@
-from sqlalchemy import Column, Integer, String
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.bcrypt import Bcrypt
+from app import (db, bcrypt)
 
-db = SQLAlchemy()
-bcrypt = Bcrypt()
-
-class User(db.Model, ):
+class User(db.Model):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True)
-    email = Column(String(120), unique=True)
-    passwd_hash = Column(String(128), unique=False)
-
-    def __init__(self, username=None, email=None, passwd_hash=None):
-        self.username = username
-        self.email = email
-        self.passwd_hash = passwd_hash
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True)
+    email = db.Column(db.String(120), unique=True)
+    passwd_hash = db.Column(db.String(128), unique=False)
+    admin = db.Column(db.Boolean, unique=False)
 
     def check_password(self,password):
         return bcrypt.check_password_hash(self.passwd_hash, password)
@@ -51,3 +42,4 @@ class User(db.Model, ):
         if equal is NotImplemented:
             return NotImplemented
         return not equal
+
