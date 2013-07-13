@@ -2,7 +2,7 @@
 from app import (app, db, bcrypt)
 
 # Flask
-from flask import render_template
+from flask import render_template, jsonify
 
 # Flask Login
 from flask.ext.login import *
@@ -54,10 +54,10 @@ manager.create_api(User, methods=['GET', 'POST', 'DELETE'],
                                        'POST': [check_admin],
                                        'DELETE' : [check_admin]})
 
-# User management
-login_manager.login_view = "login"
-login_manager.login_message = u"Please log in to access this page."
-login_manager.refresh_view = "index"
+@app.route('/api/is_admin', methods = ['GET'])
+def get_tasks():
+    return jsonify( { 'is_admin': current_user.admin } )
+
 
 # Assets
 js_base = Bundle(
@@ -92,7 +92,8 @@ assets.register('js_ie9', js_ie9)
 
 js_angular = Bundle(
     'bower_components/angular/angular.js',
-    'scripts/directives/navbar.js',
+    'scripts/controllers/navigation.js',
+    'scripts/directives/navigation.js',
     'scripts/app.js',
     'scripts/controllers/main.js',
     'scripts/controllers/manage.js',
@@ -114,6 +115,10 @@ css_main = Bundle(
     output='gen/packed_main.css')
 assets.register('css_main', css_main)
 
+# User management
+login_manager.login_view = "login"
+login_manager.login_message = u"Please log in to access this page."
+login_manager.refresh_view = "index"
 
 # Views
 @login_manager.user_loader
