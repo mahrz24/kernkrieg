@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('kkApp', ['kkNavigation'])
+angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {
@@ -15,9 +15,14 @@ angular.module('kkApp', ['kkNavigation'])
         templateUrl: '/app/views/main.html',
         controller: 'DevelopCtrl'
       })
-      .when('/users', {
-        templateUrl: '/app/views/users.html',
-        controller: 'UsersCtrl'
+      .when('/accounts', {
+        templateUrl: '/app/views/accounts.html',
+        controller: 'AccountsCtrl',
+        resolve: {
+          accounts: function(MultiUserLoader) {
+            return MultiUserLoader();
+          }
+        }
       })
       .otherwise({
         redirectTo: '/'

@@ -92,13 +92,16 @@ assets.register('js_ie9', js_ie9)
 
 js_angular = Bundle(
     'bower_components/angular/angular.js',
+    'bower_components/angular-resource/angular-resource.js',
+    'bower_components/ng-grid/ng-grid-2.0.7.debug.js',
     'scripts/controllers/navigation.js',
     'scripts/directives/navigation.js',
     'scripts/app.js',
+    'scripts/services/accounts.js',
     'scripts/controllers/main.js',
     'scripts/controllers/manage.js',
     'scripts/controllers/develop.js',
-
+    'scripts/controllers/accounts.js',
     #filters='jsmin',
     output='gen/packed_angular.js')
 assets.register('js_angular', js_angular)
@@ -106,6 +109,7 @@ assets.register('js_angular', js_angular)
 css_base = Bundle(
     'bower_components/flatui/bootstrap/css/bootstrap.css',
     'bower_components/flatui/css/flat-ui.css',
+    'bower_components/ng-grid/ng-grid.min.css',
     filters='cssmin',
     output='gen/packed_base.css')
 assets.register('css_base', css_base)
