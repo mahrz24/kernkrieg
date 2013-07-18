@@ -2,10 +2,10 @@
 from app import (app, db, bcrypt)
 
 # Flask
-from flask import render_template, jsonify
+from flask import render_template, jsonify, url_for, flash, redirect, request
 
 # Flask Login
-from flask.ext.login import login_required, LoginManager, current_user
+from flask.ext.login import login_required, LoginManager, current_user, login_user
 
 # Forms
 from forms import LoginForm
@@ -62,19 +62,19 @@ def get_tasks():
 # Assets
 js_base = Bundle(
     'bower_components/jquery/jquery.js',
-    'bower_components/bootstrap-sass/js/bootstrap-affix.js',
-    'bower_components/bootstrap-sass/js/bootstrap-alert.js',
-    'bower_components/bootstrap-sass/js/bootstrap-dropdown.js',
-    'bower_components/bootstrap-sass/js/bootstrap-tooltip.js',
-    'bower_components/bootstrap-sass/js/bootstrap-modal.js',
-    'bower_components/bootstrap-sass/js/bootstrap-transition.js',
-    'bower_components/bootstrap-sass/js/bootstrap-button.js',
-    'bower_components/bootstrap-sass/js/bootstrap-popover.js',
-    'bower_components/bootstrap-sass/js/bootstrap-typeahead.js',
-    'bower_components/bootstrap-sass/js/bootstrap-carousel.js',
-    'bower_components/bootstrap-sass/js/bootstrap-scrollspy.js',
-    'bower_components/bootstrap-sass/js/bootstrap-collapse.js',
-    'bower_components/bootstrap-sass/js/bootstrap-tab.js',
+    'bower_components/sass-bootstrap/js/bootstrap-affix.js',
+    'bower_components/sass-bootstrap/js/bootstrap-alert.js',
+    'bower_components/sass-bootstrap/js/bootstrap-dropdown.js',
+    'bower_components/sass-bootstrap/js/bootstrap-tooltip.js',
+    'bower_components/sass-bootstrap/js/bootstrap-modal.js',
+    'bower_components/sass-bootstrap/js/bootstrap-transition.js',
+    'bower_components/sass-bootstrap/js/bootstrap-button.js',
+    'bower_components/sass-bootstrap/js/bootstrap-popover.js',
+    'bower_components/sass-bootstrap/js/bootstrap-typeahead.js',
+    'bower_components/sass-bootstrap/js/bootstrap-carousel.js',
+    'bower_components/sass-bootstrap/js/bootstrap-scrollspy.js',
+    'bower_components/sass-bootstrap/js/bootstrap-collapse.js',
+    'bower_components/sass-bootstrap/js/bootstrap-tab.js',
     'bower_components/flatui/js/bootstrap-select.js',
     'bower_components/flatui/js/bootstrap-switch.js',
     'bower_components/flatui/js/flatui-checkbox.js',
@@ -152,7 +152,7 @@ def index():
     return render_template('angular.html')
 
 @app.route('/ui/<path:p>')
-#@login_required
+@login_required
 def ui(p):
     return render_template('angular.html')
 
@@ -173,7 +173,7 @@ def login():
 
 
 @app.route("/logout")
-#@login_required
+@login_required
 def logout():
     logout_user()
     flash(u"Logged out")
