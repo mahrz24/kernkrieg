@@ -61,14 +61,30 @@ padding-left: 20px;
   padding: 10px 28px 11px 32px;
 }
 
+.navbar {
+  margin-top: 10px;
+}
+
 .navbar .btn-navbar:hover,
 .navbar .btn-navbar:focus {
   background: none;
   color: #ffffff;
 }
 
+.gbox {
+  -webkit-border-radius: 6px 6px 6px 6px;
+  -moz-border-radius: 6px 6px 6px 6px;
+  border-radius: 6px 6px 6px 6px;
+  background-color: rgb(214,214,214);
+}
+
+.gbox-content {
+  padding: 10px;
+}
+
 .gridStyle {
     border: 1px solid rgb(212,212,212);
-    width: 400px;
-    height: 300px
+    width: 100%;
+    height: 400px;
+    margin-bottom: 10px;
 }
