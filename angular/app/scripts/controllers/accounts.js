@@ -28,10 +28,13 @@ angular.module('kkApp')
       {
         if(i<oldValue.length)
         {
-          if(oldValue[i] != newValue[i] && oldValue[i].id == newValue[i].id)
+          if(!angular.equals(oldValue[i],newValue[i]) && oldValue[i].id == newValue[i].id)
           {
             // Update account
-            console.log("Update account " + i);
+            var user = new User($scope.accounts[i]);
+            user.$update(function(user) {
+            }, function() {
+            });
           }
         }
       }
@@ -40,7 +43,7 @@ angular.module('kkApp')
     $scope.addNewUser = function ()
     {
       var user = new User({ username: "user" + $scope.accounts.length,
-        email : "user@localhost",
+        email : "user" + $scope.accounts.length + "@localhost",
         passwd_hash : "password",
         admin : false});
 

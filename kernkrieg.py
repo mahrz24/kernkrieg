@@ -46,13 +46,24 @@ def check_admin(instance_id=None, **kw):
         raise ProcessingException(message='Not Authorized',
                                   status_code=401)
 
-manager.create_api(User, methods=['GET', 'POST', 'DELETE'],
-                        preprocessors={'GET_SINGLE': [check_auth],
-                                       'GET_MANY' : [check_auth],
-                                       'PATCH_SINGLE': [check_admin],
-                                       'PATCH_MANY' : [check_admin],
-                                       'POST': [check_admin],
-                                       'DELETE' : [check_admin]})
+
+def pre_hash(data=None, **kw):
+    if "passwd_hash" in data.keys():
+        data["passwd_hash"] = bcrypt.generate_password_hash(data["passwd_hash"])
+
+
+manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   exclude_columns=['passwd_hash'],
+                   preprocessors={'GET_SINGLE': [check_auth],
+                                  'GET_MANY':   [check_auth],
+                                  'PUT_SINGLE': [check_admin,
+                                                 pre_hash],
+                                  'PUT_MANY':   [check_admin,
+                                                 pre_hash],
+                                  'POST':       [check_admin,
+                                                 pre_hash],
+                                  'DELETE':     [check_admin]})
+
 
 @app.route('/api/is_admin', methods = ['GET'])
 def get_tasks():

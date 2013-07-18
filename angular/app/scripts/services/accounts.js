@@ -7,7 +7,8 @@ angular.module('kkApp')
       {method: 'GET',
       transformResponse: function (data) {
         return angular.fromJson(data).objects},
-      isArray: false}});
+      isArray: false},
+    update: {method:'PUT'}});
 }]);
 
 angular.module('kkApp')
