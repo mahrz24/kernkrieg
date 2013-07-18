@@ -5,7 +5,7 @@ from app import (app, db, bcrypt)
 from flask import render_template, jsonify
 
 # Flask Login
-from flask.ext.login import *
+from flask.ext.login import login_required, LoginManager, current_user
 
 # Forms
 from forms import LoginForm
@@ -152,7 +152,7 @@ def index():
     return render_template('angular.html')
 
 @app.route('/ui/<path:p>')
-@login_required
+#@login_required
 def ui(p):
     return render_template('angular.html')
 
@@ -173,7 +173,7 @@ def login():
 
 
 @app.route("/logout")
-@login_required
+#@login_required
 def logout():
     logout_user()
     flash(u"Logged out")
