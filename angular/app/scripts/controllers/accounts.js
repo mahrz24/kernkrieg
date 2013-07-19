@@ -4,24 +4,34 @@ angular.module('kkApp')
 .directive('ngBlur', function () {
     return function ($scope, elem, attrs) {
         elem.bind('blur', function () {
+          if(!$scope.$$phase) {
             $scope.$apply(attrs.ngBlur);
+          }
         });
     };
 });
 
 angular.module('kkApp')
 .controller('AccountsCtrl',
-  ['$scope', 'accounts', 'User',
-  function ($scope, accounts, User) {
+  ['$scope', '$http', 'accounts', 'User',
+  function ($scope, $http, accounts, User) {
     var passwordCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
       '<span ng-cell-text>******</span></div>';
 
+    var checkCell = '<input type="checkbox" ng-class="\'colt\' + $index"' +
+                   ' ng-checked="COL_FIELD" ng-model="COL_FIELD"  ng-disabled="row.entity.id==user_id"/>';
+
     var editCell = '<input type="text" ng-cell-input ng-class="\'colt\' + $index"' +
                    ' ng-input="COL_FIELD" ng-model="COL_FIELD" />';
+
     var passwordEditCell = '<input type="password" ng-cell-input' +
                    ' ng-class="\'colt\' + $index" ' +
                    ' ng-input="COL_FIELD" ng-model="passwordTemp[row.entity.id]"' +
                    ' ng-blur="updatePassword(row)" />';
+
+    $http.get('/api/user_id').success(function(data, status, headers, config) {
+        $scope.user_id =  data.user_id;
+    });
 
     $scope.passwordTemp = {};
     _.each(accounts, function (a) { $scope.passwordTemp[a.id] = "" ;});
@@ -41,6 +51,11 @@ angular.module('kkApp')
                       displayName:'E-Mail',
                       enableCellEdit: true,
                       editableCellTemplate: editCell,
+                    },
+                    { field:'admin',
+                      displayName:'Admin',
+                      enableCellEdit: false,
+                      cellTemplate: checkCell,
                     },
                     { field:'passwd_hash',
                       displayName:'Password',

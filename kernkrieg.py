@@ -66,8 +66,12 @@ manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
 
 
 @app.route('/api/is_admin', methods = ['GET'])
-def get_tasks():
+def get_is_admin():
     return jsonify( { 'is_admin': current_user.admin } )
+
+@app.route('/api/user_id', methods = ['GET'])
+def get_user_id():
+    return jsonify( { 'user_id': current_user.id } )
 
 
 # Assets
