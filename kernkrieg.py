@@ -73,6 +73,7 @@ def get_tasks():
 # Assets
 js_base = Bundle(
     'bower_components/jquery/jquery.js',
+    'bower_components/lodash/lodash.js',
     'bower_components/sass-bootstrap/js/bootstrap-affix.js',
     'bower_components/sass-bootstrap/js/bootstrap-alert.js',
     'bower_components/sass-bootstrap/js/bootstrap-dropdown.js',

@@ -1,15 +1,30 @@
 'use strict';
 
 angular.module('kkApp')
+.directive('ngBlur', function () {
+    return function ($scope, elem, attrs) {
+        elem.bind('blur', function () {
+            $scope.$apply(attrs.ngBlur);
+        });
+    };
+});
+
+angular.module('kkApp')
 .controller('AccountsCtrl',
   ['$scope', 'accounts', 'User',
   function ($scope, accounts, User) {
     var passwordCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
       '<span ng-cell-text>******</span></div>';
 
-    var editCell = '<input type="text" ng-cell-input ng-class="\'colt\' + $index" ng-input="COL_FIELD" ng-model="COL_FIELD"></input>';
-    var passwordEditCell = '<input type="password" ng-cell-input ng-class="\'colt\' + $index" ng-input="COL_FIELD" ng-model="COL_FIELD"></input>';
+    var editCell = '<input type="text" ng-cell-input ng-class="\'colt\' + $index"' +
+                   ' ng-input="COL_FIELD" ng-model="COL_FIELD" />';
+    var passwordEditCell = '<input type="password" ng-cell-input' +
+                   ' ng-class="\'colt\' + $index" ' +
+                   ' ng-input="COL_FIELD" ng-model="passwordTemp[row.entity.id]"' +
+                   ' ng-blur="updatePassword(row)" />';
 
+    $scope.passwordTemp = {};
+    _.each(accounts, function (a) { $scope.passwordTemp[a.id] = "" ;});
     $scope.accounts = accounts;
     $scope.gridOptions =
     {
@@ -34,6 +49,23 @@ angular.module('kkApp')
                       enableCellEdit: true
                     } ]
     };
+
+    $scope.updatePassword = function(row)
+    {
+
+      var user = new User(_.findWhere($scope.accounts, {id :row.entity.id}));
+      user.passwd_hash = $scope.passwordTemp[row.entity.id];
+      if(user.passwd_hash.length > 0)
+      {
+        console.log("Update Password " + angular.toJson(user));
+        user.$update(function(user) {
+          $scope.passwordTemp[user.id] = "";
+          },
+        function() {
+          $scope.passwordTemp[user.id] = "";
+          });
+      }
+    }
 
     $scope.$watch('accounts', function(newValue, oldValue)
     {
@@ -65,6 +97,7 @@ angular.module('kkApp')
 
       user.$save( function(user) {
         $scope.accounts.unshift(user);
+        $scope.passwordTemp[user.id] = "";
       });
     };
   }]);
