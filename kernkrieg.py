@@ -46,6 +46,14 @@ def check_admin(instance_id=None, **kw):
         raise ProcessingException(message='Not Authorized',
                                   status_code=401)
 
+def check_admin_or_user(instance_id=None, **kw):
+    if not current_user.is_authenticated():
+        raise ProcessingException(message='Not Authorized',
+                                  status_code=401)
+    if not current_user.admin and not current_user.id == instance_id:
+        raise ProcessingException(message='Not Authorized',
+                                  status_code=401)
+
 
 def pre_hash(data=None, **kw):
     if "passwd_hash" in data.keys():
@@ -54,9 +62,9 @@ def pre_hash(data=None, **kw):
 
 manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
                    exclude_columns=['passwd_hash'],
-                   preprocessors={'GET_SINGLE': [check_auth],
-                                  'GET_MANY':   [check_auth],
-                                  'PUT_SINGLE': [check_admin,
+                   preprocessors={'GET_SINGLE': [check_admin_or_user],
+                                  'GET_MANY':   [check_admin],
+                                  'PUT_SINGLE': [check_admin_or_user,
                                                  pre_hash],
                                   'PUT_MANY':   [check_admin,
                                                  pre_hash],

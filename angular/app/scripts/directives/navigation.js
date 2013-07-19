@@ -5,8 +5,7 @@ angular.module('kkNavigation').directive('kkNavbutton', [ '$location', function(
         transclude: true,
         replace: true,
         scope: { href: '@' ,
-                 is_admin: '=',
-                 adminOnly: '@'},
+                 adminOnly: '=' },
 
         link: function(scope, element, attrs)
         {
@@ -25,7 +24,7 @@ angular.module('kkNavigation').directive('kkNavbutton', [ '$location', function(
 
             });
             if(attrs.adminOnly)
-                scope.visible = attrs.adminOnly;
+                scope.$watch('adminOnly', function(value) {scope.visible = value;});
             else
                 scope.visible = true;
         }
