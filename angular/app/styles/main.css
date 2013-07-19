@@ -75,7 +75,7 @@ padding-left: 20px;
   -webkit-border-radius: 6px 6px 6px 6px;
   -moz-border-radius: 6px 6px 6px 6px;
   border-radius: 6px 6px 6px 6px;
-  background-color: rgb(214,214,214);
+  background-color: rgb(230,230,230);
 }
 
 .gbox-content {
@@ -87,4 +87,24 @@ padding-left: 20px;
     width: 100%;
     height: 400px;
     margin-bottom: 10px;
+}
+
+form ul
+{
+  list-style-type: none;
+  padding-left: 0px;
+}
+
+form ul li span {
+  float: left;
+  width: 150px;
+  padding-top:10px;
+}
+
+.error
+{
+  color: red;
+  margin-bottom: 10px;
+  margin-top: 0px;
+  margin-left: 5px;
 }

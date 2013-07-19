@@ -1,0 +1,19 @@
+<div class="row">
+  <div class="span12 gbox">
+    <div class="gbox-content">
+      <form name="form">
+        <ul>
+        <li><span>Username:</span> <input type="text" name="username" ng-model="account.username" required /></li>
+        <li class="error" ng-show="form.username.$error.required"><span></span>Username cannot be empty</li>
+         <li><span>E-mail:</span> <input type="email" name="email" ng-model="account.email" required /></li>
+         <li class="error" ng-show="form.email.$error.email"><span></span>Please enter a valid email-address</li>
+         <li class="error" ng-show="form.email.$error.required"><span></span>Please enter an email-address</li>
+         <li><span>Password:</span> <input type="password" ng-model="account.passwd_hash" /></li>
+         <li><span>Confirm Password:</span> <input type="password" ng-model="passwordConfirm" /></li>
+         <li class="error" ng-show="account.passwd_hash != passwordConfirm"><span></span>The passwords do not match!</li>
+          <li style="margin-top:20px;"><span></span><button class="btn btn-primary" ng-click="save()" ng-disabled="!form.$valid || account.passwd_hash != passwordConfirm">Save</button></li>
+        </ul>
+      </form>
+    </div>
+  </div>
+</div>

@@ -95,13 +95,12 @@ angular.module('kkApp')
       {
         if(i<oldValue.length)
         {
-          if(!angular.equals(oldValue[i],newValue[i]) && oldValue[i].id == newValue[i].id)
+          if(!angular.equals(oldValue[i],newValue[i]) &&
+             oldValue[i].id == newValue[i].id)
           {
             // Update account
             var user = new User($scope.accounts[i]);
-            user.$update(function(user) {
-            }, function() {
-            });
+            user.$update(function(user) {}, function() {});
           }
         }
       }

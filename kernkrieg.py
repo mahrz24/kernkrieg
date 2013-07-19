@@ -118,6 +118,7 @@ js_angular = Bundle(
     'scripts/controllers/manage.js',
     'scripts/controllers/develop.js',
     'scripts/controllers/accounts.js',
+    'scripts/controllers/accountEdit.js',
     #filters='jsmin',
     output='gen/packed_angular.js')
 assets.register('js_angular', js_angular)

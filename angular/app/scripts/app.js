@@ -24,6 +24,15 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
           }
         }
       })
+      .when('/edit_account/:userId', {
+        templateUrl: '/app/views/accountEditForm.html',
+        controller: 'AccountEditCtrl',
+        resolve: {
+          account: function(UserLoader) {
+            return UserLoader();
+          }
+        }
+      })
       .otherwise({
         redirectTo: '/'
       });
