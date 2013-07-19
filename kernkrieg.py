@@ -5,7 +5,7 @@ from app import (app, db, bcrypt)
 from flask import render_template, jsonify, url_for, flash, redirect, request
 
 # Flask Login
-from flask.ext.login import login_required, LoginManager, current_user, login_user
+from flask.ext.login import login_required, LoginManager, current_user, login_user, logout_user
 
 # Forms
 from forms import LoginForm

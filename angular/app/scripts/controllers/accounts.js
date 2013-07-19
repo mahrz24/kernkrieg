@@ -18,6 +18,8 @@ angular.module('kkApp')
     var passwordCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
       '<span ng-cell-text>******</span></div>';
 
+    var actionCell = '<button class="btn btn-danger" ng-click="deleteUser(row)"> Delete </button>';
+
     var checkCell = '<input type="checkbox" ng-class="\'colt\' + $index"' +
                    ' ng-checked="COL_FIELD" ng-model="COL_FIELD"  ng-disabled="row.entity.id==user_id"/>';
 
@@ -58,10 +60,14 @@ angular.module('kkApp')
                       cellTemplate: checkCell,
                     },
                     { field:'passwd_hash',
-                      displayName:'Password',
+                      displayName: 'Password',
                       cellTemplate: passwordCell,
                       editableCellTemplate: passwordEditCell,
                       enableCellEdit: true
+                    },
+                    { field: '',
+                      displayName: 'Action',
+                      cellTemplate: actionCell
                     } ]
     };
 
@@ -72,7 +78,6 @@ angular.module('kkApp')
       user.passwd_hash = $scope.passwordTemp[row.entity.id];
       if(user.passwd_hash.length > 0)
       {
-        console.log("Update Password " + angular.toJson(user));
         user.$update(function(user) {
           $scope.passwordTemp[user.id] = "";
           },
@@ -93,7 +98,6 @@ angular.module('kkApp')
           if(!angular.equals(oldValue[i],newValue[i]) && oldValue[i].id == newValue[i].id)
           {
             // Update account
-            console.log("Updating " + i);
             var user = new User($scope.accounts[i]);
             user.$update(function(user) {
             }, function() {
@@ -115,4 +119,13 @@ angular.module('kkApp')
         $scope.passwordTemp[user.id] = "";
       });
     };
+
+    $scope.deleteUser = function (row)
+    {
+      var user = new User(row.entity);
+      user.$delete(function ()
+      {
+        $scope.accounts = _.reject($scope.accounts, {id: row.entity.id})
+      });
+    }
   }]);
