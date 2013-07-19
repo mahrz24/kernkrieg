@@ -43,15 +43,19 @@ def check_admin(instance_id=None, **kw):
         raise ProcessingException(message='Not Authorized',
                                   status_code=401)
     if not current_user.admin:
-        raise ProcessingException(message='Not Authorized',
+        raise ProcessingException(message='Not Authorized as Administrator',
                                   status_code=401)
 
 def check_admin_or_user(instance_id=None, **kw):
     if not current_user.is_authenticated():
         raise ProcessingException(message='Not Authorized',
                                   status_code=401)
-    if not current_user.admin and not current_user.id == instance_id:
-        raise ProcessingException(message='Not Authorized',
+
+    if current_user.admin:
+        return
+
+    if current_user.id != int(instance_id):
+        raise ProcessingException(message='Not Authorized for this Resource',
                                   status_code=401)
 
 
