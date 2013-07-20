@@ -2,7 +2,8 @@
 
 angular.module('kkApp')
 .controller('DevelopListCtrl',
-  ['$scope',
-  function ($scope) {
-
+  ['$scope', 'own_warriors',
+  function ($scope, own_warriors)
+  {
+    $scope.own_warriors = own_warriors;
   }]);

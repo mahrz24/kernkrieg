@@ -9,7 +9,23 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
       })
       .when('/develop', {
         templateUrl: '/app/views/developList.html',
-        controller: 'DevelopListCtrl'
+        controller: 'DevelopListCtrl',
+        resolve: {
+          own_warriors: function(QueriedWarriorLoader, $q, $http)
+          {
+            var delay = $q.defer();
+
+            $http.get('/api/user_id').success(function(data, status, headers, config) {
+              delay.resolve(QueriedWarriorLoader({filters:[{name:"owners__id",op:"any",val:data.user_id}]}));
+            });
+
+            return delay.promise;
+          },
+          public_warriors: function(QueriedWarriorLoader, $q, $http)
+          {
+            return QueriedWarriorLoader({filters:[{name:"public",op:"eq",val:true}]});
+          }
+        }
       })
       .when('/develop/:warriorId', {
         templateUrl: '/app/views/developEdit.html',

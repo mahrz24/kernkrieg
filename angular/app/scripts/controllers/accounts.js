@@ -18,7 +18,7 @@ angular.module('kkApp')
     var passwordCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
       '<span ng-cell-text>******</span></div>';
 
-    var actionCell = '<button class="btn btn-danger" ng-click="deleteUser(row)"> Delete </button>';
+    var actionCell = '<button class="btn btn-danger" ng-click="deleteUser(row)" ng-disabled="row.entity.id==user_id"> Delete </button>';
 
     var checkCell = '<input type="checkbox" ng-class="\'colt\' + $index"' +
                    ' ng-checked="COL_FIELD" ng-model="COL_FIELD"  ng-disabled="row.entity.id==user_id"/>';
@@ -38,12 +38,13 @@ angular.module('kkApp')
     $scope.passwordTemp = {};
     _.each(accounts, function (a) { $scope.passwordTemp[a.id] = "" ;});
     $scope.accounts = accounts;
-    $scope.gridOptions =
+    $scope.gridAccounts =
     {
       data: 'accounts',
       enableCellSelection: true,
       enableRowSelection: false,
       rowHeight:50,
+      plugins: [new ngGridFlexibleHeightPlugin(opts = { minHeight: 200})],
       columnDefs: [ { field: 'username',
                       displayName: 'Username',
                       enableCellEdit: true,

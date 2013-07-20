@@ -77,7 +77,7 @@ manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                   'DELETE':     [check_admin]})
 
 manager.create_api(Warrior, methods=['GET', 'POST', 'PUT', 'DELETE'],
-     include_columns=['id', 'name', 'code', 'owners', 'owners.id'])
+     include_columns=['id', 'name', 'code', 'public', 'testable', 'owners', 'owners.id', 'owners.username'])
 
 
 @app.route('/api/is_admin', methods = ['GET'])
@@ -125,13 +125,14 @@ js_angular = Bundle(
     'bower_components/angular/angular.js',
     'bower_components/angular-resource/angular-resource.js',
     'bower_components/ng-grid/ng-grid-2.0.7.debug.js',
+    'bower_components/ng-grid/plugins/ng-grid-flexible-height.js',
     'scripts/controllers/navigation.js',
     'scripts/directives/navigation.js',
     'scripts/app.js',
     'scripts/services/accounts.js',
+    'scripts/services/warriors.js',
     'scripts/controllers/main.js',
-    'scripts/controllers/manage.js',
-    'scripts/controllers/develop.js',
+    'scripts/controllers/developList.js',
     'scripts/controllers/accounts.js',
     'scripts/controllers/accountEdit.js',
     #filters='jsmin',

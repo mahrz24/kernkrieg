@@ -11,13 +11,13 @@ angular.module('kkApp')
     update: {method:'PUT'}});
 }]);
 
+
 angular.module('kkApp')
 .factory('MultiUserLoader', ['User', '$q',
   function(User, $q) {
     return function() {
       var delay = $q.defer();
       User.query(function(users) {
-        console.log(users);
         delay.resolve(users.objects);
       }, function() {
         delay.reject('Unable to fetch users');
@@ -35,6 +35,21 @@ angular.module('kkApp')
         delay.resolve(user);
       }, function() {
         delay.reject('Unable to fetch user' + $route.current.params.userId);
+      });
+      return delay.promise;
+    };
+  }]);
+
+angular.module('kkApp')
+.factory('UserID', ['$q',
+  function(User, $q) {
+    var userId
+    return function() {
+      var delay = $q.defer();
+      User.query(function(users) {
+        delay.resolve(users.objects);
+      }, function() {
+        delay.reject('Unable to fetch users');
       });
       return delay.promise;
     };
