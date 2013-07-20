@@ -2,7 +2,7 @@
 
 angular.module('kkApp')
 .factory('User', ['$resource', function($resource) {
-  return $resource('/api/users/:id', {id : '@id'},
+  return $resource('/api/user/:id', {id : '@id'},
     {query:
       {method: 'GET',
       transformResponse: function (data) {

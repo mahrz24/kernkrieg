@@ -14,7 +14,7 @@ from forms import LoginForm
 from flask.ext.assets import (Environment, Bundle)
 
 # Database & Models
-from models import (User)
+from models import (User, Warrior)
 
 # REST API
 from flask.ext.restless import *
@@ -65,7 +65,7 @@ def pre_hash(data=None, **kw):
 
 
 manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   exclude_columns=['passwd_hash'],
+                   exclude_columns=['passwd_hash','warriors'],
                    preprocessors={'GET_SINGLE': [check_admin_or_user],
                                   'GET_MANY':   [check_admin],
                                   'PUT_SINGLE': [check_admin_or_user,
@@ -75,6 +75,9 @@ manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                   'POST':       [check_admin,
                                                  pre_hash],
                                   'DELETE':     [check_admin]})
+
+manager.create_api(Warrior, methods=['GET', 'POST', 'PUT', 'DELETE'],
+     include_columns=['id', 'name', 'code', 'owners', 'owners.id'])
 
 
 @app.route('/api/is_admin', methods = ['GET'])

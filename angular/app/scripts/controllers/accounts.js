@@ -109,7 +109,7 @@ angular.module('kkApp')
     $scope.addNewUser = function ()
     {
       var user = new User({ username: "user" + $scope.accounts.length,
-        email : "user" + $scope.accounts.length + "@localhost",
+        email : "user" + $scope.accounts.length + "@nodomain.not",
         passwd_hash : "password",
         admin : false});
 
