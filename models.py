@@ -56,6 +56,8 @@ class Warrior(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     code = db.Column(db.Text)
+    public = db.Column(db.Boolean, unique=False)
+    testable = db.Column(db.Boolean, unique=False)
 
 @event.listens_for(db.Session, 'after_flush')
 def delete_warrior_orphans(session, ctx):

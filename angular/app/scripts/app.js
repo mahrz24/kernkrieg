@@ -7,13 +7,13 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
         templateUrl: '/app/views/main.html',
         controller: 'MainCtrl'
       })
-      .when('/manage', {
-        templateUrl: '/app/views/main.html',
-        controller: 'ManageCtrl'
-      })
       .when('/develop', {
-        templateUrl: '/app/views/main.html',
-        controller: 'DevelopCtrl'
+        templateUrl: '/app/views/developList.html',
+        controller: 'DevelopListCtrl'
+      })
+      .when('/develop/:warriorId', {
+        templateUrl: '/app/views/developEdit.html',
+        controller: 'DevelopEditCtrl'
       })
       .when('/accounts', {
         templateUrl: '/app/views/accounts.html',
