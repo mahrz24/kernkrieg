@@ -24,10 +24,10 @@
           </kk-navbutton>
           <kk-navbutton href="#/matches"> Matches
           </kk-navbutton>
-          <kk-navbutton admin-only="is_admin" href="#/match_admin"> Admin
-          </kk-navbutton>
-          <kk-navbutton admin-only="is_admin" href="#/accounts"> Accounts
-          </kk-navbutton>
+          <kk-nav-dropdown admin-only="is_admin" title="Admin">
+            <li><a ng-href="#">Machines</a></li>
+            <li><a href="#/accounts">Accounts</a></li>
+          </kk-nav-dropdown>
         </ul>
 
         <ul class="nav pull-right">

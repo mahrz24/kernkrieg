@@ -38,7 +38,7 @@ padding-left: 20px;
   border-radius: 0 0 0 0px;
 }
 
-.navbar-inverse .nav li.dropdown > a {
+.navbar-inverse .pull-right li.dropdown > a {
   -webkit-border-radius: 0 6px 6px 0;
   -moz-border-radius: 0 6px 6px 0;
   border-radius: 0 6px 6px 0;
