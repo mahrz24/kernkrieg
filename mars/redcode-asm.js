@@ -1,6 +1,6 @@
 module.exports = (function(){
     var redcodeParser = require('./redcode-asm-parser.js');
-    var _ = require('lodash')._;
+    var _ = require('lodash');
 
     function Program(name, author, version, date, strict94, origin, instructions)
     {

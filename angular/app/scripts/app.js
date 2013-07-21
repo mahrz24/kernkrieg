@@ -1,4 +1,4 @@
-
+console.log(mars.redcode);
 
 angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
   .config(function ($routeProvider) {

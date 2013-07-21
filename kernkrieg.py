@@ -126,6 +126,7 @@ js_angular = Bundle(
     'bower_components/angular-resource/angular-resource.js',
     'bower_components/ng-grid/ng-grid-2.0.7.debug.js',
     'bower_components/ng-grid/plugins/ng-grid-flexible-height.js',
+    'vendor/mars.js',
     'scripts/controllers/navigation.js',
     'scripts/directives/navigation.js',
     'scripts/app.js',
