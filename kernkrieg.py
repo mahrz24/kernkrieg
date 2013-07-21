@@ -14,7 +14,7 @@ from forms import LoginForm
 from flask.ext.assets import (Environment, Bundle)
 
 # Database & Models
-from models import (User, Warrior, Machine)
+from models import (User, Warrior, Machine, Queue, Match, Submission)
 
 # REST API
 from flask.ext.restless import *
@@ -112,6 +112,15 @@ def pre_hash(data=None, **kw):
         data["passwdHash"] = bcrypt.generate_password_hash(data["passwdHash"])
 
 
+def post_create_testq(result=None, **kw):
+    testq = Queue(name = result['name'] + " Testing",
+                  machineId = result['id'],
+                  qType = 0,
+                  maxSubsPerWarrior = -1,
+                  maxSubsPerUser = -1)
+    db.session.add(testq)
+    db.session.commit()
+
 manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
                    exclude_columns=['passwdHash','warriors'],
                    preprocessors={'GET_SINGLE': [check_admin_or_user],
@@ -147,7 +156,9 @@ manager.create_api(Machine, methods=['GET', 'POST', 'PUT', 'DELETE'],
                    preprocessors={'PUT_SINGLE': [check_admin],
                                   'PUT_MANY':   [check_admin],
                                   'POST':       [check_admin],
-                                  'DELETE':     [check_admin]})
+                                  'DELETE':     [check_admin]},
+                   postprocessors={'POST':  [post_create_testq]})
+
 
 @app.route('/api/is_admin', methods = ['GET'])
 def get_is_admin():

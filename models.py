@@ -77,3 +77,32 @@ class Machine(db.Model):
     initialSep = db.Column(db.Integer)
     readDist = db.Column(db.Integer)
     writeDist = db.Column(db.Integer)
+
+class Queue(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), unique=True)
+    machineId = db.Column(db.Integer, db.ForeignKey('machine.id'))
+    machine = db.relationship("Machine")
+    qType = db.Column(db.Integer)
+    # 0 = Test Queue, 1 = Random Queue, 3 = TrueSkill Queue
+    maxSubsPerWarrior = db.Column(db.Integer)
+    # -1 = No Limit
+    maxSubsPerUser = db.Column(db.Integer)
+    # -1 = No Limit
+
+class Match(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    priority = db.Column(db.Integer)
+    # -1 = Past match
+    scheduled = db.Column(db.DateTime)
+    executed = db.Column(db.DateTime)
+    tie = db.Column(db.Boolean)
+    winner = db.Column(db.Integer)
+
+
+class Submission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+    authors = db.Column(db.String(255))
+    code = db.Column(db.Text)
+    submitted = db.Column(db.DateTime)
