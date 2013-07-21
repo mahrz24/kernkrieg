@@ -7,7 +7,7 @@ angular.module('kkApp')
     $scope.account = account;
 
     $scope.save = function() {
-      if($scope.account.passwd_hash == $scope.passwordConfirm)
+      if($scope.account.passwdHash == $scope.passwordConfirm)
       {
         $scope.account.$update();
       }

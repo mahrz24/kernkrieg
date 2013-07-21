@@ -108,12 +108,12 @@ def deny(**kw):
       status_code=401)
 
 def pre_hash(data=None, **kw):
-    if "passwd_hash" in data.keys():
-        data["passwd_hash"] = bcrypt.generate_password_hash(data["passwd_hash"])
+    if "passwdHash" in data.keys():
+        data["passwdHash"] = bcrypt.generate_password_hash(data["passwdHash"])
 
 
 manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   exclude_columns=['passwd_hash','warriors'],
+                   exclude_columns=['passwdHash','warriors'],
                    preprocessors={'GET_SINGLE': [check_admin_or_user],
                                   'GET_MANY':   [check_admin],
                                   'PUT_SINGLE': [check_admin_or_user,
@@ -143,7 +143,7 @@ manager.create_api(Warrior, methods=['GET', 'POST', 'PUT', 'DELETE'],
 
 
 manager.create_api(Machine, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   exclude_columns=['passwd_hash','warriors'],
+                   exclude_columns=['passwdHash','warriors'],
                    preprocessors={'PUT_SINGLE': [check_admin],
                                   'PUT_MANY':   [check_admin],
                                   'POST':       [check_admin],
@@ -201,9 +201,11 @@ js_angular = Bundle(
     'scripts/app.js',
     'scripts/services/accounts.js',
     'scripts/services/warriors.js',
+    'scripts/services/machines.js',
     'scripts/controllers/main.js',
     'scripts/controllers/developList.js',
     'scripts/controllers/accounts.js',
+    'scripts/controllers/machines.js',
     'scripts/controllers/accountEdit.js',
     #filters='jsmin',
     output='gen/packed_angular.js')
@@ -242,7 +244,7 @@ def reset_db():
     db.create_all()
     admin = User(username = "admin",
                  email = "admin@localhost",
-                 passwd_hash = bcrypt.generate_password_hash("admin"),
+                 passwdHash = bcrypt.generate_password_hash("admin"),
                  admin = True)
     db.session.add(admin)
     db.session.commit()

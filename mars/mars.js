@@ -39,10 +39,10 @@ module.exports = (function(){
 
     var MARS = function(config)
     {
-        if(config.readDist == MARS.full)
+        if(config.readDist == MARS.full || config.readDist == -1)
             config.readDist = config.coreSize;
 
-        if(config.writeDist == MARS.full)
+        if(config.writeDist == MARS.full || config.writeDist == -1)
             config.writeDist = config.coreSize;
 
         this.coreSize = config.coreSize;

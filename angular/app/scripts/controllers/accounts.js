@@ -60,7 +60,7 @@ angular.module('kkApp')
                       enableCellEdit: false,
                       cellTemplate: checkCell,
                     },
-                    { field:'passwd_hash',
+                    { field:'passwdHash',
                       displayName: 'Password',
                       cellTemplate: passwordCell,
                       editableCellTemplate: passwordEditCell,
@@ -76,8 +76,8 @@ angular.module('kkApp')
     {
 
       var user = new User(_.findWhere($scope.accounts, {id :row.entity.id}));
-      user.passwd_hash = $scope.passwordTemp[row.entity.id];
-      if(user.passwd_hash.length > 0)
+      user.passwdHash = $scope.passwordTemp[row.entity.id];
+      if(user.passwdHash.length > 0)
       {
         user.$update(function(user) {
           $scope.passwordTemp[user.id] = "";
@@ -111,7 +111,7 @@ angular.module('kkApp')
     {
       var user = new User({ username: "user" + $scope.accounts.length,
         email : "user" + $scope.accounts.length + "@nodomain.not",
-        passwd_hash : "password",
+        passwdHash : "password",
         admin : false});
 
       user.$save( function(user) {

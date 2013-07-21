@@ -31,7 +31,16 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
         templateUrl: '/app/views/developEdit.html',
         controller: 'DevelopEditCtrl'
       })
-      .when('/accounts', {
+      .when('/admin/machines', {
+        templateUrl: '/app/views/machines.html',
+        controller: 'MachinesCtrl',
+        resolve: {
+          machines: function(MultiMachineLoader) {
+            return MultiMachineLoader();
+          }
+        }
+      })
+      .when('/admin/accounts', {
         templateUrl: '/app/views/accounts.html',
         controller: 'AccountsCtrl',
         resolve: {

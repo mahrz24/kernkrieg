@@ -1,0 +1,4 @@
+*.pyc
+mars/client
+**/gen/*
+**/.webassets-cache/*

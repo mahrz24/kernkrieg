@@ -10,7 +10,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
     email = db.Column(db.String(120), unique=True)
-    passwd_hash = db.Column(db.String(128), unique=False)
+    passwdHash = db.Column(db.String(128), unique=False)
     admin = db.Column(db.Boolean, unique=False)
 
     warriors = db.relationship("Warrior",
@@ -18,7 +18,7 @@ class User(db.Model):
         backref="owners")
 
     def check_password(self,password):
-        return bcrypt.check_password_hash(self.passwd_hash, password)
+        return bcrypt.check_password_hash(self.passwdHash, password)
 
     def is_active(self):
         return True
@@ -56,8 +56,8 @@ class Warrior(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     code = db.Column(db.Text)
-    public = db.Column(db.Boolean, unique=False)
-    testable = db.Column(db.Boolean, unique=False)
+    public = db.Column(db.Boolean)
+    testable = db.Column(db.Boolean)
 
 @event.listens_for(db.Session, 'after_flush')
 def delete_warrior_orphans(session, ctx):
@@ -67,13 +67,13 @@ def delete_warrior_orphans(session, ctx):
 
 class Machine(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128))
-    core_size = db.Column(db.Integer)
-    pspace_size = db.Column(db.Integer)
-    cycles_until_tie = db.Column(db.Integer)
-    initial_instruction = db.Column(db.String)
-    max_tasks = db.Column(db.Integer)
-    min_sep = db.Column(db.Integer)
-    initial_sep = db.Column(db.Integer)
-    read_dist = db.Column(db.Integer)
-    write_dist = db.Column(db.Integer)
+    name = db.Column(db.String(128), unique=True)
+    coreSize = db.Column(db.Integer)
+    pSpaceSize = db.Column(db.Integer)
+    cyclesUntilTie = db.Column(db.Integer)
+    initialInstruction = db.Column(db.String)
+    maxTasks = db.Column(db.Integer)
+    minSep = db.Column(db.Integer)
+    initialSep = db.Column(db.Integer)
+    readDist = db.Column(db.Integer)
+    writeDist = db.Column(db.Integer)
