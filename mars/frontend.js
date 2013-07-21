@@ -1,2 +1,2 @@
-var redcode = require('./redcode-asm.js');
-var MARS = require('./mars.js');
+exports.redcode = require('./redcode-asm.js');
+exports.MARS = require('./mars.js');
