@@ -14,7 +14,7 @@ from forms import LoginForm
 from flask.ext.assets import (Environment, Bundle)
 
 # Database & Models
-from models import (User, Warrior)
+from models import (User, Warrior, Machine)
 
 # REST API
 from flask.ext.restless import *
@@ -58,6 +58,54 @@ def check_admin_or_user(instance_id=None, **kw):
         raise ProcessingException(message='Not Authorized for this Resource',
                                   status_code=401)
 
+def check_owner_single(instance_id=None, data=None, **kw):
+    if current_user.admin:
+        return
+    if not data:
+        w = Warrior.query.get(instance_id)
+        if w.public:
+            return
+
+        is_owner = False
+        for owner in w.owners:
+            if current_user.id == owner.id:
+                is_owner = True
+
+                if not is_owner:
+                    raise ProcessingException(message='Not Authorized for this Resource',
+                      status_code=401)
+        return
+    if data['public']:
+        return
+
+    is_owner = False
+    for owner in data['owners']:
+        if current_user.id == owner['id']:
+            is_owner = True
+
+    if not is_owner:
+        raise ProcessingException(message='Not Authorized for this Resource',
+                                  status_code=401)
+
+
+def post_check_owner_many(result=None, **kw):
+    print(result)
+    if current_user.admin:
+        return
+
+    for obj in result['objects']:
+        is_owner = False
+        for owner in obj['owners']:
+            if current_user.id == owner['id']:
+                is_owner = True
+
+        if (not is_owner) and (not obj['public']):
+            raise ProcessingException(message='Not Authorized for this Resource',
+                                      status_code=401)
+
+def deny(**kw):
+    raise ProcessingException(message='Not Allowed',
+      status_code=401)
 
 def pre_hash(data=None, **kw):
     if "passwd_hash" in data.keys():
@@ -77,8 +125,29 @@ manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                   'DELETE':     [check_admin]})
 
 manager.create_api(Warrior, methods=['GET', 'POST', 'PUT', 'DELETE'],
-     include_columns=['id', 'name', 'code', 'public', 'testable', 'owners', 'owners.id', 'owners.username'])
+                   include_columns=['id',
+                                    'name',
+                                    'code',
+                                    'public',
+                                    'testable',
+                                    'owners',
+                                    'owners.id',
+                                    'owners.username'],
+                   preprocessors={'GET_SINGLE': [check_owner_single],
+                                  'GET_MANY':   [check_auth],
+                                  'PUT_SINGLE': [check_owner_single],
+                                  'PUT_MANY':   [deny],
+                                  'POST':       [check_owner_single],
+                                  'DELETE':     [check_owner_single]},
+                   postprocessors={'GET_MANY':   [post_check_owner_many]})
 
+
+manager.create_api(Machine, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   exclude_columns=['passwd_hash','warriors'],
+                   preprocessors={'PUT_SINGLE': [check_admin],
+                                  'PUT_MANY':   [check_admin],
+                                  'POST':       [check_admin],
+                                  'DELETE':     [check_admin]})
 
 @app.route('/api/is_admin', methods = ['GET'])
 def get_is_admin():

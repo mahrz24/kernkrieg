@@ -44,18 +44,18 @@ if(argv.ii !== MARS.random)
 else
     initial = argv.ii;
 
-var mars = new MARS(
-    argv.core,
-    argv.pspc,
-    argv.tiec,
-    initial,
-    argv.lim,
-    argv.maxt,
-    argv.minsep,
-    argv.sep,
-    argv.readd,
-    argv.writed
-    );
+var mars = new MARS({
+    coreSize: argv.core,
+    pSpaceSize: argv.pspc,
+    cyclesUntilTie: argv.tiec,
+    initialInstruction: initial,
+    instructionLimit: argv.lim,
+    maxTasks: argv.maxt,
+    minSep: argv.minsep,
+    initialSep: argv.sep,
+    readDist: argv.readd,
+    writeDist: argv.writed
+    });
 
 _.each(warriors, function(w) { mars.loadWarrior(w,0); });
 

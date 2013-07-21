@@ -64,3 +64,16 @@ def delete_warrior_orphans(session, ctx):
     session.query(Warrior).\
         filter(~Warrior.owners.any()).\
         delete(synchronize_session=False)
+
+class Machine(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+    core_size = db.Column(db.Integer)
+    pspace_size = db.Column(db.Integer)
+    cycles_until_tie = db.Column(db.Integer)
+    initial_instruction = db.Column(db.String)
+    max_tasks = db.Column(db.Integer)
+    min_sep = db.Column(db.Integer)
+    initial_sep = db.Column(db.Integer)
+    read_dist = db.Column(db.Integer)
+    write_dist = db.Column(db.Integer)

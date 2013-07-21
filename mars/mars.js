@@ -37,34 +37,25 @@ module.exports = (function(){
         throw new Error("Unable to copy obj! Its type isn't supported.");
     };
 
-    var MARS = function(coreSize,
-        pSpaceSize,
-        cyclesUntilTie,
-        initialInstruction,
-        instructionLimit,
-        maxTasks,
-        minSep,
-        initialSep,
-        readDist,
-        writeDist)
+    var MARS = function(config)
     {
-        if(readDist == MARS.full)
-            readDist = coreSize;
+        if(config.readDist == MARS.full)
+            config.readDist = config.coreSize;
 
-        if(writeDist == MARS.full)
-            writeDist = coreSize;
+        if(config.writeDist == MARS.full)
+            config.writeDist = config.coreSize;
 
-        this.coreSize = coreSize;
-        this.pSpaceSize = pSpaceSize;
-        this.cyclesUntilTie = cyclesUntilTie;
-        this.initialInstruction = initialInstruction;
-        this.instructionLimit = instructionLimit;
-        this.maxTasks = maxTasks;
+        this.coreSize = config.coreSize;
+        this.pSpaceSize = config.pSpaceSize;
+        this.cyclesUntilTie = config.cyclesUntilTie;
+        this.initialInstruction = config.initialInstruction;
+        this.instructionLimit = config.instructionLimit;
+        this.maxTasks = config.maxTasks;
         this.curMaxTasks = 0;
-        this.minSep = minSep;
-        this.initialSep = initialSep;
-        this.readDist = readDist;
-        this.writeDist = writeDist;
+        this.minSep = config.minSep;
+        this.initialSep = config.initialSep;
+        this.readDist = config.readDist;
+        this.writeDist = config.writeDist;
         this.loadedWarriors = 0;
         this.loadedWarriorsLength = 0;
         this.activeWarriors = 0;
@@ -72,27 +63,27 @@ module.exports = (function(){
         this.taskQueues = [];
         this.pSpaces = [];
 
-        if(coreSize % pSpaceSize !== 0)
+        if(this.coreSize % this.pSpaceSize !== 0)
             throw new Error("PSpace size needs two be a factor of the size of the Core");
 
-        if(coreSize % readDist !== 0)
+        if(this.coreSize % this.readDist !== 0)
             throw new Error("Read distance needs two be a factor of the size of the Core");
 
-        if(coreSize % writeDist !== 0)
+        if(this.coreSize % this.writeDist !== 0)
             throw new Error("Write distance needs two be a factor of the size of the Core");
 
 
         this.coreOwner = [];
         this.core = [];
-        for(var i=0;i<coreSize;i++)
+        for(var i=0;i<this.coreSize;i++)
         {
-            if(typeof initialInstruction == "string")
+            if(typeof config.initialInstruction == "string")
             {
-                this.core.push(Instruction.randomInstruction(coreSize));
+                this.core.push(Instruction.randomInstruction(config.coreSize));
             }
             else
             {
-                this.core.push(clone(initialInstruction));
+                this.core.push(clone(config.initialInstruction));
             }
             this.coreOwner.push(-1);
         }
