@@ -1,7 +1,6 @@
 module.exports = (function(){
     var redcodeParser = require('./redcode-asm-parser.js');
     var _ = require('lodash')._;
-    var fs = require('fs');
 
     function Program(name, author, version, date, strict94, origin, instructions)
     {
@@ -240,13 +239,6 @@ module.exports = (function(){
     var redcode =
     {
         parser: redcodeParser,
-        assembleFile: function(filename, loadFile)
-        {
-            loadFile = typeof loadFile !== 'undefined' ? loadFile : false;
-            program = fs.readFileSync(filename, { encoding : "utf8" });
-
-            return redcode.assembleString(program, loadFile);
-        },
 
         assembleString: function(programString, loadFile, name, author, version, date)
         {

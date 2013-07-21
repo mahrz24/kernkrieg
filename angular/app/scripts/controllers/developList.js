@@ -18,8 +18,8 @@ filter('owners', function() {
 
 angular.module('kkApp')
 .controller('DevelopListCtrl',
-  ['$scope', '$http', 'own_warriors', 'Warrior',
-  function ($scope, $http, own_warriors, Warrior)
+  ['$scope', '$http', '$location', 'own_warriors', 'Warrior',
+  function ($scope, $http, $location, own_warriors, Warrior)
   {
 
     var actionCell = '<button class="btn btn-info" ng-click="editWarrior(row)"> Edit </button>' +
@@ -71,7 +71,7 @@ angular.module('kkApp')
         public: false, testable: false, owners : [{id: $scope.user_id}]});
 
       warrior.$save( function(warrior) {
-        $scope.own_warriors.unshift(warrior);
+        $scope.ownWarriors.unshift(warrior);
       });
     };
 
@@ -86,10 +86,6 @@ angular.module('kkApp')
 
     $scope.editWarrior = function (row)
     {
-      var warrior = new Warrior(row.entity);
-      warrior.$delete(function ()
-      {
-        $scope.ownWarriors = _.reject($scope.ownWarriors, {id: row.entity.id})
-      });
+      $location.path('#/develop/' + row.entity.id);
     }
   }]);

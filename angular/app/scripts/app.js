@@ -1,4 +1,4 @@
-'use strict';
+
 
 angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
   .config(function ($routeProvider) {

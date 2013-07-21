@@ -2,6 +2,7 @@
 
 var redcode = require('./redcode-asm.js');
 var MARS = require('./mars.js');
+var fs = require('fs');
 var _ = require('lodash')._;
 
 var argv = require('optimist')
@@ -29,7 +30,11 @@ _.each(argv._, function(file)
     {
         if(argv.debug > 0)
             console.log("Loading warrior: " + file)
-        warriors.push(redcode.assembleFile(file));
+
+
+        program = fs.readFileSync(filename, { encoding : "utf8" });
+
+        warriors.push(redcode.assembleString(program));
     });
 
 var initial;
