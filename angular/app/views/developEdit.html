@@ -32,16 +32,25 @@
        Testable: <input type="checkbox" name="testable" ng-model="warrior.testable"/>
      </div>
      <div class="tab-pane" id="test">
-       Test against:
+       Test against
        <div class="btn-group">
         <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-          <span ng-bind="testSelection.name"></span>
+          <span ng-bind="testWarriorSelection.name"></span>
           <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
-        <li  ng-repeat="t in testables"><a tabindex="-1" ng-click="changeTestSelection(t)">{{t.name}}</a></li>
+        <li  ng-repeat="t in testables"><a tabindex="-1" ng-click="changeTestWarriorSelection(t)">{{t.name}}</a></li>
         </ul>
-      </div>
+      </div> on
+      <div class="btn-group">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          <span ng-bind="testQueueSelection.name"></span>
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+        <li  ng-repeat="q in testQueues"><a tabindex="-1" ng-click="changeTestQueueSelection(q)">{{q.name}}</a></li>
+        </ul>
+      </div><br/>
       <button class="btn btn-warning" ng-click="submitTest()">
        Submit Test
      </button>

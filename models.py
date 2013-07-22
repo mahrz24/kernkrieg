@@ -106,3 +106,7 @@ class Submission(db.Model):
     authors = db.Column(db.String(255))
     code = db.Column(db.Text)
     submitted = db.Column(db.DateTime)
+    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
+    queue = db.relationship("Queue", backref="submissions")
+    warrior_id = db.Column(db.Integer, db.ForeignKey('warrior.id'))
+    warrior = db.relationship("Warrior", backref="submissions")

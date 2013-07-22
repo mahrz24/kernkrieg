@@ -1,6 +1,8 @@
 # App
 from app import (app, db, bcrypt)
 
+from datetime import datetime
+
 # Flask
 from flask import render_template, jsonify, url_for, flash, redirect, request
 
@@ -169,6 +171,11 @@ manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                   'POST':       [check_admin],
                                   'DELETE':     [check_admin]})
 
+def authors(warrior):
+    name = ""
+    for o in warrior.owners:
+        name += o.username + ", "
+    return name[:-2]
 
 @app.route('/api/testables', methods=['GET'])
 def get_testables():
@@ -184,18 +191,66 @@ def get_testables():
         result = own_warriors.union(testable_warriors, public_warriors).all()
     result_array = []
     for w in result:
-        result_array.append({'id': w.id, 'name': w.name})
+        result_array.append({'id': w.id, 'name': w.name + " by " + authors(w)})
     return jsonify({'results': result_array})
 
 
-@app.route('/api/is_admin', methods=['GET'])
-def get_is_admin():
-    return jsonify({'is_admin': current_user.admin})
+def submit_to_queue(q,w_id):
+    w = Warrior.query.filter(Warrior.id == w_id).first()
+    if not w:
+        abort(404)
+    if (not (q.qType == 0 and w.testable)):
+        is_owner = False
+        for o in w.owners:
+            if o.id == current_user.id:
+                is_owner = True
+        if not is_owner:
+            abort(401)
+
+    sub = Submission(name=w.name,
+                     authors=authors(w),
+                     code=w.code,
+                     submitted=datetime.now(),
+                     queue_id=q.id,
+                     warrior_id=w.id)
+    db.session.add(sub)
+    db.session.commit()
+    return sub.id
+
+@app.route('/api/queue/submit_test', methods=['POST'])
+def post_queue_submit_test():
+    if (not request.json) or (not 'queueId' in request.json):
+        abort(400)
+    if (not 'warrior1Id' in request.json) or (not 'warrior2Id' in request.json):
+        abort(400)
+
+    q_id = int(request.json['queueId'])
+    # Get the queue information
+    queue = Queue.query.filter(Queue.id == q_id).first()
+
+    if not queue:
+        abort(404)
+
+    # Check if test queue
+    if queue.qType != 0:
+        abort(403)
+
+    # Submit to queue using normal submission function
+    sub1_id = submit_to_queue(queue, int(request.json['warrior1Id']))
+    sub2_id = submit_to_queue(queue, int(request.json['warrior2Id']))
+    # Create match to be scheduled
+
+
+    return jsonify({'yay' : 'yippie'}), 201
 
 
 @app.route('/api/user_id', methods=['GET'])
 def get_user_id():
     return jsonify({'user_id': current_user.id})
+
+@app.route('/api/is_admin', methods=['GET'])
+def get_is_admin():
+    return jsonify({'is_admin': current_user.admin})
 
 
 # Assets

@@ -36,6 +36,9 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
           },
           testables: function(TestableWarriorIdLoader) {
             return TestableWarriorIdLoader();
+          },
+          test_queues: function(TestQueueLoader) {
+            return TestQueueLoader();
           }
         }
       })
@@ -45,7 +48,7 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
         resolve: {
           machines: function(MultiMachineLoader) {
             return MultiMachineLoader();
-          }
+          },
         }
       })
       .when('/admin/queues', {
