@@ -31,6 +31,7 @@ db.create_all()
 
 manager = APIManager(app, flask_sqlalchemy_db=db)
 
+
 # Create the REST API
 def check_auth(instance_id=None, **kw):
     if not current_user.is_authenticated():
@@ -46,6 +47,7 @@ def check_admin(instance_id=None, **kw):
         raise ProcessingException(message='Not Authorized as Administrator',
                                   status_code=401)
 
+
 def check_admin_or_user(instance_id=None, **kw):
     if not current_user.is_authenticated():
         raise ProcessingException(message='Not Authorized',
@@ -57,6 +59,7 @@ def check_admin_or_user(instance_id=None, **kw):
     if current_user.id != int(instance_id):
         raise ProcessingException(message='Not Authorized for this Resource',
                                   status_code=401)
+
 
 def check_owner_single(instance_id=None, data=None, **kw):
     if current_user.admin:
@@ -73,7 +76,7 @@ def check_owner_single(instance_id=None, data=None, **kw):
 
                 if not is_owner:
                     raise ProcessingException(message='Not Authorized for this Resource',
-                      status_code=401)
+                                              status_code=401)
         return
     if data['public']:
         return
@@ -103,9 +106,11 @@ def post_check_owner_many(result=None, **kw):
             raise ProcessingException(message='Not Authorized for this Resource',
                                       status_code=401)
 
+
 def deny(**kw):
     raise ProcessingException(message='Not Allowed',
-      status_code=401)
+                              status_code=401)
+
 
 def pre_hash(data=None, **kw):
     if "passwdHash" in data.keys():
@@ -113,16 +118,16 @@ def pre_hash(data=None, **kw):
 
 
 def post_create_testq(result=None, **kw):
-    testq = Queue(name = result['name'] + " Testing",
-                  machineId = result['id'],
-                  qType = 0,
-                  maxSubsPerWarrior = -1,
-                  maxSubsPerUser = -1)
+    testq = Queue(name=result['name'] + " Testing",
+                  machineId=result['id'],
+                  qType=0,
+                  maxSubsPerWarrior=-1,
+                  maxSubsPerUser=-1)
     db.session.add(testq)
     db.session.commit()
 
 manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   exclude_columns=['passwdHash','warriors'],
+                   exclude_columns=['passwdHash', 'warriors'],
                    preprocessors={'GET_SINGLE': [check_admin_or_user],
                                   'GET_MANY':   [check_admin],
                                   'PUT_SINGLE': [check_admin_or_user,
@@ -152,21 +157,27 @@ manager.create_api(Warrior, methods=['GET', 'POST', 'PUT', 'DELETE'],
 
 
 manager.create_api(Machine, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   exclude_columns=['passwdHash','warriors'],
                    preprocessors={'PUT_SINGLE': [check_admin],
                                   'PUT_MANY':   [check_admin],
                                   'POST':       [check_admin],
                                   'DELETE':     [check_admin]},
                    postprocessors={'POST':  [post_create_testq]})
 
+manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   preprocessors={'PUT_SINGLE': [check_admin],
+                                  'PUT_MANY':   [check_admin],
+                                  'POST':       [check_admin],
+                                  'DELETE':     [check_admin]})
 
-@app.route('/api/is_admin', methods = ['GET'])
+
+@app.route('/api/is_admin', methods=['GET'])
 def get_is_admin():
-    return jsonify( { 'is_admin': current_user.admin } )
+    return jsonify({'is_admin': current_user.admin})
 
-@app.route('/api/user_id', methods = ['GET'])
+
+@app.route('/api/user_id', methods=['GET'])
 def get_user_id():
-    return jsonify( { 'user_id': current_user.id } )
+    return jsonify({'user_id': current_user.id})
 
 
 # Assets
@@ -188,8 +199,8 @@ js_base = Bundle(
     'bower_components/sass-bootstrap/js/bootstrap-tab.js',
     'bower_components/flatui/js/bootstrap-select.js',
     'bower_components/flatui/js/bootstrap-switch.js',
-    'bower_components/flatui/js/flatui-checkbox.js',
-    'bower_components/flatui/js/flatui-radio.js',
+    #'bower_components/flatui/js/flatui-checkbox.js',
+    #'bower_components/flatui/js/flatui-radio.js',
     #filters='jsmin',
     output='gen/packed_base.js')
 assets.register('js_base', js_base)
@@ -206,26 +217,34 @@ js_angular = Bundle(
     'bower_components/angular-resource/angular-resource.js',
     'bower_components/ng-grid/ng-grid-2.0.7.debug.js',
     'bower_components/ng-grid/plugins/ng-grid-flexible-height.js',
+    'bower_components/CodeMirror/lib/codemirror.js',
+    'vendor/redcode_cm.js',
     'vendor/mars.js',
     'scripts/controllers/navigation.js',
     'scripts/directives/navigation.js',
     'scripts/app.js',
+    'scripts/directives/codemirror.js',
     'scripts/services/accounts.js',
     'scripts/services/warriors.js',
     'scripts/services/machines.js',
+    'scripts/services/queues.js',
     'scripts/controllers/main.js',
     'scripts/controllers/developList.js',
+    'scripts/controllers/developEdit.js',
     'scripts/controllers/accounts.js',
     'scripts/controllers/machines.js',
+    'scripts/controllers/queues.js',
     'scripts/controllers/accountEdit.js',
     #filters='jsmin',
     output='gen/packed_angular.js')
 assets.register('js_angular', js_angular)
 
 css_base = Bundle(
-    'bower_components/flatui/bootstrap/css/bootstrap.css',
-    'bower_components/flatui/css/flat-ui.css',
+    'bower_components/sass-bootstrap/bootstrap-2.3.2.css',
+    #'bower_components/flatui/css/flat-ui.css',
     'bower_components/ng-grid/ng-grid.min.css',
+    'bower_components/CodeMirror/lib/codemirror.css',
+    'bower_components/CodeMirror/theme/monokai.css',
     filters='cssmin',
     output='gen/packed_base.css')
 assets.register('css_base', css_base)
@@ -240,6 +259,7 @@ login_manager.login_view = "login"
 login_manager.login_message = u"Please log in to access this page."
 login_manager.refresh_view = "index"
 
+
 # Views
 @login_manager.user_loader
 def load_user(userid):
@@ -253,10 +273,10 @@ def load_user(userid):
 def reset_db():
     db.drop_all()
     db.create_all()
-    admin = User(username = "admin",
-                 email = "admin@localhost",
-                 passwdHash = bcrypt.generate_password_hash("admin"),
-                 admin = True)
+    admin = User(username="admin",
+                 email="admin@localhost",
+                 passwdHash=bcrypt.generate_password_hash("admin"),
+                 admin=True)
     db.session.add(admin)
     db.session.commit()
     return "Done"
@@ -266,6 +286,7 @@ def reset_db():
 @login_required
 def index():
     return render_template('angular.html')
+
 
 @app.route('/ui/<path:p>')
 @login_required

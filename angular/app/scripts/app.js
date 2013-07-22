@@ -29,12 +29,29 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
       })
       .when('/develop/:warriorId', {
         templateUrl: '/app/views/developEdit.html',
-        controller: 'DevelopEditCtrl'
+        controller: 'DevelopEditCtrl',
+        resolve: {
+          warrior: function(WarriorLoader) {
+            return WarriorLoader();
+          }
+        }
       })
       .when('/admin/machines', {
         templateUrl: '/app/views/machines.html',
         controller: 'MachinesCtrl',
         resolve: {
+          machines: function(MultiMachineLoader) {
+            return MultiMachineLoader();
+          }
+        }
+      })
+      .when('/admin/queues', {
+        templateUrl: '/app/views/queues.html',
+        controller: 'QueuesCtrl',
+        resolve: {
+          queues: function(MultiQueueLoader) {
+            return MultiQueueLoader();
+          },
           machines: function(MultiMachineLoader) {
             return MultiMachineLoader();
           }

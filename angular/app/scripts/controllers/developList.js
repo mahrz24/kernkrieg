@@ -86,6 +86,7 @@ angular.module('kkApp')
 
     $scope.editWarrior = function (row)
     {
-      $location.path('#/develop/' + row.entity.id);
+      console.log('#/develop/' + row.entity.id);
+      $location.path('/develop/' + row.entity.id);
     }
   }]);

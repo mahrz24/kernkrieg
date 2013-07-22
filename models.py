@@ -84,7 +84,7 @@ class Queue(db.Model):
     machineId = db.Column(db.Integer, db.ForeignKey('machine.id'))
     machine = db.relationship("Machine")
     qType = db.Column(db.Integer)
-    # 0 = Test Queue, 1 = Random Queue, 3 = TrueSkill Queue
+    # 0 = Test Queue, 1 = Random Queue, 2 = TrueSkill Queue
     maxSubsPerWarrior = db.Column(db.Integer)
     # -1 = No Limit
     maxSubsPerUser = db.Column(db.Integer)
