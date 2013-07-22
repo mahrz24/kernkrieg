@@ -18,12 +18,16 @@ filter('owners', function() {
 
 angular.module('kkApp')
 .controller('DevelopListCtrl',
-  ['$scope', '$http', '$location', 'own_warriors', 'Warrior',
-  function ($scope, $http, $location, own_warriors, Warrior)
+  ['$scope', '$http', '$location', 'own_warriors', 'public_warriors', 'Warrior',
+  function ($scope, $http, $location, own_warriors, public_warriors, Warrior)
   {
 
     var actionCell = '<button class="btn btn-info" ng-click="editWarrior(row)"> Edit </button>' +
       '<button class="btn btn-danger" ng-click="deleteWarrior(row)"> Delete </button>';
+
+    var publicActionCell = '<button class="btn btn-info" ng-click="editWarrior(row)"> View </button>' +
+      '<button class="btn btn-danger" ng-click="deleteWarrior(row)"> Edit Copy </button>';
+
 
     var boolCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
       '<span ng-cell-text>{{COL_FIELD | bool }}</span></div>';
@@ -36,6 +40,7 @@ angular.module('kkApp')
     });
 
     $scope.ownWarriors = own_warriors;
+    $scope.publicWarriors = public_warriors;
 
     $scope.gridOwnWarriors =
     {
@@ -62,6 +67,26 @@ angular.module('kkApp')
                     { field: '',
                       displayName: 'Action',
                       cellTemplate: actionCell
+                    } ]
+    };
+
+    $scope.gridPublicWarriors =
+    {
+      data: 'publicWarriors',
+      enableCellSelection: true,
+      enableRowSelection: false,
+      rowHeight:50,
+      plugins: [new ngGridFlexibleHeightPlugin(opts = { minHeight: 200})],
+      columnDefs: [ { field: 'name',
+                      displayName: 'Name',
+                    },
+                    { field:'owners',
+                      displayName:'Authors',
+                      cellTemplate: ownerCell
+                    },
+                    { field: '',
+                      displayName: 'Action',
+                      cellTemplate: publicActionCell
                     } ]
     };
 

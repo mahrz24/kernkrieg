@@ -11,7 +11,6 @@
   <div class="span8 gbox">
     <textarea ui-codemirror="{
     lineNumbers: true,
-    rows: 150,
     theme: 'monokai',
     mode: 'redcode'
   }" ui-refresh="codeMirrorRefresh" ng-model="warrior.code"></textarea>
@@ -23,10 +22,17 @@
       <li><a href="#test" data-toggle="tab">Test</a></li>
       <li><a href="#submissions" data-toggle="tab">Submissions</a></li>
     </ul>
-    <div class="tab-content" style=" height: 200px;">
-      <div class="tab-pane active" id="info">Hi</div>
-      <div class="tab-pane" id="test">...</div>
-      <div class="tab-pane" id="submissions">...</div>
+    <div class="tab-content" style=" height: 100%px;">
+      <div class="tab-pane active" id="info">
+       Name: <input type="text" name="name" ng-model="warrior.name"/>
+       Public: <input type="checkbox" name="public" ng-model="warrior.public"/>
+      </div>
+      <div class="tab-pane" id="test">
+
+      </div>
+      <div class="tab-pane" id="submissions">
+
+      </div>
     </div>
   </div>
 </div>
