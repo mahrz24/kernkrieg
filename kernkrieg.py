@@ -170,6 +170,24 @@ manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                   'DELETE':     [check_admin]})
 
 
+@app.route('/api/testables', methods=['GET'])
+def get_testables():
+    if not current_user.is_authenticated():
+        raise ProcessingException(message='Not Authorized',
+                                  status_code=401)
+    if current_user.admin:
+        result = Warrior.query.all()
+    else:
+        own_warriors = Warrior.query.filter(Warrior.owners.any(id=current_user.id))
+        testable_warriors = Warrior.query.filter(Warrior.testable==True)
+        public_warriors = Warrior.query.filter(Warrior.public==True)
+        result = own_warriors.union(testable_warriors, public_warriors).all()
+    result_array = []
+    for w in result:
+        result_array.append({'id': w.id, 'name': w.name})
+    return jsonify({'results': result_array})
+
+
 @app.route('/api/is_admin', methods=['GET'])
 def get_is_admin():
     return jsonify({'is_admin': current_user.admin})

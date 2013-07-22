@@ -40,6 +40,18 @@ angular.module('kkApp')
   }]);
 
 angular.module('kkApp')
+.factory('TestableWarriorIdLoader', ['$http',
+  function($http) {
+    return function() {
+      var promise = $http.get('/api/testables').then(function (response) {
+        return response.data;
+      });
+      // Return the promise to the controller
+      return promise;
+    };
+  }]);
+
+angular.module('kkApp')
 .factory('WarriorLoader', ['Warrior', '$route', '$q',
   function(Warrior, $route, $q) {
     return function() {

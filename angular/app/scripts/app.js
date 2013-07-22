@@ -33,6 +33,9 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
         resolve: {
           warrior: function(WarriorLoader) {
             return WarriorLoader();
+          },
+          testables: function(TestableWarriorIdLoader) {
+            return TestableWarriorIdLoader();
           }
         }
       })
