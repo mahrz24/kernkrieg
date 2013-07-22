@@ -5,4 +5,9 @@ angular.module('kkApp')
   {
     $scope.warrior = warrior;
 
+    $scope.saveWarrior = function ()
+    {
+      $scope.warrior.$update();
+    }
+
   }]);

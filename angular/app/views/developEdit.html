@@ -1,23 +1,44 @@
 <div class="row">
-  <div class="span12">
-     Toolbar
-  </div>
+  <div class="span12 gbox">
+  <div class="gbox-content">
+     <button class="btn btn-primary" ng-click="saveWarrior()">
+       Save
+     </button>
+   </div>
+ </div>
 </div>
 <div class="row">
   <div class="span8 gbox">
-      <textarea ui-codemirror="{
-      lineNumbers: true,
-      theme: 'monokai',
-      mode: 'redcode'
-    }" ui-refresh="codeMirrorRefresh" ng-model="warrior.code"></textarea>
-  </div>
-  <div class="span8 gbox">
-    <div class="gbox-content">
+    <textarea ui-codemirror="{
+    lineNumbers: true,
+    rows: 150,
+    theme: 'monokai',
+    mode: 'redcode'
+  }" ui-refresh="codeMirrorRefresh" ng-model="warrior.code"></textarea>
+</div>
+<div class="span4 gbox">
+  <div class="gbox-content">
+    <ul class="nav nav-tabs" id="sidepaneTab">
+      <li><a href="#info" data-toggle="tab">Info</a></li>
+      <li><a href="#test" data-toggle="tab">Test</a></li>
+      <li><a href="#submissions" data-toggle="tab">Submissions</a></li>
+    </ul>
+    <div class="tab-content" style=" height: 200px;">
+      <div class="tab-pane active" id="info">Hi</div>
+      <div class="tab-pane" id="test">...</div>
+      <div class="tab-pane" id="submissions">...</div>
     </div>
   </div>
 </div>
+</div>
 <div class="row">
   <div class="span12">
-     Debugger
-  </div>
+   Debugger
+ </div>
 </div>
+
+<script>
+$(function () {
+$('#sidepaneTab a:first').tab('show');
+})
+</script>
