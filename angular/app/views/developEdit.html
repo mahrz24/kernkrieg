@@ -1,6 +1,9 @@
 <div class="row">
   <div class="span12 gbox">
-  <div class="gbox-content">
+    <div class="gbox-content">
+     <button class="btn" ng-click="">
+       Back
+     </button>
      <button class="btn btn-primary" ng-click="saveWarrior()">
        Save
      </button>
@@ -8,14 +11,14 @@
  </div>
 </div>
 <div class="row">
-  <div class="span8 gbox">
+  <div class="span6 gbox">
     <textarea ui-codemirror="{
     lineNumbers: true,
     theme: 'monokai',
     mode: 'redcode'
   }" ui-refresh="codeMirrorRefresh" ng-model="warrior.code"></textarea>
 </div>
-<div class="span4 gbox">
+<div class="span6 gbox">
   <div class="gbox-content">
     <ul class="nav nav-tabs" id="sidepaneTab">
       <li><a href="#info" data-toggle="tab">Info</a></li>
@@ -27,15 +30,27 @@
        Name: <input type="text" name="name" ng-model="warrior.name"/>
        Public: <input type="checkbox" name="public" ng-model="warrior.public"/>
        Testable: <input type="checkbox" name="testable" ng-model="warrior.testable"/>
+     </div>
+     <div class="tab-pane" id="test">
+       Test against:
+       <div class="btn-group">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          <span ng-bind="testSelection.name"></span>
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+        <li  ng-repeat="t in testables"><a tabindex="-1" ng-click="changeTestSelection(t)">{{t.name}}</a></li>
+        </ul>
       </div>
-      <div class="tab-pane" id="test">
+      <button class="btn btn-warning" ng-click="submitTest()">
+       Submit Test
+     </button>
+    </div>
+    <div class="tab-pane" id="submissions">
 
-      </div>
-      <div class="tab-pane" id="submissions">
-
-      </div>
     </div>
   </div>
+</div>
 </div>
 </div>
 <div class="row">
@@ -45,7 +60,7 @@
 </div>
 
 <script>
-$(function () {
-$('#sidepaneTab a:first').tab('show');
-})
+  $(function () {
+    $('#sidepaneTab a:first').tab('show');
+  })
 </script>
