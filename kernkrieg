@@ -1,10 +1,11 @@
+#!/usr/bin/env python2
 # App
 from app import (app, db, bcrypt)
 
 from datetime import datetime
 
 # Flask
-from flask import render_template, jsonify, url_for, flash, redirect, request
+from flask import render_template, jsonify, url_for, flash, redirect, request, session
 
 # Flask Login
 from flask.ext.login import login_required, LoginManager, current_user, login_user, logout_user
@@ -20,6 +21,19 @@ from models import (User, Warrior, Machine, Queue, Match, Submission)
 
 # REST API
 from flask.ext.restless import *
+
+import rq
+from redis import Redis
+from bkg import stuff
+
+# Tell RQ what Redis connection to use
+redis_conn = Redis()
+q = rq.Queue(connection=redis_conn)
+
+
+
+
+import time
 
 login_manager = LoginManager()
 
@@ -215,7 +229,7 @@ def submit_to_queue(q,w_id):
                      warrior_id=w.id)
     db.session.add(sub)
     db.session.commit()
-    return sub.id
+    return sub
 
 @app.route('/api/queue/submit_test', methods=['POST'])
 def post_queue_submit_test():
@@ -236,12 +250,22 @@ def post_queue_submit_test():
         abort(403)
 
     # Submit to queue using normal submission function
-    sub1_id = submit_to_queue(queue, int(request.json['warrior1Id']))
-    sub2_id = submit_to_queue(queue, int(request.json['warrior2Id']))
+    sub1 = submit_to_queue(queue, int(request.json['warrior1Id']))
+    sub2 = submit_to_queue(queue, int(request.json['warrior2Id']))
     # Create match to be scheduled
+    match = Match(done=False,
+                  scheduled=datetime.now(),
+                  executed=None,
+                  winner=-1,
+                  participant1Id=sub1.id,
+                  participant2Id=sub2.id,
+                  queue_id=queue.id)
+    db.session.add(match)
+    db.session.commit()
 
-
-    return jsonify({'yay' : 'yippie'}), 201
+    return jsonify({'match': match,
+                    'submission1': sub1,
+                    'submission2': sub2}), 201
 
 
 @app.route('/api/user_id', methods=['GET'])
@@ -340,6 +364,23 @@ def load_user(userid):
     if not users:
         return None
     return users.first()
+
+
+
+@app.route('/make/')
+def make():
+    job = q.enqueue(stuff, 'argument')
+    session['job'] = job.id
+    return job.id
+
+@app.route('/get/')
+def get():
+
+    job = rq.job.Job.fetch(session['job'], connection=redis_conn)
+    out = str(job.result)
+    #except:
+    #    out = 'No result yet'
+    return out
 
 
 @app.route('/reset_db')

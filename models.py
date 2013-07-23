@@ -1,5 +1,13 @@
 from app import (db, bcrypt)
 from sqlalchemy import event
+from collections import OrderedDict
+
+class DictSerializable(object):
+    def _asdict(self):
+        result = OrderedDict()
+        for key in self.__mapper__.c.keys():
+            result[key] = getattr(self, key)
+        return result
 
 team_table = db.Table('teams', db.Model.metadata,
     db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='cascade'), primary_key=True),
@@ -90,17 +98,25 @@ class Queue(db.Model):
     maxSubsPerUser = db.Column(db.Integer)
     # -1 = No Limit
 
-class Match(db.Model):
+class Match(db.Model, DictSerializable):
     id = db.Column(db.Integer, primary_key=True)
-    priority = db.Column(db.Integer)
-    # -1 = Past match
+    done = db.Column(db.Boolean)
     scheduled = db.Column(db.DateTime)
     executed = db.Column(db.DateTime)
-    tie = db.Column(db.Boolean)
     winner = db.Column(db.Integer)
+    participant1Id = db.Column(db.Integer, db.ForeignKey('submission.id'))
+    participant1 = db.relationship("Submission", backref="attackerMatches",
+        foreign_keys=participant1Id,
+        primaryjoin = "Match.participant1Id == Submission.id")
+    participant2Id = db.Column(db.Integer, db.ForeignKey('submission.id'))
+    participant2 = db.relationship("Submission", backref="defenderMatches",
+        foreign_keys=participant2Id,
+        primaryjoin = "Match.participant2Id == Submission.id")
+    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
+    queue = db.relationship("Queue", backref="matches")
 
 
-class Submission(db.Model):
+class Submission(db.Model, DictSerializable):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     authors = db.Column(db.String(255))
