@@ -26,11 +26,15 @@ def frontend_submit_to_queue(q, w_id):
                      code=w.code,
                      submitted=datetime.now(),
                      submissionUserId=current_user.id,
-                     queue_id=q.id,
-                     warrior_id=w.id)
+                     queueId=q.id,
+                     warriorId=w.id)
     # Todo respect subs per warrior
-    # Todo respect subs per user
 
+    # Todo respect subs per user
+    user_subs = Submission.query.filter(Submission.submissionUserId == current_user.id and Submission.queueId == q.id).count()
+    warrior_subs = Submission.query.filter(Submission.warriorId == w.id and Submission.queueId == q.id).count()
+    if user_subs >= q.maxSubsPerUser or warrior_subs >= q.maxSubsPerWarrior:
+        abort(401)
     db.session.add(sub)
     db.session.commit()
 
@@ -43,7 +47,7 @@ def schedule_match(queue, sub1, sub2):
                   winner=-1,
                   participant1Id=sub1.id,
                   participant2Id=sub2.id,
-                  queue_id=queue.id)
+                  queueId=queue.id)
     db.session.add(match)
     db.session.commit()
     q.enqueue(run_match, match.id)

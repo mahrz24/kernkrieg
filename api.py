@@ -136,7 +136,6 @@ def post_queue_submit():
     # Submit to queue using normal submission function
     sub = frontend_submit_to_queue(queue, int(request.json['warriorId']))
 
-
     return jsonify({'submission': sub,}), 201
 
 

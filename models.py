@@ -119,7 +119,7 @@ class Match(db.Model, DictSerializable):
     participant2 = db.relationship("Submission", backref="defenderMatches",
         foreign_keys=participant2Id,
         primaryjoin = "Match.participant2Id == Submission.id")
-    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
+    queueId = db.Column(db.Integer, db.ForeignKey('queue.id'))
     queue = db.relationship("Queue", backref="matches")
 
 
@@ -131,7 +131,7 @@ class Submission(db.Model, DictSerializable):
     submitted = db.Column(db.DateTime)
     submissionUserId = db.Column(db.Integer, db.ForeignKey('user.id'))
     submissionUser = db.relationship("User", backref="submissions")
-    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
+    queueId = db.Column(db.Integer, db.ForeignKey('queue.id'))
     queue = db.relationship("Queue", backref="submissions")
-    warrior_id = db.Column(db.Integer, db.ForeignKey('warrior.id'))
+    warriorId = db.Column(db.Integer, db.ForeignKey('warrior.id'))
     warrior = db.relationship("Warrior", backref="submissions")
