@@ -70,13 +70,15 @@ class Warrior(db.Model):
     testable = db.Column(db.Boolean)
 
     def test_matches(self):
-        subs = filter(lambda s: s.queue.qType == 0, self.submissions)
+        subs = filter(lambda s: s.queue.qType == 0 and s.active, self.submissions)
         j = list(itertools.chain(*map(lambda s: s.attackerMatches, subs)))
         j = map(lambda x: dict(x._asdict().items() + {"opponent": x.participant2.name, "op_authors": x.participant2.authors}.items()), j)
         return j
 
     def nontest_submissions(self):
-        return filter(lambda s: s.queue.qType != 0 and s.queue.isOpen, self.submissions)
+        subs = filter(lambda s: s.queue.qType != 0 and s.queue.isOpen and s.active, self.submissions)
+        subs = map(lambda x: dict(x._asdict().items() + {"queueName": x.queue.name}.items()), subs)
+        return subs
 
 
     def authors(self):
@@ -140,6 +142,7 @@ class Submission(db.Model, DictSerializable):
     name = db.Column(db.String(128))
     authors = db.Column(db.String(255))
     code = db.Column(db.Text)
+    active = db.Column(db.Boolean, default=True)
     submitted = db.Column(db.DateTime)
     submissionUserId = db.Column(db.Integer, db.ForeignKey('user.id'))
     submissionUser = db.relationship("User", backref="submissions")

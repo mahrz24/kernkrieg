@@ -63,7 +63,7 @@ manager.create_api(Machine, methods=['GET', 'POST', 'PUT', 'DELETE'],
                    postprocessors={'POST':  [post_create_testq]})
 
 manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   exclude_columns=['matches'],
+                   exclude_columns=['matches','submissions'],
                    preprocessors={'PUT_SINGLE': [check_admin],
                                   'PUT_MANY':   [check_admin],
                                   'POST':       [check_admin],
@@ -97,9 +97,9 @@ def get_submittables():
     results = []
     w_id = request.args['w']
     for q in qs:
-        user_subs = Submission.query.filter(Submission.submissionUserId == current_user.id).filter(Submission.queueId == q.id).count()
-        warrior_subs = Submission.query.filter(Submission.warriorId == w_id).filter(Submission.queueId == q.id).count()
-        if user_subs < q.maxSubsPerUser and warrior_subs < q.maxSubsPerWarrior and q.isOpen:
+        user_subs = Submission.query.filter(Submission.active == True).filter(Submission.submissionUserId == current_user.id).filter(Submission.queueId == q.id).count()
+        warrior_subs = Submission.query.filter(Submission.active == True).filter(Submission.warriorId == w_id).filter(Submission.queueId == q.id).count()
+        if (user_subs < q.maxSubsPerUser or q.maxSubsPerUser < 0) and (warrior_subs < q.maxSubsPerWarrior or q.maxSubsPerWarrior < 0) and q.isOpen:
             results.append(q)
 
     return jsonify({'results': results})

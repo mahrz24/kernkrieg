@@ -56,8 +56,10 @@ angular.module('kkApp')
       $http.post("/api/queue/submit",
         { queueId: $scope.sublQueueSelection.id,
           warriorId: $scope.warrior.id,
-        }).success(function () {
-          console.log("Posted warrior");
+        }).success(function (result) {
+          var sub = result.submission;
+          sub.queueName = $scope.sublQueueSelection.name;
+          $scope.warrior.nontest_submissions.unshift(sub);
         });
     }
 

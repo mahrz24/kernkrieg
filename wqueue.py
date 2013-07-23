@@ -33,9 +33,9 @@ def frontend_submit_to_queue(q, w_id):
     # Todo respect subs per warrior
 
     # Todo respect subs per user
-    user_subs = Submission.query.filter(Submission.submissionUserId == current_user.id).filter(Submission.queueId == q.id).count()
-    warrior_subs = Submission.query.filter(Submission.warriorId == w.id).filter(Submission.queueId == q.id).count()
-    if q.qType != 0 and (user_subs >= q.maxSubsPerUser or warrior_subs >= q.maxSubsPerWarrior):
+    user_subs = Submission.query.filter(Submission.active == True).filter(Submission.submissionUserId == current_user.id).filter(Submission.queueId == q.id).count()
+    warrior_subs = Submission.query.filter(Submission.active == True).filter(Submission.warriorId == w.id).filter(Submission.queueId == q.id).count()
+    if q.qType != 0 and ((user_subs >= q.maxSubsPerUser and q.maxSubsPerUser > -1) or (warrior_subs >= q.maxSubsPerWarrior and q.maxSubsPerWarrior > -1)):
         abort(401)
     db.session.add(sub)
     db.session.commit()
