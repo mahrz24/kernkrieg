@@ -1,6 +1,8 @@
 from app import (db, bcrypt)
 from sqlalchemy import event
 from collections import OrderedDict
+from flask import jsonify
+import itertools
 
 class DictSerializable(object):
     def _asdict(self):
@@ -67,6 +69,15 @@ class Warrior(db.Model):
     public = db.Column(db.Boolean)
     testable = db.Column(db.Boolean)
 
+    def test_matches(self):
+        subs = filter(lambda s: s.queue.qType == 0, self.submissions)
+        j = list(itertools.chain(*map(lambda s: s.attackerMatches, subs)))
+        j = map(lambda x: dict(x._asdict().items() + {"opponent": x.participant2.name, "op_authors": x.participant2.authors}.items()), j)
+        return j
+
+    def nontest_submissions(self):
+        return filter(lambda s: s.queue.qType != 0 and s.queue.isOpen, self.submissions)
+
 
     def authors(self):
         name = ""
@@ -93,12 +104,13 @@ class Machine(db.Model):
     readDist = db.Column(db.Integer)
     writeDist = db.Column(db.Integer)
 
-class Queue(db.Model):
+class Queue(db.Model, DictSerializable):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True)
     machineId = db.Column(db.Integer, db.ForeignKey('machine.id'))
     machine = db.relationship("Machine")
     qType = db.Column(db.Integer)
+    isOpen = db.Column(db.Boolean, default=True)
     # 0 = Test Queue, 1 = TrueSkill Queue, 2 = All vs All
     maxSubsPerWarrior = db.Column(db.Integer)
     # -1 = No Limit

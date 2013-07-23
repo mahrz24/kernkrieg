@@ -11,6 +11,8 @@ def frontend_submit_to_queue(q, w_id):
     w = Warrior.query.filter(Warrior.id == w_id).first()
     if not w:
         abort(404)
+    if not q.isOpen:
+        abort(401)
     # Only an owner, or the admin can submit to the queue
     # Testables can be submitted to a test queue
     if (not (q.qType == 0 and w.testable)) and (not current_user.admin):
@@ -31,9 +33,9 @@ def frontend_submit_to_queue(q, w_id):
     # Todo respect subs per warrior
 
     # Todo respect subs per user
-    user_subs = Submission.query.filter(Submission.submissionUserId == current_user.id and Submission.queueId == q.id).count()
-    warrior_subs = Submission.query.filter(Submission.warriorId == w.id and Submission.queueId == q.id).count()
-    if user_subs >= q.maxSubsPerUser or warrior_subs >= q.maxSubsPerWarrior:
+    user_subs = Submission.query.filter(Submission.submissionUserId == current_user.id).filter(Submission.queueId == q.id).count()
+    warrior_subs = Submission.query.filter(Submission.warriorId == w.id).filter(Submission.queueId == q.id).count()
+    if q.qType != 0 and (user_subs >= q.maxSubsPerUser or warrior_subs >= q.maxSubsPerWarrior):
         abort(401)
     db.session.add(sub)
     db.session.commit()
@@ -51,6 +53,7 @@ def schedule_match(queue, sub1, sub2):
     db.session.add(match)
     db.session.commit()
     q.enqueue(run_match, match.id)
+    return match
 
 # Todo
 # resubmit

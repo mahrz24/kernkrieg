@@ -26,11 +26,13 @@
       <li><a href="#submissions" data-toggle="tab">Submissions</a></li>
     </ul>
     <div class="tab-content" style=" height: 100%px;">
+
       <div class="tab-pane active" id="info">
        Name: <input type="text" name="name" ng-model="warrior.name"/>
        Public: <input type="checkbox" name="public" ng-model="warrior.public"/>
        Testable: <input type="checkbox" name="testable" ng-model="warrior.testable"/>
      </div>
+
      <div class="tab-pane" id="test">
        Test against
        <div class="btn-group">
@@ -39,7 +41,7 @@
           <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
-        <li  ng-repeat="t in testables"><a tabindex="-1" ng-click="changeTestWarriorSelection(t)">{{t.name}}</a></li>
+        <li  ng-repeat="t in testables"><a tabindex="-1" ng-click="changeTestWarriorSelection(t)">{{t.name}} by {{t.authors}}</a></li>
         </ul>
       </div> on
       <div class="btn-group">
@@ -54,7 +56,11 @@
       <button class="btn btn-warning" ng-click="submitTest()">
        Submit Test
      </button>
+     <ul>
+     <li ng-repeat="t in warrior.test_matches">vs. {{t.opponent}}</li>
+     </ul>
     </div>
+
     <div class="tab-pane" id="submissions">
 Submit to queue
       <div class="btn-group">

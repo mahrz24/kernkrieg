@@ -44,6 +44,8 @@ manager.create_api(Warrior, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                     'owners.id',
                                     'owners.username',
                                     'submissions'],
+                   include_methods=['test_matches',
+                                    'nontest_submissions'],
                    preprocessors={'GET_SINGLE': [check_owner_single],
                                   'GET_MANY':   [check_auth],
                                   'PUT_SINGLE': [check_owner_single],
@@ -68,7 +70,7 @@ manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                   'DELETE':     [check_admin]})
 
 
-@app.route('/api/testables', methods=['GET'])
+@app.route('/api/warrior/testable', methods=['GET'])
 def get_testables():
     if not current_user.is_authenticated():
         raise ProcessingException(message='Not Authorized',
@@ -82,10 +84,25 @@ def get_testables():
         result = own_warriors.union(testable_warriors, public_warriors).all()
     result_array = []
     for w in result:
-        result_array.append({'id': w.id, 'name': w.name + " by " + w.authors()})
+        result_array.append({'id': w.id, 'name': w.name, 'authors': w.authors()})
     return jsonify({'results': result_array})
 
+@app.route('/api/queue/submittable', methods=['GET'])
+def get_submittables():
+    if not current_user.is_authenticated():
+        raise ProcessingException(message='Not Authorized',
+                                  status_code=401)
 
+    qs = Queue.query.filter(Queue.qType==1).all()
+    results = []
+    w_id = request.args['w']
+    for q in qs:
+        user_subs = Submission.query.filter(Submission.submissionUserId == current_user.id).filter(Submission.queueId == q.id).count()
+        warrior_subs = Submission.query.filter(Submission.warriorId == w_id).filter(Submission.queueId == q.id).count()
+        if user_subs < q.maxSubsPerUser and warrior_subs < q.maxSubsPerWarrior and q.isOpen:
+            results.append(q)
+
+    return jsonify({'results': results})
 
 @app.route('/api/queue/submit_test', methods=['POST'])
 def post_queue_submit_test():

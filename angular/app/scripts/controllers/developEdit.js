@@ -1,17 +1,21 @@
 angular.module('kkApp')
 .controller('DevelopEditCtrl',
   ['$scope', '$http', '$location', 'warrior', 'Warrior',
-  'testables', 'test_queues', 'subl_queues',
+  'testables', 'test_queues', 'SublQueueLoader',
   function ($scope, $http, $location, warrior,
-   Warrior, testables, test_queues, subl_queues)
+   Warrior, testables, test_queues, SublQueueLoader)
   {
     $scope.warrior = warrior;
     $scope.testables = testables.results;
     $scope.testWarriorSelection = $scope.testables[0];
     $scope.testQueues = test_queues;
     $scope.testQueueSelection = test_queues[0];
-    $scope.sublQueues = subl_queues;
-    $scope.sublQueueSelection = subl_queues[0];
+
+    SublQueueLoader(warrior).then(function(s) {
+          $scope.sublQueues = s.results;
+          $scope.sublQueueSelection = s.results[0];
+    })
+
 
     $scope.saveWarrior = function ()
     {
@@ -39,8 +43,11 @@ angular.module('kkApp')
         { queueId: $scope.testQueueSelection.id,
           warrior1Id: $scope.warrior.id,
           warrior2Id: $scope.testWarriorSelection.id
-        }).success(function () {
-          console.log("Posted test");
+        }).success(function (result) {
+          var match = result.match;
+          match.opponent = $scope.testWarriorSelection.name;
+          match.op_authors = $scope.testWarriorSelection.authors;
+          $scope.warrior.test_matches.unshift(match);
         });
     }
 

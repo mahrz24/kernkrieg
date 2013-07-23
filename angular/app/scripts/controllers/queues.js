@@ -58,6 +58,11 @@ angular.module('kkApp')
                       enableCellEdit: true,
                       editableCellTemplate: editCell
                     },
+                    { field:'isOpen',
+                      displayName:'Open',
+                      enableCellEdit: true,
+                      editableCellTemplate: editCell
+                    },
                     { field:'maxSubsPerWarrior',
                       displayName:'Submissions per Warrior',
                       enableCellEdit: true,
@@ -99,6 +104,7 @@ angular.module('kkApp')
       var queue = new Queue({ name: "Queue " + $scope.queues.length,
         machine: machines[0],
         qType: 1,
+        isOpen: false,
         maxSubsPerWarrior: 1,
         maxSubsPerUser: 1
       });

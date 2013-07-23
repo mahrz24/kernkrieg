@@ -39,9 +39,6 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
           },
           test_queues: function(TestQueueLoader) {
             return TestQueueLoader();
-          },
-          subl_queues: function(SublQueueLoader) {
-            return SublQueueLoader();
           }
         }
       })

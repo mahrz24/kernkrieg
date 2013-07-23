@@ -43,7 +43,7 @@ angular.module('kkApp')
 .factory('TestableWarriorIdLoader', ['$http',
   function($http) {
     return function() {
-      var promise = $http.get('/api/testables').then(function (response) {
+      var promise = $http.get('/api/warrior/testable').then(function (response) {
         return response.data;
       });
       // Return the promise to the controller
