@@ -115,6 +115,30 @@ def post_queue_submit_test():
                     'submission1': sub1,
                     'submission2': sub2}), 201
 
+@app.route('/api/queue/submit', methods=['POST'])
+def post_queue_submit():
+    if (not request.json) or (not 'queueId' in request.json):
+        abort(400)
+    if (not 'warriorId' in request.json):
+        abort(400)
+
+    q_id = int(request.json['queueId'])
+    # Get the queue information
+    queue = Queue.query.filter(Queue.id == q_id).first()
+
+    if not queue:
+        abort(404)
+
+    # Check if submittable queue
+    if queue.qType != 1:
+        abort(403)
+
+    # Submit to queue using normal submission function
+    sub = frontend_submit_to_queue(queue, int(request.json['warriorId']))
+
+
+    return jsonify({'submission': sub,}), 201
+
 
 @app.route('/api/user_id', methods=['GET'])
 def get_user_id():
