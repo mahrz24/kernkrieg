@@ -1,355 +1,32 @@
 #!/usr/bin/env python2
 # App
-from app import (app, db, bcrypt)
-
-from datetime import datetime
+from app import app, db, bcrypt, redis_conn
 
 # Flask
-from flask import render_template, jsonify, url_for, flash, redirect, request, session
+from flask import render_template, url_for, flash, redirect, request
 
 # Flask Login
-from flask.ext.login import login_required, LoginManager, current_user, login_user, logout_user
+from flask.ext.login import login_required, current_user, LoginManager, login_user, logout_user
 
 # Forms
 from forms import LoginForm
 
-# Assets
-from flask.ext.assets import (Environment, Bundle)
-
 # Database & Models
-from models import (User, Warrior, Machine, Queue, Match, Submission)
+from models import User
 
 # REST API
-from flask.ext.restless import *
-
-import rq
-from redis import Redis
-from bkg import stuff
-
-# Tell RQ what Redis connection to use
-redis_conn = Redis()
-q = rq.Queue(connection=redis_conn)
-
-
-
-
-import time
-
-login_manager = LoginManager()
-
-login_manager.init_app(app)
-bcrypt.init_app(app)
-
-assets = Environment()
-assets.init_app(app)
-
-db.create_all()
-
-manager = APIManager(app, flask_sqlalchemy_db=db)
-
-
-# Create the REST API
-def check_auth(instance_id=None, **kw):
-    if not current_user.is_authenticated():
-        raise ProcessingException(message='Not Authorized',
-                                  status_code=401)
-
-
-def check_admin(instance_id=None, **kw):
-    if not current_user.is_authenticated():
-        raise ProcessingException(message='Not Authorized',
-                                  status_code=401)
-    if not current_user.admin:
-        raise ProcessingException(message='Not Authorized as Administrator',
-                                  status_code=401)
-
-
-def check_admin_or_user(instance_id=None, **kw):
-    if not current_user.is_authenticated():
-        raise ProcessingException(message='Not Authorized',
-                                  status_code=401)
-
-    if current_user.admin:
-        return
-
-    if current_user.id != int(instance_id):
-        raise ProcessingException(message='Not Authorized for this Resource',
-                                  status_code=401)
-
-
-def check_owner_single(instance_id=None, data=None, **kw):
-    if current_user.admin:
-        return
-    if not data:
-        w = Warrior.query.get(instance_id)
-        if w.public:
-            return
-
-        is_owner = False
-        for owner in w.owners:
-            if current_user.id == owner.id:
-                is_owner = True
-
-                if not is_owner:
-                    raise ProcessingException(message='Not Authorized for this Resource',
-                                              status_code=401)
-        return
-    if data['public']:
-        return
-
-    is_owner = False
-    for owner in data['owners']:
-        if current_user.id == owner['id']:
-            is_owner = True
-
-    if not is_owner:
-        raise ProcessingException(message='Not Authorized for this Resource',
-                                  status_code=401)
-
-
-def post_check_owner_many(result=None, **kw):
-    print(result)
-    if current_user.admin:
-        return
-
-    for obj in result['objects']:
-        is_owner = False
-        for owner in obj['owners']:
-            if current_user.id == owner['id']:
-                is_owner = True
-
-        if (not is_owner) and (not obj['public']):
-            raise ProcessingException(message='Not Authorized for this Resource',
-                                      status_code=401)
-
-
-def deny(**kw):
-    raise ProcessingException(message='Not Allowed',
-                              status_code=401)
-
-
-def pre_hash(data=None, **kw):
-    if "passwdHash" in data.keys():
-        data["passwdHash"] = bcrypt.generate_password_hash(data["passwdHash"])
-
-
-def post_create_testq(result=None, **kw):
-    testq = Queue(name=result['name'] + " Testing",
-                  machineId=result['id'],
-                  qType=0,
-                  maxSubsPerWarrior=-1,
-                  maxSubsPerUser=-1)
-    db.session.add(testq)
-    db.session.commit()
-
-manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   exclude_columns=['passwdHash', 'warriors'],
-                   preprocessors={'GET_SINGLE': [check_admin_or_user],
-                                  'GET_MANY':   [check_admin],
-                                  'PUT_SINGLE': [check_admin_or_user,
-                                                 pre_hash],
-                                  'PUT_MANY':   [check_admin,
-                                                 pre_hash],
-                                  'POST':       [check_admin,
-                                                 pre_hash],
-                                  'DELETE':     [check_admin]})
-
-manager.create_api(Warrior, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   include_columns=['id',
-                                    'name',
-                                    'code',
-                                    'public',
-                                    'testable',
-                                    'owners',
-                                    'owners.id',
-                                    'owners.username'],
-                   preprocessors={'GET_SINGLE': [check_owner_single],
-                                  'GET_MANY':   [check_auth],
-                                  'PUT_SINGLE': [check_owner_single],
-                                  'PUT_MANY':   [deny],
-                                  'POST':       [check_owner_single],
-                                  'DELETE':     [check_owner_single]},
-                   postprocessors={'GET_MANY':   [post_check_owner_many]})
-
-
-manager.create_api(Machine, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   preprocessors={'PUT_SINGLE': [check_admin],
-                                  'PUT_MANY':   [check_admin],
-                                  'POST':       [check_admin],
-                                  'DELETE':     [check_admin]},
-                   postprocessors={'POST':  [post_create_testq]})
-
-manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   preprocessors={'PUT_SINGLE': [check_admin],
-                                  'PUT_MANY':   [check_admin],
-                                  'POST':       [check_admin],
-                                  'DELETE':     [check_admin]})
-
-def authors(warrior):
-    name = ""
-    for o in warrior.owners:
-        name += o.username + ", "
-    return name[:-2]
-
-@app.route('/api/testables', methods=['GET'])
-def get_testables():
-    if not current_user.is_authenticated():
-        raise ProcessingException(message='Not Authorized',
-                                  status_code=401)
-    if current_user.admin:
-        result = Warrior.query.all()
-    else:
-        own_warriors = Warrior.query.filter(Warrior.owners.any(id=current_user.id))
-        testable_warriors = Warrior.query.filter(Warrior.testable==True)
-        public_warriors = Warrior.query.filter(Warrior.public==True)
-        result = own_warriors.union(testable_warriors, public_warriors).all()
-    result_array = []
-    for w in result:
-        result_array.append({'id': w.id, 'name': w.name + " by " + authors(w)})
-    return jsonify({'results': result_array})
-
-
-def submit_to_queue(q,w_id):
-    w = Warrior.query.filter(Warrior.id == w_id).first()
-    if not w:
-        abort(404)
-    if (not (q.qType == 0 and w.testable)):
-        is_owner = False
-        for o in w.owners:
-            if o.id == current_user.id:
-                is_owner = True
-        if not is_owner:
-            abort(401)
-
-    sub = Submission(name=w.name,
-                     authors=authors(w),
-                     code=w.code,
-                     submitted=datetime.now(),
-                     queue_id=q.id,
-                     warrior_id=w.id)
-    db.session.add(sub)
-    db.session.commit()
-    return sub
-
-@app.route('/api/queue/submit_test', methods=['POST'])
-def post_queue_submit_test():
-    if (not request.json) or (not 'queueId' in request.json):
-        abort(400)
-    if (not 'warrior1Id' in request.json) or (not 'warrior2Id' in request.json):
-        abort(400)
-
-    q_id = int(request.json['queueId'])
-    # Get the queue information
-    queue = Queue.query.filter(Queue.id == q_id).first()
-
-    if not queue:
-        abort(404)
-
-    # Check if test queue
-    if queue.qType != 0:
-        abort(403)
-
-    # Submit to queue using normal submission function
-    sub1 = submit_to_queue(queue, int(request.json['warrior1Id']))
-    sub2 = submit_to_queue(queue, int(request.json['warrior2Id']))
-    # Create match to be scheduled
-    match = Match(done=False,
-                  scheduled=datetime.now(),
-                  executed=None,
-                  winner=-1,
-                  participant1Id=sub1.id,
-                  participant2Id=sub2.id,
-                  queue_id=queue.id)
-    db.session.add(match)
-    db.session.commit()
-
-    return jsonify({'match': match,
-                    'submission1': sub1,
-                    'submission2': sub2}), 201
-
-
-@app.route('/api/user_id', methods=['GET'])
-def get_user_id():
-    return jsonify({'user_id': current_user.id})
-
-@app.route('/api/is_admin', methods=['GET'])
-def get_is_admin():
-    return jsonify({'is_admin': current_user.admin})
-
+import api
 
 # Assets
-js_base = Bundle(
-    'bower_components/jquery/jquery.js',
-    'bower_components/lodash/lodash.js',
-    'bower_components/sass-bootstrap/js/bootstrap-affix.js',
-    'bower_components/sass-bootstrap/js/bootstrap-alert.js',
-    'bower_components/sass-bootstrap/js/bootstrap-dropdown.js',
-    'bower_components/sass-bootstrap/js/bootstrap-tooltip.js',
-    'bower_components/sass-bootstrap/js/bootstrap-modal.js',
-    'bower_components/sass-bootstrap/js/bootstrap-transition.js',
-    'bower_components/sass-bootstrap/js/bootstrap-button.js',
-    'bower_components/sass-bootstrap/js/bootstrap-popover.js',
-    'bower_components/sass-bootstrap/js/bootstrap-typeahead.js',
-    'bower_components/sass-bootstrap/js/bootstrap-carousel.js',
-    'bower_components/sass-bootstrap/js/bootstrap-scrollspy.js',
-    'bower_components/sass-bootstrap/js/bootstrap-collapse.js',
-    'bower_components/sass-bootstrap/js/bootstrap-tab.js',
-    'bower_components/flatui/js/bootstrap-select.js',
-    'bower_components/flatui/js/bootstrap-switch.js',
-    #'bower_components/flatui/js/flatui-checkbox.js',
-    #'bower_components/flatui/js/flatui-radio.js',
-    #filters='jsmin',
-    output='gen/packed_base.js')
-assets.register('js_base', js_base)
+import assets
 
-js_ie9 = Bundle(
-    'bower_components/es5-shim/es5-shim.js',
-    'bower_components/json3/lib/json3.min.js',
-    filters='jsmin',
-    output='gen/packed_ie9.js')
-assets.register('js_ie9', js_ie9)
+# Init Login Manager
+login_manager = LoginManager()
+login_manager.init_app(app)
 
-js_angular = Bundle(
-    'bower_components/angular/angular.js',
-    'bower_components/angular-resource/angular-resource.js',
-    'bower_components/ng-grid/ng-grid-2.0.7.debug.js',
-    'bower_components/ng-grid/plugins/ng-grid-flexible-height.js',
-    'bower_components/CodeMirror/lib/codemirror.js',
-    'vendor/redcode_cm.js',
-    'vendor/mars.js',
-    'scripts/controllers/navigation.js',
-    'scripts/directives/navigation.js',
-    'scripts/app.js',
-    'scripts/directives/codemirror.js',
-    'scripts/services/accounts.js',
-    'scripts/services/warriors.js',
-    'scripts/services/machines.js',
-    'scripts/services/queues.js',
-    'scripts/controllers/main.js',
-    'scripts/controllers/developList.js',
-    'scripts/controllers/developEdit.js',
-    'scripts/controllers/accounts.js',
-    'scripts/controllers/machines.js',
-    'scripts/controllers/queues.js',
-    'scripts/controllers/accountEdit.js',
-    #filters='jsmin',
-    output='gen/packed_angular.js')
-assets.register('js_angular', js_angular)
 
-css_base = Bundle(
-    'bower_components/sass-bootstrap/bootstrap-2.3.2.css',
-    #'bower_components/flatui/css/flat-ui.css',
-    'bower_components/ng-grid/ng-grid.min.css',
-    'bower_components/CodeMirror/lib/codemirror.css',
-    'bower_components/CodeMirror/theme/monokai.css',
-    filters='cssmin',
-    output='gen/packed_base.css')
-assets.register('css_base', css_base)
-
-css_main = Bundle(
-    'styles/main.css',
-    output='gen/packed_main.css')
-assets.register('css_main', css_main)
+# Create the database if needed
+db.create_all()
 
 # User management
 login_manager.login_view = "login"
@@ -364,24 +41,6 @@ def load_user(userid):
     if not users:
         return None
     return users.first()
-
-
-
-@app.route('/make/')
-def make():
-    job = q.enqueue(stuff, 'argument')
-    session['job'] = job.id
-    return job.id
-
-@app.route('/get/')
-def get():
-
-    job = rq.job.Job.fetch(session['job'], connection=redis_conn)
-    out = str(job.result)
-    #except:
-    #    out = 'No result yet'
-    return out
-
 
 @app.route('/reset_db')
 def reset_db():

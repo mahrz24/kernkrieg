@@ -67,6 +67,13 @@ class Warrior(db.Model):
     public = db.Column(db.Boolean)
     testable = db.Column(db.Boolean)
 
+
+    def authors(self):
+        name = ""
+        for o in self.owners:
+            name += o.username + ", "
+            return name[:-2]
+
 @event.listens_for(db.Session, 'after_flush')
 def delete_warrior_orphans(session, ctx):
     session.query(Warrior).\
@@ -92,7 +99,7 @@ class Queue(db.Model):
     machineId = db.Column(db.Integer, db.ForeignKey('machine.id'))
     machine = db.relationship("Machine")
     qType = db.Column(db.Integer)
-    # 0 = Test Queue, 1 = Random Queue, 2 = TrueSkill Queue
+    # 0 = Test Queue, 1 = Random Queue, 2 = TrueSkill Queue, 3 = All vs All
     maxSubsPerWarrior = db.Column(db.Integer)
     # -1 = No Limit
     maxSubsPerUser = db.Column(db.Integer)
@@ -122,6 +129,8 @@ class Submission(db.Model, DictSerializable):
     authors = db.Column(db.String(255))
     code = db.Column(db.Text)
     submitted = db.Column(db.DateTime)
+    submissionUserId = db.Column(db.Integer, db.ForeignKey('user.id'))
+    submissionUser = db.relationship("User", backref="submissions")
     queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
     queue = db.relationship("Queue", backref="submissions")
     warrior_id = db.Column(db.Integer, db.ForeignKey('warrior.id'))

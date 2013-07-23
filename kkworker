@@ -3,7 +3,7 @@ import sys
 import rq
 
 # Preload libraries
-import bkg
+import jobs
 
 # Provide queue names to listen to as arguments to this script,
 # similar to rqworker
