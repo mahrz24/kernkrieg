@@ -25,9 +25,12 @@ def frontend_submit_to_queue(q, w_id):
                      authors=w.authors(),
                      code=w.code,
                      submitted=datetime.now(),
-                     submissionUser=current_user.id,
+                     submissionUserId=current_user.id,
                      queue_id=q.id,
                      warrior_id=w.id)
+    # Todo respect subs per warrior
+    # Todo respect subs per user
+
     db.session.add(sub)
     db.session.commit()
 
@@ -44,6 +47,10 @@ def schedule_match(queue, sub1, sub2):
     db.session.add(match)
     db.session.commit()
     q.enqueue(run_match, match.id)
+
+# Todo
+# resubmit
+# copy_submission
 
 # @app.route('/make/')
 # def make():

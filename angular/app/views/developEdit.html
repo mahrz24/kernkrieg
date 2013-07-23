@@ -56,7 +56,19 @@
      </button>
     </div>
     <div class="tab-pane" id="submissions">
-
+Submit to queue
+      <div class="btn-group">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          <span ng-bind="sublQueueSelection.name"></span>
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+        <li  ng-repeat="q in sublQueues"><a tabindex="-1" ng-click="changeSublQueueSelection(q)">{{q.name}}</a></li>
+        </ul>
+      </div><br/>
+      <button class="btn btn-warning" ng-click="submit()">
+       Submit
+     </button>
     </div>
   </div>
 </div>
