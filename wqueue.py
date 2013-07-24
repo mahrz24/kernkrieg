@@ -47,7 +47,7 @@ def schedule_queue(q):
         scheduled_time=datetime.now(),
         func=queue_job,
         args=[q.id],
-        interval=10,
+        interval=app.config['SECONDS_PER_QUEUE_UPDATE'],
         repeat=None
         )
     print("Scheduled periodic job for queue: " + str(job.id))
@@ -64,15 +64,15 @@ def queue_job(q_id):
     subs_query = Submission.query.filter(Submission.queueId == q_id).filter(Submission.active == True)
     num_of_subs = subs_query.count()
 
-    if app.config['QUEUE_MATCHES_PER'] == -1:
-        app.config['QUEUE_MATCHES_PER'] = num_of_subs
+    if app.config['MATCHES_PER_QUEUE_UPDATE'] == -1:
+        app.config['MATCHES_PER_QUEUE_UPDATE'] = num_of_subs
 
-    new_matches = app.config['QUEUE_MATCHES_PER'] - remaining_matches
+    new_matches = app.config['MATCHES_PER_QUEUE_UPDATE'] - remaining_matches
 
     if remaining_matches > 0:
-        app.config['QUEUE_MATCHES_PER'] = math.ceil(app.config['QUEUE_MATCHES_PER']*0.9)
-    elif app.config['QUEUE_MATCHES_PER'] < num_of_subs:
-        app.config['QUEUE_MATCHES_PER'] = math.ceil(app.config['QUEUE_MATCHES_PER']*1.1)
+        app.config['MATCHES_PER_QUEUE_UPDATE'] = math.ceil(app.config['MATCHES_PER_QUEUE_UPDATE']*0.9)
+    elif app.config['MATCHES_PER_QUEUE_UPDATE'] < num_of_subs:
+        app.config['MATCHES_PER_QUEUE_UPDATE'] = math.ceil(app.config['MATCHES_PER_QUEUE_UPDATE']*1.1)
 
     print("New matches: " + str(new_matches))
     subs = subs_query.order_by(Submission.sigma.desc()).all()
