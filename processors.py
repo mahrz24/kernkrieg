@@ -1,7 +1,7 @@
 from flask.ext.login import current_user
 from flask.ext.restless import *
 from models import (Warrior, Queue)
-from app import db
+from app import db, bcrypt
 from wqueue import schedule_queue
 
 # Create the REST API

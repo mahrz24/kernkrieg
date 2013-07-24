@@ -42,6 +42,15 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
           }
         }
       })
+      .when('/admin/warriors', {
+        templateUrl: '/app/views/adminWarriors.html',
+        controller: 'AdminWarriorsCtrl',
+        resolve: {
+          warriors: function(AllWarriorLoader) {
+            return AllWarriorLoader();
+          },
+        }
+      })
       .when('/admin/machines', {
         templateUrl: '/app/views/machines.html',
         controller: 'MachinesCtrl',

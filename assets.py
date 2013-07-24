@@ -56,6 +56,7 @@ js_angular = Bundle(
     'scripts/controllers/main.js',
     'scripts/controllers/developList.js',
     'scripts/controllers/developEdit.js',
+    'scripts/controllers/adminWarriors.js',
     'scripts/controllers/accounts.js',
     'scripts/controllers/machines.js',
     'scripts/controllers/queues.js',

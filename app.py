@@ -9,7 +9,8 @@ app = Flask(__name__, static_folder = './angular/app', static_url_path='/app')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 app.config['SECRET_KEY'] = "KERNKRIEGFTW"
 app.config['QUEUE_DIR'] = "/tmp/kk-queues"
-app.config['QUEUE_MATCHES_PER'] = -1
+app.config['MATCHES_PER_QUEUE_UPDATE'] = -1
+app.config['SECONDS_PER_QUEUE_UPDATE'] = 30
 
 db = SQLAlchemy(app)
 
