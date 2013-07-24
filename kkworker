@@ -4,6 +4,7 @@ import rq
 
 # Preload libraries
 import jobs
+import wqueue
 
 # Provide queue names to listen to as arguments to this script,
 # similar to rqworker

@@ -94,7 +94,7 @@ def get_submittables():
         raise ProcessingException(message='Not Authorized',
                                   status_code=401)
 
-    qs = Queue.query.filter(Queue.qType==1).all()
+    qs = Queue.query.filter(Queue.qType==2).all()
     results = []
     w_id = request.args['w']
     for q in qs:
@@ -127,7 +127,7 @@ def post_queue_submit_test():
     sub1 = frontend_submit_to_queue(queue, int(request.json['warrior1Id']))
     sub2 = frontend_submit_to_queue(queue, int(request.json['warrior2Id']))
     # Create match to be scheduled
-    match = schedule_match(queue, sub1, sub2)
+    match = schedule_match(queue, sub1, sub2, test=True)
 
     return jsonify({'match': match,
                     'submission1': sub1,
@@ -149,7 +149,7 @@ def post_queue_submit():
         abort(404)
 
     # Check if submittable queue
-    if queue.qType != 1:
+    if queue.qType != 2:
         abort(403)
 
     # Submit to queue using normal submission function

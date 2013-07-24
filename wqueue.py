@@ -1,11 +1,11 @@
 # App
-from app import db, q
+from app import app, db, scheduler, q, match_q, test_q
 from flask.ext.login import current_user
-from models import Warrior, Submission, Match
+from models import Warrior, Submission, Match, Queue
 from flask import abort
 from datetime import datetime
 from jobs import run_match
-
+import math
 
 def frontend_submit_to_queue(q, w_id):
     w = Warrior.query.filter(Warrior.id == w_id).first()
@@ -42,7 +42,56 @@ def frontend_submit_to_queue(q, w_id):
 
     return sub
 
-def schedule_match(queue, sub1, sub2):
+def schedule_queue(q):
+    job = scheduler.schedule(
+        scheduled_time=datetime.now(),
+        func=queue_job,
+        args=[q.id],
+        interval=10,
+        repeat=None
+        )
+    print("Scheduled periodic job for queue: " + str(job.id))
+    return job.id
+
+def stop_queue(q):
+    print("Canceling periodic job queue: " + str(q.job))
+    scheduler.cancel(q.job)
+
+def queue_job(q_id):
+    print("Running queue job for id " + str(q_id))
+    remaining_matches = match_q.count
+    queue = Queue.query.get(q_id)
+    subs_query = Submission.query.filter(Submission.queueId == q_id).filter(Submission.active == True)
+    num_of_subs = subs_query.count()
+
+    if app.config['QUEUE_MATCHES_PER'] == -1:
+        app.config['QUEUE_MATCHES_PER'] = num_of_subs
+
+    new_matches = app.config['QUEUE_MATCHES_PER'] - remaining_matches
+
+    if remaining_matches > 0:
+        app.config['QUEUE_MATCHES_PER'] = math.ceil(app.config['QUEUE_MATCHES_PER']*0.9)
+    elif app.config['QUEUE_MATCHES_PER'] < num_of_subs:
+        app.config['QUEUE_MATCHES_PER'] = math.ceil(app.config['QUEUE_MATCHES_PER']*1.1)
+
+    print("New matches: " + str(new_matches))
+    subs = subs_query.order_by(Submission.sigma.desc()).all()
+    print(subs)
+    for i in range(0,new_matches):
+        dmin = 100000000
+        the_op = None
+        for op in subs:
+            if op.id != subs[i].id:
+                d = abs(op.mu - subs[i].mu)
+                if d < dmin:
+                    dmin = d
+                    the_op = op
+        if the_op:
+            print("Schedule match ")
+            schedule_match(queue, subs[i], the_op)
+    print("Done running queue job")
+
+def schedule_match(queue, sub1, sub2, test=False):
     match = Match(done=False,
                   scheduled=datetime.now(),
                   executed=None,
@@ -52,7 +101,10 @@ def schedule_match(queue, sub1, sub2):
                   queueId=queue.id)
     db.session.add(match)
     db.session.commit()
-    q.enqueue(run_match, match.id)
+    if test:
+      test_q.enqueue(run_match, match.id)
+    else:
+      match_q.enqueue(run_match, match.id)
     return match
 
 # Todo

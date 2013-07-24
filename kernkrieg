@@ -14,7 +14,7 @@ from forms import LoginForm
 # Database & Models
 from models import User, Queue
 
-from jobs import schedule_queue, stop_queue
+from wqueue import schedule_queue, stop_queue
 
 # REST API
 import api
@@ -94,7 +94,7 @@ def logout():
 
 if __name__ == '__main__':
     # Start schedules for all open
-    queues = Queue.query.filter(Queue.qType != 0).filter(Queue.active == True).all()
+    queues = Queue.query.filter(Queue.qType == 2).filter(Queue.active == True).all()
     for q in queues:
         if(q.job):
             stop_queue(q)

@@ -115,7 +115,7 @@ class Queue(db.Model, DictSerializable):
     isOpen = db.Column(db.Boolean, default=True)
     active = db.Column(db.Boolean, default=True)
     job = db.Column(db.String(256))
-    # 0 = Test Queue, 1 = TrueSkill Queue, 2 = All vs All
+    # 0 = Test Queue, 1 = All vs. All, 2 = TrueSkill Queue
     maxSubsPerWarrior = db.Column(db.Integer)
     # -1 = No Limit
     maxSubsPerUser = db.Column(db.Integer)
@@ -145,8 +145,8 @@ class Submission(db.Model, DictSerializable):
     authors = db.Column(db.String(255))
     code = db.Column(db.Text)
     active = db.Column(db.Boolean, default=True)
-    sigma = db.Column(db.Float, default=25.0)
-    mu = db.Column(db.Float, default=208.3)
+    mu = db.Column(db.Float, default=25.0)
+    sigma = db.Column(db.Float, default=208.3)
     submitted = db.Column(db.DateTime)
     submissionUserId = db.Column(db.Integer, db.ForeignKey('user.id'))
     submissionUser = db.relationship("User", backref="submissions")

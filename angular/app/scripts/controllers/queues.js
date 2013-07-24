@@ -108,7 +108,7 @@ angular.module('kkApp')
     {
       var queue = new Queue({ name: "Queue " + $scope.queues.length,
         machine: machines[0],
-        qType: 1,
+        qType: 2,
         isOpen: false,
         active: true,
         maxSubsPerWarrior: 1,
