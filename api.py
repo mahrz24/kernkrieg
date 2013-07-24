@@ -62,11 +62,13 @@ manager.create_api(Machine, methods=['GET', 'POST', 'PUT', 'DELETE'],
                    postprocessors={'POST':  [post_create_testq]})
 
 manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   exclude_columns=['matches','submissions'],
+                   exclude_columns=['matches','submissions','job'],
                    preprocessors={'PUT_SINGLE': [check_admin],
-                                  'PUT_MANY':   [check_admin],
+                                  'PUT_MANY':   [deny],
                                   'POST':       [check_admin],
-                                  'DELETE':     [check_admin]})
+                                  'DELETE':     [check_admin]},
+                   postprocessors={'POST':  [post_schedule_queue_job],
+                                   'PUT_SINGLE':  [post_schedule_queue_job],})
 
 
 @app.route('/api/warrior/testable', methods=['GET'])

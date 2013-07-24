@@ -63,6 +63,11 @@ angular.module('kkApp')
                       enableCellEdit: true,
                       editableCellTemplate: editCell
                     },
+                    { field:'active',
+                      displayName:'Active',
+                      enableCellEdit: true,
+                      editableCellTemplate: editCell
+                    },
                     { field:'maxSubsPerWarrior',
                       displayName:'Submissions per Warrior',
                       enableCellEdit: true,
@@ -105,6 +110,7 @@ angular.module('kkApp')
         machine: machines[0],
         qType: 1,
         isOpen: false,
+        active: true,
         maxSubsPerWarrior: 1,
         maxSubsPerUser: 1
       });

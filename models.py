@@ -113,6 +113,8 @@ class Queue(db.Model, DictSerializable):
     machine = db.relationship("Machine")
     qType = db.Column(db.Integer)
     isOpen = db.Column(db.Boolean, default=True)
+    active = db.Column(db.Boolean, default=True)
+    job = db.Column(db.String(256))
     # 0 = Test Queue, 1 = TrueSkill Queue, 2 = All vs All
     maxSubsPerWarrior = db.Column(db.Integer)
     # -1 = No Limit

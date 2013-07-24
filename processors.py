@@ -2,6 +2,7 @@ from flask.ext.login import current_user
 from flask.ext.restless import *
 from models import (Warrior, Queue)
 from app import db
+from jobs import schedule_queue, stop_queue
 
 # Create the REST API
 def check_auth(instance_id=None, **kw):
@@ -95,3 +96,16 @@ def post_create_testq(result=None, **kw):
                   maxSubsPerUser=-1)
     db.session.add(testq)
     db.session.commit()
+
+def post_schedule_queue_job(result=None, **kw):
+    if result['active'] and result['qType'] != 0:
+        queue = Queue.query.get(result['id'])
+        if not queue.job:
+            queue.job = schedule_queue(queue)
+            db.session.commit()
+    if not result['active'] and result['qType'] != 0:
+        queue = Queue.query.get(result['id'])
+        if queue.job:
+            stop_queue(queue)
+            queue.job = None
+            db.session.commit()
