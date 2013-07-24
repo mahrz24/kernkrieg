@@ -42,8 +42,7 @@ manager.create_api(Warrior, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                     'testable',
                                     'owners',
                                     'owners.id',
-                                    'owners.username',
-                                    'submissions'],
+                                    'owners.username'],
                    include_methods=['test_matches',
                                     'nontest_submissions'],
                    preprocessors={'GET_SINGLE': [check_owner_single],
@@ -132,6 +131,7 @@ def post_queue_submit_test():
                     'submission1': sub1,
                     'submission2': sub2}), 201
 
+
 @app.route('/api/queue/submit', methods=['POST'])
 def post_queue_submit():
     if (not request.json) or (not 'queueId' in request.json):
@@ -153,7 +153,34 @@ def post_queue_submit():
     # Submit to queue using normal submission function
     sub = frontend_submit_to_queue(queue, int(request.json['warriorId']))
 
-    return jsonify({'submission': sub,}), 201
+    return jsonify({'submission': sub}), 201
+
+
+@app.route('/api/queue/resubmit', methods=['POST'])
+def post_queue_resubmit():
+    if (not request.json) or (not 'submissionId' in request.json):
+        abort(400)
+
+    submissionId = int(request.json['submissionId'])
+    sub = Submission.query.get(submissionId)
+
+    if not sub:
+        abort(404)
+
+    if not current_user.admin and not sub.submissionUserId == current_user.id:
+        abort(401)
+
+    if not current_user.admin and not sub.active:
+        abort(401)
+
+    sub.active = False
+    db.session.commit()
+
+    # Submit to queue using normal submission function
+    resub = frontend_submit_to_queue(sub.queue, sub.warriorId)
+
+    return jsonify({'submission': resub}), 201
+
 
 @app.route('/api/queue/remove_submission/<int:submissionId>', methods=['DELETE'])
 def delete_queue_submission(submissionId):
@@ -167,7 +194,6 @@ def delete_queue_submission(submissionId):
 
     if not current_user.admin and not sub.active:
         abort(401)
-
 
     db.session.delete(sub)
     db.session.commit()

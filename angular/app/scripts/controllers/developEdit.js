@@ -68,15 +68,20 @@ angular.module('kkApp')
         });
       }
 
-    $scope.resubmit = function()
+    $scope.resubmit = function(sub)
     {
-      $http.post("/api/queue/submit",
-        { queueId: $scope.sublQueueSelection.id,
-          warriorId: $scope.warrior.id,
+      $http.post("/api/queue/resubmit",
+        { submissionId: sub.id
         }).success(function (result) {
-          var sub = result.submission;
-          sub.queueName = $scope.sublQueueSelection.name;
-          $scope.warrior.nontest_submissions.unshift(sub);
+          var resub = result.submission;
+          resub.queueName = sub.queueName;
+          $scope.warrior.nontest_submissions = _.map($scope.warrior.nontest_submissions,
+            function(x)
+            {
+              if(angular.equals(x, sub))
+                return resub;
+              return x;
+            });
         });
     }
 
