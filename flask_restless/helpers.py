@@ -166,6 +166,10 @@ def is_date_field(model, fieldname):
 
     """
     field = getattr(model, fieldname)
+
+    if inspect.ismethod(field):
+        return False
+
     if isinstance(field, ColumnElement):
         fieldtype = field.type
     else:

@@ -27,6 +27,7 @@ from collections import defaultdict
 from functools import wraps
 import math
 import warnings
+import inspect
 
 from flask import abort
 from flask import current_app
@@ -1240,7 +1241,8 @@ class API(ModelView):
             if data:
                 for item in query.all():
                     for field, value in data.iteritems():
-                        setattr(item, field, value)
+                        if not inspect.ismethod(getattr(item, field)):
+                            setattr(item, field, value)
                     num_modified += 1
             self.session.commit()
         except self.validation_exceptions, exception:

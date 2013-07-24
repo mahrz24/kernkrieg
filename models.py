@@ -143,6 +143,8 @@ class Submission(db.Model, DictSerializable):
     authors = db.Column(db.String(255))
     code = db.Column(db.Text)
     active = db.Column(db.Boolean, default=True)
+    sigma = db.Column(db.Float, default=25.0)
+    mu = db.Column(db.Float, default=208.3)
     submitted = db.Column(db.DateTime)
     submissionUserId = db.Column(db.Integer, db.ForeignKey('user.id'))
     submissionUser = db.relationship("User", backref="submissions")
