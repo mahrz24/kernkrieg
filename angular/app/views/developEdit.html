@@ -76,7 +76,14 @@ Submit to queue
        Submit
      </button>
      <ul>
-     <li ng-repeat="t in warrior.nontest_submissions">in {{t.queueName}}</li>
+     <li ng-repeat="sub in warrior.nontest_submissions">in {{sub.queueName}} on {{sub.submitted}}
+        <button class="btn btn-info" ng-click="resubmit(sub)">
+         Resubmit
+       </button>
+       <button class="btn btn-danger" ng-click="removeSubmission(sub)">
+         Remove
+       </button>
+     </li>
      </ul>
     </div>
   </div>

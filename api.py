@@ -2,7 +2,7 @@
 from app import app, db
 
 # Flask
-from flask import jsonify, request
+from flask import jsonify, request, Response
 
 # Models
 from models import (User, Warrior, Machine, Queue, Match, Submission)
@@ -154,6 +154,26 @@ def post_queue_submit():
     sub = frontend_submit_to_queue(queue, int(request.json['warriorId']))
 
     return jsonify({'submission': sub,}), 201
+
+@app.route('/api/queue/remove_submission/<int:submissionId>', methods=['DELETE'])
+def delete_queue_submission(submissionId):
+    sub = Submission.query.get(submissionId)
+
+    if not sub:
+        abort(404)
+
+    if not current_user.admin and not sub.submissionUserId == current_user.id:
+        abort(401)
+
+    if not current_user.admin and not sub.active:
+        abort(401)
+
+
+    db.session.delete(sub)
+    db.session.commit()
+    response = Response(status=204)
+    del response.headers['content-type']
+    return response
 
 
 @app.route('/api/user_id', methods=['GET'])

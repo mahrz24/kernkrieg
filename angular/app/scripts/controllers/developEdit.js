@@ -60,6 +60,35 @@ angular.module('kkApp')
           var sub = result.submission;
           sub.queueName = $scope.sublQueueSelection.name;
           $scope.warrior.nontest_submissions.unshift(sub);
+
+          SublQueueLoader(warrior).then(function(s) {
+            $scope.sublQueues = s.results;
+            $scope.sublQueueSelection = s.results[0];
+          })
+        });
+      }
+
+    $scope.resubmit = function()
+    {
+      $http.post("/api/queue/submit",
+        { queueId: $scope.sublQueueSelection.id,
+          warriorId: $scope.warrior.id,
+        }).success(function (result) {
+          var sub = result.submission;
+          sub.queueName = $scope.sublQueueSelection.name;
+          $scope.warrior.nontest_submissions.unshift(sub);
+        });
+    }
+
+    $scope.removeSubmission = function(sub)
+    {
+      $http.delete("/api/queue/remove_submission/" + sub.id).success(function () {
+          $scope.warrior.nontest_submissions = _.reject($scope.warrior.nontest_submissions,
+            function(x) { return angular.equals(x, sub) });
+                    SublQueueLoader(warrior).then(function(s) {
+            $scope.sublQueues = s.results;
+            $scope.sublQueueSelection = s.results[0];
+          })
         });
     }
 
