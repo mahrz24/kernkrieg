@@ -13,6 +13,7 @@ def run_match(match_id):
         if match:
             match.executed = datetime.now()
             match.winner = 1
+            match.job = None
             match.done = True
             db.session.commit()
             print("Executed match")

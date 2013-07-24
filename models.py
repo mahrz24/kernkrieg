@@ -1,8 +1,17 @@
-from app import (db, bcrypt)
+from app import (app,db, redis_conn, scheduler, bcrypt)
 from sqlalchemy import event
 from collections import OrderedDict
 from flask import jsonify
+from flask.ext.sqlalchemy import models_committed
 import itertools
+import rq
+
+def on_models_committed(sender, changes):
+    for obj, change in changes:
+        if change == 'delete' and hasattr(obj, '__commit_delete__'):
+            obj.__commit_delete__()
+
+models_committed.connect(on_models_committed, sender=app)
 
 class DictSerializable(object):
     def _asdict(self):
@@ -15,6 +24,7 @@ team_table = db.Table('teams', db.Model.metadata,
     db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='cascade'), primary_key=True),
     db.Column('warrior_id', db.Integer, db.ForeignKey('warrior.id', ondelete='cascade'), primary_key=True)
 )
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -62,6 +72,7 @@ class User(db.Model):
             return NotImplemented
         return not equal
 
+
 class Warrior(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
@@ -93,6 +104,7 @@ def delete_warrior_orphans(session, ctx):
         filter(~Warrior.owners.any()).\
         delete(synchronize_session=False)
 
+
 class Machine(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True)
@@ -105,6 +117,7 @@ class Machine(db.Model):
     initialSep = db.Column(db.Integer)
     readDist = db.Column(db.Integer)
     writeDist = db.Column(db.Integer)
+
 
 class Queue(db.Model, DictSerializable):
     id = db.Column(db.Integer, primary_key=True)
@@ -121,22 +134,43 @@ class Queue(db.Model, DictSerializable):
     maxSubsPerUser = db.Column(db.Integer)
     # -1 = No Limit
 
+    def stop_queue(self):
+        if self.job:
+            print("Canceling periodic job queue: " + str(self.job))
+            scheduler.cancel(self.job)
+
+    def __commit_delete__(self):
+        self.stop_queue()
+
+
 class Match(db.Model, DictSerializable):
     id = db.Column(db.Integer, primary_key=True)
     done = db.Column(db.Boolean)
     scheduled = db.Column(db.DateTime)
+    job = db.Column(db.String(256))
     executed = db.Column(db.DateTime)
     winner = db.Column(db.Integer)
     participant1Id = db.Column(db.Integer, db.ForeignKey('submission.id'))
-    participant1 = db.relationship("Submission", backref="attackerMatches",
+    participant1 = db.relationship("Submission",
+        backref=db.backref("attackerMatches", cascade="all,delete"),
         foreign_keys=participant1Id,
         primaryjoin = "Match.participant1Id == Submission.id")
     participant2Id = db.Column(db.Integer, db.ForeignKey('submission.id'))
-    participant2 = db.relationship("Submission", backref="defenderMatches",
+    participant2 = db.relationship("Submission",
+        backref=db.backref("defenderMatches", cascade="all,delete"),
         foreign_keys=participant2Id,
-        primaryjoin = "Match.participant2Id == Submission.id")
+        primaryjoin="Match.participant2Id == Submission.id")
     queueId = db.Column(db.Integer, db.ForeignKey('queue.id'))
-    queue = db.relationship("Queue", backref="matches")
+    queue = db.relationship("Queue",
+        backref=db.backref("matches", cascade="all,delete"))
+
+    def stop_match(self):
+        if self.job:
+            print("Canceling match job: " + str(self.job))
+            rq.cancel_job(self.job, connection=redis_conn)
+
+    def __commit_delete__(self):
+        self.stop_match()
 
 
 class Submission(db.Model, DictSerializable):
@@ -151,6 +185,8 @@ class Submission(db.Model, DictSerializable):
     submissionUserId = db.Column(db.Integer, db.ForeignKey('user.id'))
     submissionUser = db.relationship("User", backref="submissions")
     queueId = db.Column(db.Integer, db.ForeignKey('queue.id'))
-    queue = db.relationship("Queue", backref="submissions")
+    queue = db.relationship("Queue",
+        backref=db.backref("submissions", cascade="all,delete"))
     warriorId = db.Column(db.Integer, db.ForeignKey('warrior.id'))
     warrior = db.relationship("Warrior", backref="submissions")
+

@@ -14,7 +14,7 @@ from forms import LoginForm
 # Database & Models
 from models import User, Queue
 
-from wqueue import schedule_queue, stop_queue
+from wqueue import schedule_queue
 
 # REST API
 import api
@@ -96,8 +96,7 @@ if __name__ == '__main__':
     # Start schedules for all open
     queues = Queue.query.filter(Queue.qType == 2).filter(Queue.active == True).all()
     for q in queues:
-        if(q.job):
-            stop_queue(q)
+        q.stop_queue()
         q.job = schedule_queue(q)
     db.session.commit()
 

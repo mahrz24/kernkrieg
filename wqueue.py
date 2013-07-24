@@ -53,14 +53,14 @@ def schedule_queue(q):
     print("Scheduled periodic job for queue: " + str(job.id))
     return job.id
 
-def stop_queue(q):
-    print("Canceling periodic job queue: " + str(q.job))
-    scheduler.cancel(q.job)
 
 def queue_job(q_id):
     print("Running queue job for id " + str(q_id))
     remaining_matches = match_q.count
     queue = Queue.query.get(q_id)
+    if not queue:
+        print("Queue not existing")
+        return
     subs_query = Submission.query.filter(Submission.queueId == q_id).filter(Submission.active == True)
     num_of_subs = subs_query.count()
 
@@ -87,7 +87,7 @@ def queue_job(q_id):
                     dmin = d
                     the_op = op
         if the_op:
-            print("Schedule match ")
+            print("Schedule match "  + str(subs[i].id) + " vs. " + str(the_op.id))
             schedule_match(queue, subs[i], the_op)
     print("Done running queue job")
 
@@ -101,10 +101,13 @@ def schedule_match(queue, sub1, sub2, test=False):
                   queueId=queue.id)
     db.session.add(match)
     db.session.commit()
+    job = ""
     if test:
-      test_q.enqueue(run_match, match.id)
+      job = test_q.enqueue(run_match, match.id)
     else:
-      match_q.enqueue(run_match, match.id)
+      job = match_q.enqueue(run_match, match.id)
+    match.job = job.id
+    db.session.commit()
     return match
 
 # Todo
