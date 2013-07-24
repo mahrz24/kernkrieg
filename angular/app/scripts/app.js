@@ -7,6 +7,15 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
         templateUrl: '/app/views/main.html',
         controller: 'MainCtrl'
       })
+      .when('/matches', {
+        templateUrl: '/app/views/matchesList.html',
+        controller: 'MatchesListCtrl',
+        resolve: {
+          queues: function(NonTestQueueLoader) {
+            return NonTestQueueLoader();
+          }
+        }
+      })
       .when('/develop', {
         templateUrl: '/app/views/developList.html',
         controller: 'DevelopListCtrl',

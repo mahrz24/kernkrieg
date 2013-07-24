@@ -70,6 +70,15 @@ manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
                    postprocessors={'POST':  [post_schedule_queue_job],
                                    'PUT_SINGLE':  [post_schedule_queue_job],})
 
+manager.create_api(Match, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   exclude_columns=['participant1.code',
+                                    'participant2.code'])
+manager.create_api(Submission, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   exclude_columns=['code',
+                                    'submissionUser',
+                                    'attackerMatches',
+                                    'defenderMatches'])
+
 
 @app.route('/api/warrior/testable', methods=['GET'])
 def get_testables():

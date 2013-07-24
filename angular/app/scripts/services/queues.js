@@ -41,6 +41,20 @@ angular.module('kkApp')
   }]);
 
 angular.module('kkApp')
+.factory('NonTestQueueLoader', ['Queue', '$q',
+  function(Queue, $q) {
+    return function() {
+      var delay = $q.defer();
+      Queue.query({q: angular.toJson({filters:[{name:"qType",op:"neq",val:0}]})},function(queues) {
+        delay.resolve(queues.objects);
+      }, function() {
+        delay.reject('Unable to fetch queues');
+      });
+      return delay.promise;
+    };
+  }]);
+
+angular.module('kkApp')
 .factory('SublQueueLoader', ['$http',
   function($http) {
     return function(warrior) {

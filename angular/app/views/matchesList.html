@@ -1,0 +1,29 @@
+<div class="row">
+  <div class="span12 gbox">
+    <div class="gbox-content">
+      Queue:
+      <div class="btn-group">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          <span ng-bind="queueSelection.name"></span>
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li  ng-repeat="q in queues"><a tabindex="-1" ng-click="changeQueueSelection(q)">{{q.name}}</a></li>
+        </ul>
+      </div>
+      <div style="margin-top:10px;">
+        Submissions:
+        <div class="gridStyle" ng-grid="gridSubmissions"></div>
+      </div>
+      <div>
+        Scheduled Matches:
+        <div class="gridStyle" ng-grid="gridScheduledMatches"></div>
+      </div>
+      <div>
+        Matches:
+        <div class="gridStyle" ng-grid="gridMatches"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
