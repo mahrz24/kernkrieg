@@ -72,12 +72,22 @@ manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
 
 manager.create_api(Match, methods=['GET', 'POST', 'PUT', 'DELETE'],
                    exclude_columns=['participant1.code',
-                                    'participant2.code'])
+                                    'participant2.code'],
+                   preprocessors={'PUT_SINGLE': [check_admin],
+                                  'PUT_MANY':   [deny],
+                                  'POST':       [check_admin],
+                                  'DELETE':     [check_admin]})
+
 manager.create_api(Submission, methods=['GET', 'POST', 'PUT', 'DELETE'],
                    exclude_columns=['code',
                                     'submissionUser',
                                     'attackerMatches',
-                                    'defenderMatches'])
+                                    'defenderMatches'],
+                   preprocessors={'PUT_SINGLE': [check_admin],
+                                  'PUT_MANY':   [deny],
+                                  'POST':       [check_admin],
+                                  'DELETE':     [check_admin]})
+
 
 
 @app.route('/api/warrior/testable', methods=['GET'])
