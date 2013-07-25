@@ -75,6 +75,7 @@ manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                    'PUT_SINGLE':  [post_schedule_queue_job],})
 
 manager.create_api(Match, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   results_per_page=25,
                    exclude_columns=['participant1.code',
                                     'participant2.code'],
                    preprocessors={'PUT_SINGLE': [check_admin],

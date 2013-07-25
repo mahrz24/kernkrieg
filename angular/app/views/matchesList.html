@@ -27,12 +27,18 @@
           </div>
           <div class="tab-pane active" id="matches">
             <ul>
-              <li ng-repeat="m in matches.objects">{{s.job}}</li>
+              <li ng-repeat="m in matches.objects">{{m.executed}}</li>
             </ul>
+            <div class="pagination pagination-mini" id="matchPagination">
+              <ul>
+                <li ng-class="currentMatchPage($index+1)" ng-repeat="n in [] | range:matches.total_pages"><a ng-click="reloadMatches($index+1)">{{$index+1}}</a></li>
+              </ul>
+            </div>
+
           </div>
-          <div class="tab-pane active" id="matches">
+          <div class="tab-pane active" id="scheduled">
             <ul>
-              <li ng-repeat="m in scheduledMatches.objects">{{s.job}}</li>
+              <li ng-repeat="m in scheduledMatches.objects">{{m.scheduled}}</li>
             </ul>
           </div>
 

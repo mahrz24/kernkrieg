@@ -1,3 +1,13 @@
+var myApp = angular.module('kkApp').filter('range', function() {
+  return function(input, total) {
+    total = parseInt(total);
+
+    for (var i=0; i<total; i++)
+      input.push(i);
+    return input;
+  };
+});
+
 
 angular.module('kkApp')
 .controller('MatchesListCtrl',
@@ -45,6 +55,13 @@ angular.module('kkApp')
         {name:"done",op:"eq",val:false}]}).then(function(s) {
           $scope.scheduledMatches = s;
         });
+    }
+
+    $scope.currentMatchPage = function(page)
+    {
+      if(page == $scope.matches.page)
+        return "active";
+      return "";
     }
 
     $scope.changeQueueSelection(queues[0]);
