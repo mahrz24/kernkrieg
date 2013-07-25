@@ -62,6 +62,14 @@ def queue_job(q_id):
     if not queue:
         print("Queue not existing")
         return
+    if not queue.active:
+        print("Queue not longer active stopping")
+        queue.stop_queue();
+        return
+    if queue.qType != 2:
+        print("Queue not of schedule type")
+        queue.stop_queue();
+        return
     subs_query = Submission.query.filter(Submission.queueId == q_id).filter(Submission.active == True)
     num_of_subs = subs_query.count()
 
