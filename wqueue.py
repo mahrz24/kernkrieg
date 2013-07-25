@@ -6,6 +6,7 @@ from flask import abort
 from datetime import datetime
 from jobs import run_match
 import math
+import random
 
 def frontend_submit_to_queue(q, w_id):
     w = Warrior.query.filter(Warrior.id == w_id).first()
@@ -99,6 +100,7 @@ def schedule_match(queue, sub1, sub2, test=False):
                   scheduled=datetime.now(),
                   executed=None,
                   winner=-1,
+                  seed=random.randint(1, 1000000),
                   participant1Id=sub1.id,
                   participant2Id=sub2.id,
                   queueId=queue.id)

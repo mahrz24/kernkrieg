@@ -150,6 +150,7 @@ class Match(db.Model, DictSerializable):
     job = db.Column(db.String(256))
     executed = db.Column(db.DateTime)
     winner = db.Column(db.Integer)
+    log = db.Column(db.Text)
     seed = db.Column(db.Integer)
     participant1Id = db.Column(db.Integer, db.ForeignKey('submission.id'))
     participant1 = db.relationship("Submission",
