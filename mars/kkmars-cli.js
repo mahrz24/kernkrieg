@@ -19,6 +19,8 @@ var argv = require('optimist')
     .default('minw', 1)
     .default('debug', 0)
     .default('dres', 500)
+    .default('samples', 1500)
+    .default('seed', MARS.random)
     .argv
 ;
 if(argv.debug > 0)
@@ -26,10 +28,10 @@ if(argv.debug > 0)
 
 var warriors = [];
 
-_.each(argv._, function(file)
+_.each(argv._, function(filename)
     {
         if(argv.debug > 0)
-            console.log("Loading warrior: " + file)
+            console.log("Loading warrior: " + filename)
 
 
         program = fs.readFileSync(filename, { encoding : "utf8" });
@@ -38,30 +40,42 @@ _.each(argv._, function(file)
     });
 
 var initial;
-console.log(argv.ii);
 if(argv.ii !== MARS.random)
     initial = redcode.assembleString(";redcode\n" + argv.ii).instructions[0];
 else
     initial = argv.ii;
 
 var mars = new MARS({
-    coreSize: argv.core,
-    pSpaceSize: argv.pspc,
-    cyclesUntilTie: argv.tiec,
-    initialInstruction: initial,
-    instructionLimit: argv.lim,
-    maxTasks: argv.maxt,
-    minSep: argv.minsep,
-    initialSep: argv.sep,
-    readDist: argv.readd,
-    writeDist: argv.writed
+        coreSize: argv.core,
+        pSpaceSize: argv.pspc,
+        cyclesUntilTie: argv.tiec,
+        initialInstruction: initial,
+        instructionLimit: argv.lim,
+        maxTasks: argv.maxt,
+        minSep: argv.minsep,
+        initialSep: argv.sep,
+        readDist: argv.readd,
+        writeDist: argv.writed
+    }, {
+        eventTypes: {
+            detectWinner: true,
+            detectTie: true,
+            detectDeath: true
+        },
+        logTypes: {
+            warriorTasks: true,
+        }
     });
 
 _.each(warriors, function(w) { mars.loadWarrior(w,0); });
 
-var result = mars.run(argv.minw,argv.debug, argv.dres);
+var result = mars.run();
+
+var log = mars.sampleLog(argv.samples);
+
+var events = mars.events;
 
 if(argv.debug > 0)
     console.log("Returned with status: " + result);
 else
-    console.log(result);
+    console.log(JSON.stringify({result: result, log: log, events: events}));

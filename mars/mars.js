@@ -37,7 +37,7 @@ module.exports = (function(){
         throw new Error("Unable to copy obj! Its type isn't supported.");
     };
 
-    var MARS = function(config)
+    var MARS = function(config, runtimeSettings)
     {
         if(config.readDist == MARS.full || config.readDist == -1)
             config.readDist = config.coreSize;
@@ -62,6 +62,13 @@ module.exports = (function(){
         this.currentWarrior = 0;
         this.taskQueues = [];
         this.pSpaces = [];
+        this.curCycle = -1;
+        this.minWarriors = runtimeSettings.minWarriors;
+        this.eventTypes = runtimeSettings.eventTypes;
+        this.logTypes = runtimeSettings.logTypes;
+        this.running = false;
+        this.events = [];
+        this.logData = {};
 
         if(this.coreSize % this.pSpaceSize !== 0)
             throw new Error("PSpace size needs two be a factor of the size of the Core");
@@ -87,13 +94,6 @@ module.exports = (function(){
             }
             this.coreOwner.push(-1);
         }
-    };
-
-
-
-    MARS.prototype.reset = function()
-    {
-
     };
 
     MARS.prototype.loadWarrior = function(program, pSpaceZero)
@@ -151,53 +151,85 @@ module.exports = (function(){
         this.pSpaces.push(pSpace);
     };
 
-    MARS.prototype.run = function(minWarriors, debugOutput, debugResolution)
+    MARS.prototype.run = function()
     {
-        var curCycle = 0;
-        while(curCycle < this.cyclesUntilTie && this.activeWarriors > minWarriors)
+        this.running = true;
+        while(this.running)
         {
-            this.cycle();
-
-            if(curCycle % debugResolution == 0)
-            {
-                if(debugOutput == 1)
-                {
-                    console.log(sprintf("Cycle %u", curCycle));
-                    console.log(this.taskQueues);
-                }
-                if(debugOutput == 2)
-                {
-                    console.log(sprintf("################### Cycle %u ###################", curCycle));
-                    console.log(this.coreDump());
-                }
-            }
-
-            curCycle++;
+            this.runCycle();
         }
 
-        if(debugOutput == 1)
-        {
-            console.log(sprintf("Cycle %u", curCycle));
-            console.log(this.taskQueues);
-        }
-        if(debugOutput == 2)
-        {
-            console.log(sprintf("################### Cycle %u ###################", curCycle));
-            console.log(this.coreDump());
-        }
-
-
-
-        if(curCycle == this.cyclesUntilTie)
-            return -1;
-
-        for(var w=0;w<this.loadedWarriors;w++)
-            if(this.taskQueues[w].length > 0)
-                return w;
-
-        return -2;
+        return this.events[this.events.length - 1];
     };
 
+    MARS.prototype.runCycle = function()
+    {
+        this.curCycle += 1;
+        this.cycle();
+
+        this.logPerWarrior('warriorTasks', function(w) { return this.taskQueues[w].length; });
+
+        if (this.eventTypes.detectTie &&
+            this.running && this.curCycle == this.cyclesUntilTie)
+        {
+            this.event({halt: true, event: 'tie'});
+        }
+    };
+
+    MARS.prototype.event = function(event)
+    {
+        this.events.push({cycle: this.curCycle, event: event});
+        if (event.halt) {
+            this.running = false;
+        }
+    };
+
+    MARS.prototype.log = function(type, value)
+    {
+        if (this.logTypes[type]) {
+            var data = this.logData[type];
+            if (data === undefined) {
+                data = [];
+                this.logData[type] = data;
+            }
+            data[this.curCycle] = value;
+        }
+    };
+
+    MARS.prototype.logPerWarrior = function(type, fn)
+    {
+        if (this.logTypes[type]) {
+            var value = [];
+            for(var w=0;w<this.loadedWarriors;w++)
+            {
+                value.push(fn.call(this, w));
+            }
+            this.log(type, value);
+        }
+    };
+
+    MARS.prototype.sampleLog = function(maxSamples)
+    {
+        var sampleCount = Math.min(maxSamples, this.curCycle);
+
+        var types = Object.keys(this.logData);
+
+        var resampled = {cycle: []};
+
+        for (var t = 0; t < types.length; t++) {
+            resampled[types[t]] = []
+        }
+
+        for (var i = 0; i < sampleCount; i++) {
+            var samplePoint = (i * this.curCycle / (sampleCount - 1)) | 0;
+            for (var t = 0; t < types.length; t++) {
+                resampled['cycle'][i] = samplePoint;
+                resampled[types[t]][i] = this.logData[types[t]][samplePoint];
+            }
+        }
+
+        return resampled;
+    };
 
     MARS.prototype.address = function(integer)
     {
@@ -563,7 +595,26 @@ module.exports = (function(){
         }
 
         if(this.taskQueues[cw].length == 0)
+        {
             this.activeWarriors--;
+
+            if (this.eventTypes.detectDeath) {
+                this.event({event: 'death', warrior: cw});
+            }
+            if (this.eventTypes.detectWinner && this.activeWarriors == 1) {
+                var winner;
+                for(var w=0;w<this.loadedWarriors;w++)
+                {
+                    if(this.taskQueues[w].length > 0)
+                    {
+                        winner = w;
+                        break;
+                    }
+                }
+
+                this.event({halt: true, event: 'won', winner: winner});
+            }
+        }
 
         do
         {
