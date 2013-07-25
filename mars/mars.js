@@ -69,6 +69,10 @@ module.exports = (function(){
         this.running = false;
         this.events = [];
         this.logData = {};
+        this.savepoints = [];
+        this.minSavepointStep = 8;
+        this.savepointStep = this.minSavepointStep;
+        this.nextSavepoint = this.minSavepointStep;
 
         if(this.coreSize % this.pSpaceSize !== 0)
             throw new Error("PSpace size needs two be a factor of the size of the Core");
@@ -153,6 +157,9 @@ module.exports = (function(){
 
     MARS.prototype.run = function()
     {
+        if (this.curCycle == -1) {
+            this.initialSnapshot = this.makeSnapshot();
+        }
         this.running = true;
         while(this.running)
         {
@@ -161,6 +168,75 @@ module.exports = (function(){
 
         return this.events[this.events.length - 1];
     };
+
+    MARS.prototype.runTo = function(targetCycle, breakOnEvent)
+    {
+        var startCycle = this.curCycle;
+        var breakEvents = [];
+        var backwards = targetCycle < startCycle;
+
+        if (backwards && breakOnEvent) {
+            for (var i = this.events.length - 1; i >= 0; i--) {
+                var event = this.events[i];
+                if (event.cycle < startCycle) {
+                    if (event.cycle < targetCycle)
+                        break;
+                    targetCycle = event.cycle;
+                    breakEvents.push(event);
+                }
+            }
+        }
+
+        if (this.curCycle == -1) {
+            this.initialSnapshot = this.makeSnapshot();
+        }
+
+        var bestSavepoint = null;
+        var bestSavepointCycle = backwards ? -1 : this.curCycle;
+
+        var eventLength = this.events.length;
+
+        for (var i = 0; i < this.savepoints.length; i++) {
+            var savepoint = this.savepoints[i];
+            if (!backwards && breakOnEvent && savepoint.events.length > eventLength) {
+                continue;
+            }
+            if (savepoint.curCycle <= targetCycle) {
+                if (bestSavepointCycle < savepoint.curCycle) {
+                    bestSavepoint = savepoint;
+                    bestSavepointCycle = savepoint.curCycle;
+                }
+            }
+        }
+
+        if (bestSavepoint === null && backwards) {
+            bestSavepoint = this.initialSnapshot;
+        }
+
+        if (bestSavepoint !== null) {
+            this.loadSnapshot(bestSavepoint);
+            this.savepointStep = this.minSavepointStep;
+            this.nextSavepoint = this.curCycle + this.savepointStep;
+        }
+
+
+        while(this.curCycle != targetCycle) {
+            this.runCycle();
+            if (this.curCycle == this.nextSavepoint) {
+                this.savepoints.push(this.makeSnapshot());
+                if (this.savepoints.length > 100)
+                    this.savepoints.shift();
+                this.savepointStep <<= 1;
+                this.nextSavepoint += this.savepointStep;
+            }
+            if (this.events.length != eventLength && breakOnEvent && !backwards) {
+                breakEvents = this.events.slice(eventLength);
+                break;
+            }
+        }
+
+        return breakEvents;
+    }
 
     MARS.prototype.runCycle = function()
     {
@@ -212,23 +288,45 @@ module.exports = (function(){
     {
         var sampleCount = Math.min(maxSamples, this.curCycle);
 
-        var types = Object.keys(this.logData);
-
         var resampled = {cycle: []};
 
-        for (var t = 0; t < types.length; t++) {
-            resampled[types[t]] = []
+        for (var t in this.logData) {
+            resampled[t] = [];
         }
 
         for (var i = 0; i < sampleCount; i++) {
             var samplePoint = (i * this.curCycle / (sampleCount - 1)) | 0;
-            for (var t = 0; t < types.length; t++) {
-                resampled['cycle'][i] = samplePoint;
-                resampled[types[t]][i] = this.logData[types[t]][samplePoint];
+            for (var t in this.logData) {
+                resampled.cycle[i] = samplePoint;
+                resampled[t][i] = this.logData[t][samplePoint];
             }
         }
 
         return resampled;
+    };
+
+    MARS.prototype.makeSnapshot = function()
+    {
+        var snapshot = {
+            curMaxTasks: this.curMaxTasks,
+            activeWarriors: this.activeWarriors,
+            currentWarrior: this.currentWarrior,
+            taskQueues: this.taskQueues,
+            pSpaces: this.pSpaces,
+            curCycle: this.curCycle,
+            coreOwner: this.coreOwner,
+            core: this.core,
+            events: this.events
+        };
+        return clone(snapshot);
+    };
+
+    MARS.prototype.loadSnapshot = function(snapshot)
+    {
+        var copy = clone(snapshot);
+        for (var v in copy) {
+            this[v] = copy[v];
+        }
     };
 
     MARS.prototype.address = function(integer)
@@ -330,6 +428,9 @@ module.exports = (function(){
 
     MARS.prototype.cycle = function()
     {
+        if(!this.taskQueues.length)
+            return;
+
         // Get the current task pointer
         var cw = this.currentWarrior;
         var pc = this.taskQueues[cw].shift();
