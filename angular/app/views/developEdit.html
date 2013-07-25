@@ -1,7 +1,7 @@
 <div class="row">
   <div class="span12 gbox">
     <div class="gbox-content">
-      <button class="btn" ng-click="">
+      <button class="btn" ng-click="back()">
         Back
       </button>
       <button class="btn btn-primary" ng-click="saveWarrior()">
@@ -59,7 +59,11 @@
           Submit Test
         </button>
         <ul>
-          <li ng-repeat="t in warrior.test_matches">vs. {{t.opponent}}</li>
+          <li ng-repeat="t in warrior.test_matches">vs. {{t.opponent}}
+            <button class="btn btn-primary" ng-click="viewMatch(t)">
+                  View Match
+                </button>
+              </li>
         </ul>
       </div>
 

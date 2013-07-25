@@ -150,6 +150,7 @@ class Match(db.Model, DictSerializable):
     job = db.Column(db.String(256))
     executed = db.Column(db.DateTime)
     winner = db.Column(db.Integer)
+    seed = db.Column(db.Integer)
     participant1Id = db.Column(db.Integer, db.ForeignKey('submission.id'))
     participant1 = db.relationship("Submission",
         backref=db.backref("attackerMatches", cascade="all,delete"),
@@ -181,6 +182,7 @@ class Submission(db.Model, DictSerializable):
     active = db.Column(db.Boolean, default=True)
     mu = db.Column(db.Float, default=25.0)
     sigma = db.Column(db.Float, default=208.3)
+    score = db.Column(db.Float, default=0)
     submitted = db.Column(db.DateTime)
     submissionUserId = db.Column(db.Integer, db.ForeignKey('user.id'))
     submissionUser = db.relationship("User", backref="submissions")

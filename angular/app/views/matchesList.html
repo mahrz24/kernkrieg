@@ -1,3 +1,4 @@
+<style type="text/css">a {cursor:pointer;}</style>
 <div class="row">
   <div class="span12 gbox">
     <div class="gbox-content">
@@ -11,6 +12,9 @@
           <li  ng-repeat="q in queues"><a tabindex="-1" ng-click="changeQueueSelection(q)">{{q.name}}</a></li>
         </ul>
       </div>
+      <button class="btn btn-primary" ng-click="refresh()">
+        Refresh
+      </button>
 
       <div style="margin-top:20px;">
         <ul class="nav nav-tabs" id="matchesTab">
@@ -22,12 +26,22 @@
 
           <div class="tab-pane active" id="submissions">
             <ul>
-              <li ng-repeat="s in submissions">{{s.name}}</li>
+              <li ng-repeat="s in submissions">{{s.name}}
+                <div ng-show="submissionIsOwn(s)">
+                  <button class="btn btn-primary" ng-click="editWarrior(s.warriorId)">
+                    Edit Warrior
+                  </button>
+                </div>
+              </li>
             </ul>
           </div>
           <div class="tab-pane active" id="matches">
             <ul>
-              <li ng-repeat="m in matches.objects">{{m.executed}}</li>
+              <li ng-repeat="m in matches.objects">{{m.executed}}
+                <button class="btn btn-primary" ng-click="viewMatch(m)">
+                  View Match
+                </button>
+              </li>
             </ul>
             <div class="pagination pagination-mini" id="matchPagination">
               <ul>

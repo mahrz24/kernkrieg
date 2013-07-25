@@ -26,7 +26,7 @@ angular.module('kkApp')
       '<button class="btn btn-danger" ng-click="deleteWarrior(row)"> Delete </button>';
 
     var publicActionCell = '<button class="btn btn-info" ng-click="editWarrior(row)"> View </button>' +
-      '<button class="btn btn-danger" ng-click="deleteWarrior(row)"> Edit Copy </button>';
+      '<button class="btn btn-danger" ng-click=""> Edit Copy </button>';
 
 
     var boolCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
@@ -111,7 +111,6 @@ angular.module('kkApp')
 
     $scope.editWarrior = function (row)
     {
-      console.log('#/develop/' + row.entity.id);
       $location.path('/develop/' + row.entity.id);
     }
   }]);

@@ -1,8 +1,8 @@
 angular.module('kkApp')
 .controller('DevelopEditCtrl',
-  ['$scope', '$http', '$location', 'warrior', 'Warrior',
+  ['$scope', '$http', '$location', '$window', 'warrior', 'Warrior',
   'testables', 'test_queues', 'SublQueueLoader',
-  function ($scope, $http, $location, warrior,
+  function ($scope, $http, $location, $window, warrior,
    Warrior, testables, test_queues, SublQueueLoader)
   {
     $scope.warrior = warrior;
@@ -16,6 +16,10 @@ angular.module('kkApp')
           $scope.sublQueueSelection = s.results[0];
     })
 
+    $scope.back = function()
+    {
+      $window.history.back();
+    }
 
     $scope.saveWarrior = function ()
     {
@@ -49,6 +53,11 @@ angular.module('kkApp')
           match.op_authors = $scope.testWarriorSelection.authors;
           $scope.warrior.test_matches.unshift(match);
         });
+    }
+
+    $scope.viewMatch = function(m)
+    {
+      $location.path('/matches/' +  m.id);
     }
 
     $scope.submit = function()

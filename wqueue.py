@@ -74,6 +74,9 @@ def queue_job(q_id):
     elif app.config['MATCHES_PER_QUEUE_UPDATE'] < num_of_subs:
         app.config['MATCHES_PER_QUEUE_UPDATE'] = math.ceil(app.config['MATCHES_PER_QUEUE_UPDATE']*1.1)
 
+    if new_matches < 0:
+        new_matches = 1
+
     print("New matches: " + str(new_matches))
     subs = subs_query.order_by(Submission.sigma.desc()).all()
     print(subs)

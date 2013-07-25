@@ -23,3 +23,17 @@ angular.module('kkApp')
       return delay.promise;
     };
   }]);
+
+angular.module('kkApp')
+.factory('MatchLoader', ['Match', '$route', '$q',
+  function(Match, $route, $q) {
+    return function() {
+      var delay = $q.defer();
+      Match.get({id: $route.current.params.matchId},function(match) {
+        delay.resolve(match);
+      }, function() {
+        delay.reject('Unable to fetch match' + $route.current.params.matchId);
+      });
+      return delay.promise;
+    };
+  }]);
