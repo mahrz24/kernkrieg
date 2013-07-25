@@ -23,6 +23,7 @@ manager = APIManager(app, flask_sqlalchemy_db=db)
 
 
 manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   results_per_page=None,
                    exclude_columns=['passwdHash', 'warriors'],
                    preprocessors={'GET_SINGLE': [check_admin_or_user],
                                   'GET_MANY':   [check_admin],
@@ -35,6 +36,7 @@ manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                   'DELETE':     [check_admin]})
 
 manager.create_api(Warrior, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   results_per_page=None,
                    include_columns=['id',
                                     'name',
                                     'code',
@@ -55,6 +57,7 @@ manager.create_api(Warrior, methods=['GET', 'POST', 'PUT', 'DELETE'],
 
 
 manager.create_api(Machine, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   results_per_page=None,
                    preprocessors={'PUT_SINGLE': [check_admin],
                                   'PUT_MANY':   [check_admin],
                                   'POST':       [check_admin],
@@ -62,6 +65,7 @@ manager.create_api(Machine, methods=['GET', 'POST', 'PUT', 'DELETE'],
                    postprocessors={'POST':  [post_create_testq]})
 
 manager.create_api(Queue, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   results_per_page=None,
                    exclude_columns=['matches','submissions','job'],
                    preprocessors={'PUT_SINGLE': [check_admin],
                                   'PUT_MANY':   [deny],
@@ -79,6 +83,7 @@ manager.create_api(Match, methods=['GET', 'POST', 'PUT', 'DELETE'],
                                   'DELETE':     [check_admin]})
 
 manager.create_api(Submission, methods=['GET', 'POST', 'PUT', 'DELETE'],
+                   results_per_page=None,
                    exclude_columns=['code',
                                     'submissionUser',
                                     'attackerMatches',

@@ -1,15 +1,16 @@
 <div class="row">
   <div class="span12 gbox">
     <div class="gbox-content">
-     <button class="btn" ng-click="">
-       Back
-     </button>
-     <button class="btn btn-primary" ng-click="saveWarrior()">
-       Save
-     </button>
-   </div>
- </div>
+      <button class="btn" ng-click="">
+        Back
+      </button>
+      <button class="btn btn-primary" ng-click="saveWarrior()">
+        Save
+      </button>
+    </div>
+  </div>
 </div>
+
 <div class="row">
   <div class="span6 gbox">
     <textarea ui-codemirror="{
@@ -18,6 +19,7 @@
     mode: 'redcode'
   }" ui-refresh="codeMirrorRefresh" ng-model="warrior.code"></textarea>
 </div>
+
 <div class="span6 gbox">
   <div class="gbox-content">
     <ul class="nav nav-tabs" id="sidepaneTab">
@@ -28,72 +30,73 @@
     <div class="tab-content" style=" height: 100%px;">
 
       <div class="tab-pane active" id="info">
-       Name: <input type="text" name="name" ng-model="warrior.name"/>
-       Public: <input type="checkbox" name="public" ng-model="warrior.public"/>
-       Testable: <input type="checkbox" name="testable" ng-model="warrior.testable"/>
-     </div>
+        Name: <input type="text" name="name" ng-model="warrior.name"/>
+        Public: <input type="checkbox" name="public" ng-model="warrior.public"/>
+        Testable: <input type="checkbox" name="testable" ng-model="warrior.testable"/>
+      </div>
 
-     <div class="tab-pane" id="test">
-       Test against
-       <div class="btn-group">
-        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-          <span ng-bind="testWarriorSelection.name"></span>
-          <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu">
-        <li  ng-repeat="t in testables"><a tabindex="-1" ng-click="changeTestWarriorSelection(t)">{{t.name}} by {{t.authors}}</a></li>
+      <div class="tab-pane" id="test">
+        Test against
+        <div class="btn-group">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+            <span ng-bind="testWarriorSelection.name"></span>
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li  ng-repeat="t in testables"><a tabindex="-1" ng-click="changeTestWarriorSelection(t)">{{t.name}} by {{t.authors}}</a></li>
+          </ul>
+        </div> on
+        <div class="btn-group">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+            <span ng-bind="testQueueSelection.name"></span>
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li  ng-repeat="q in testQueues"><a tabindex="-1" ng-click="changeTestQueueSelection(q)">{{q.name}}</a></li>
+          </ul>
+        </div><br/>
+        <button class="btn btn-warning" ng-click="submitTest()">
+          Submit Test
+        </button>
+        <ul>
+          <li ng-repeat="t in warrior.test_matches">vs. {{t.opponent}}</li>
         </ul>
-      </div> on
-      <div class="btn-group">
-        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-          <span ng-bind="testQueueSelection.name"></span>
-          <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu">
-        <li  ng-repeat="q in testQueues"><a tabindex="-1" ng-click="changeTestQueueSelection(q)">{{q.name}}</a></li>
-        </ul>
-      </div><br/>
-      <button class="btn btn-warning" ng-click="submitTest()">
-       Submit Test
-     </button>
-     <ul>
-     <li ng-repeat="t in warrior.test_matches">vs. {{t.opponent}}</li>
-     </ul>
-    </div>
+      </div>
 
-    <div class="tab-pane" id="submissions">
-Submit to queue
-      <div class="btn-group">
-        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-          <span ng-bind="sublQueueSelection.name"></span>
-          <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu">
-        <li  ng-repeat="q in sublQueues"><a tabindex="-1" ng-click="changeSublQueueSelection(q)">{{q.name}}</a></li>
+      <div class="tab-pane" id="submissions">
+        Submit to queue
+        <div class="btn-group">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+            <span ng-bind="sublQueueSelection.name"></span>
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li  ng-repeat="q in sublQueues"><a tabindex="-1" ng-click="changeSublQueueSelection(q)">{{q.name}}</a></li>
+          </ul>
+        </div><br/>
+        <button class="btn btn-warning" ng-click="submit()">
+          Submit
+        </button>
+        <ul>
+          <li ng-repeat="sub in warrior.nontest_submissions">in {{sub.queueName}} on {{sub.submitted}}
+            <button class="btn btn-info" ng-click="resubmit(sub)">
+              Resubmit
+            </button>
+            <button class="btn btn-danger" ng-click="removeSubmission(sub)">
+              Remove
+            </button>
+          </li>
         </ul>
-      </div><br/>
-      <button class="btn btn-warning" ng-click="submit()">
-       Submit
-     </button>
-     <ul>
-     <li ng-repeat="sub in warrior.nontest_submissions">in {{sub.queueName}} on {{sub.submitted}}
-        <button class="btn btn-info" ng-click="resubmit(sub)">
-         Resubmit
-       </button>
-       <button class="btn btn-danger" ng-click="removeSubmission(sub)">
-         Remove
-       </button>
-     </li>
-     </ul>
+      </div>
     </div>
   </div>
 </div>
-</div>
-</div>
+
+
 <div class="row">
   <div class="span12">
-   Debugger
- </div>
+    Debugger
+  </div>
 </div>
 
 <script>
