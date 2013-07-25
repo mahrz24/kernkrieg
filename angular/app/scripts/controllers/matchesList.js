@@ -50,9 +50,11 @@ angular.module('kkApp')
     $scope.reloadSubmissions = function()
     {
       if($scope.queueSelection)
-        QueriedSubmissionLoader({filters:[{name:"queueId",op:"eq",val:$scope.queueSelection.id}]}).then(function(s) {
-          $scope.submissions = s;
-        });
+        QueriedSubmissionLoader({filters:[{name:"queueId",op:"eq",val:$scope.queueSelection.id}],
+                                 order_by:[{field: "score", direction: "desc"}]
+                               }).then(function(s) {
+                               $scope.submissions = s;
+                             });
     }
 
     $scope.reloadMatches = function(page)
@@ -60,7 +62,8 @@ angular.module('kkApp')
       if($scope.queueSelection)
         QueriedMatchLoader(page,
           {filters:[{name:"queueId",op:"eq",val:$scope.queueSelection.id},
-          {name:"done",op:"eq",val:true}]}).then(function(s) {
+            {name:"done",op:"eq",val:true}],
+           order_by:[{field: "executed", direction: "desc"}]}).then(function(s) {
             $scope.matches = s;
           });
     }
@@ -70,7 +73,8 @@ angular.module('kkApp')
       if($scope.queueSelection)
         QueriedMatchLoader(page,
           {filters:[{name:"queueId",op:"eq",val:$scope.queueSelection.id},
-          {name:"done",op:"eq",val:false}]}).then(function(s) {
+            {name:"done",op:"eq",val:false}],
+           order_by:[{field: "scheduled", direction: "asc"}]}).then(function(s) {
             $scope.scheduledMatches = s;
           });
     }

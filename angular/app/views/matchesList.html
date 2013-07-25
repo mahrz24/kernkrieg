@@ -26,7 +26,7 @@
 
           <div class="tab-pane active" id="submissions">
             <ul>
-              <li ng-repeat="s in submissions">{{s.name}}
+              <li ng-repeat="s in submissions">{{s.name}} - {{s.score}}
                 <div ng-show="submissionIsOwn(s)">
                   <button class="btn btn-primary" ng-click="editWarrior(s.warriorId)">
                     Edit Warrior
