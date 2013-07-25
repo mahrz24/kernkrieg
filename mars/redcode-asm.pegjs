@@ -11,10 +11,12 @@
     var Instruction = require("./instruction.js");
 }
 
-assembly_file = list
+assembly_file = next_line? l:list { return l; }
 
-list = (l:line "\n"+ lst:list) { return [l].concat(lst)} /
-    (l:line "\n"*) { return [l];}
+list = (l:line next_line lst:list) { return [l].concat(lst)} /
+    (l:line next_line?) { return [l];}
+
+next_line = " "* ("\n" " "*)+
 
 line = l:(c:comment { return [[], c]} /
           i:instruction { return [i.instruction,[i.comment]]})

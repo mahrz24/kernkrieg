@@ -6,6 +6,7 @@ var fs = require('fs');
 var _ = require('lodash')._;
 
 var argv = require('optimist')
+    .default('file', 1)
     .default('core', 8000)
     .default('pspc', 8)
     .default('tiec', 80000)
@@ -30,12 +31,14 @@ var warriors = [];
 
 _.each(argv._, function(filename)
     {
-        if(argv.debug > 0)
-            console.log("Loading warrior: " + filename)
+        program = filename;
+        if(argv.file)
+        {
+            if(argv.debug > 0)
+                console.log("Loading warrior: " + filename)
 
-
-        program = fs.readFileSync(filename, { encoding : "utf8" });
-
+            program = fs.readFileSync(filename, { encoding : "utf8" });
+        }
         warriors.push(redcode.assembleString(program));
     });
 
