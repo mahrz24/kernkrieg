@@ -48,11 +48,11 @@ def run_match(match_id):
             match.participant2.sigma = new_rating2.sigma
 
             if match.queue.qType == 2:
-                match.participant1.score = 200 + match.participant1.mu - match.participant1.sigma
-                match.participant2.score = 200 + match.participant2.mu - match.participant2.sigma
+                match.participant1.score = match.participant1.mu - match.participant1.sigma
+                match.participant2.score = match.participant2.mu - match.participant2.sigma
             if match.queue.qType == 1:
-                match.participant1.score = 200 + match.participant1.mu
-                match.participant2.score = 200 + match.participant2.mu
+                match.participant1.score = match.participant1.mu
+                match.participant2.score = match.participant2.mu
 
 
             db.session.commit()
