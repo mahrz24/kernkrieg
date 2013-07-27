@@ -22,6 +22,8 @@ angular.module('kkApp')
     });
 
     $scope.queues = queues;
+    $scope.avaQueues = _.filter(queues, function(q) { return q.qType == 1;});
+    $scope.avaQueueSelection = $scope.avaQueues[0];
     $scope.matches = [];
     $scope.scheduledMatches = [];
     $scope.submissions = [];
@@ -32,12 +34,32 @@ angular.module('kkApp')
       return $scope.is_admin || _.filter($scope.own_warriors, function(w) { return w.id == submission.warriorId }).length > 0;
     }
 
+    $scope.changeAvaQueueSelection = function(queue)
+    {
+      $scope.avaQueueSelection = queue;
+    }
+
     $scope.changeQueueSelection = function(queue)
     {
       $scope.queueSelection = queue;
       $scope.reloadSubmissions();
       $scope.reloadMatches(1);
       $scope.reloadScheduledMatches(1);
+    }
+
+    $scope.canBeAddedToAllVsAll = function()
+    {
+      return $scope.is_admin && $scope.queueSelection.qType == 2;
+    }
+
+    $scope.copyToAvA = function()
+    {
+      $http.post("/api/queue/copytoava",
+        { queueId: $scope.queueSelection.id,
+          avaQueueId: $scope.avaQueueSelection.id
+        }).success(function (result) {
+
+        });
     }
 
     $scope.refresh = function()
