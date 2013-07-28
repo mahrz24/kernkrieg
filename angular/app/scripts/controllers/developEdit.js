@@ -1,9 +1,11 @@
 angular.module('kkApp')
 .controller('DevelopEditCtrl',
   ['$scope', '$http', '$location', '$window', '$timeout', 'warrior', 'Warrior',
-  'testables', 'test_queues', 'SublQueueLoader',
+  'testables', 'test_queues', 'SublQueueLoader', 'own_warriors', 'public_warriors',
+  'machines',
   function ($scope, $http, $location, $window, $timeout, warrior,
-   Warrior, testables, test_queues, SublQueueLoader)
+   Warrior, testables, test_queues, SublQueueLoader, own_warriors, public_warriors,
+   machines)
   {
     $scope.warrior = warrior;
     $scope.testables = testables.results;
@@ -14,6 +16,23 @@ angular.module('kkApp')
     $scope.errorInCode = false;
     $scope.message = "";
     $scope.messageTimeout = 0;
+    $scope.debuggables = _.filter(own_warriors, function(w)
+    {
+        var ok = false;
+        try
+        {
+          mars.redcode.assembleString(w.code);
+          ok = true;
+        }
+        catch(e)
+        {
+        }
+
+        return ok;
+    });
+    $scope.debugAgainst = $scope.debuggables[0];
+    $scope.machines = machines;
+    $scope.selectedMachine = $scope.machines[0];
 
     $scope.$watch('warrior.code', function(scope, newValue, oldValue)
     {
@@ -77,21 +96,136 @@ angular.module('kkApp')
     }
 
     // Debugger
-    $scope.selectedItem = "1";
-        $scope.selects = [
+
+    $scope.running = false;
+    $scope.loaded = false;
+    $scope.cycle = 0;
+    $scope.iteration = 0;
+    $scope.lastCycle;
+    $scope.cyclesPerStep = 1;
+    var debugTimer;
+
+    $scope.$watch('cycle', function(scope, newValue, oldValue)
+    {
+      $scope.lastCycle = oldValue;
+      if($scope.loaded)
       {
-        "id": "1",
-        "name": "foo"
-      },
-      {
-        "id": "2",
-        "name": "bar"
-      },
-      {
-        "id": "3",
-        "name": "baz"
+        $scope.mars.runTo(newValue, false);
+        $scope.iteration++;
       }
-    ];
+    });
+
+    $scope.coreRenderer = function(el, data)
+    {
+      if($scope.mars && $scope.iteration == 1)
+      {
+        var red = d3.rgb(255, 0, 0);
+        var blue = d3.rgb(0, 0, 255);
+        el.selectAll("rect")
+        .data(d3.zip($scope.mars.coreOwner,$scope.mars.core))
+        .enter().append("rect")
+        .attr("x", function(d,i) { return (i%$scope.memWidth)*$scope.cellWidth; })
+        .attr("y",  function(d,i) { return (Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
+        .attr("height",$scope.cellWidth*0.8)
+        .attr("width", $scope.cellWidth*0.8)
+        .style("fill", function(d) {
+          if(d[0] < 0)
+            return blue;
+          else
+           return red.darker(d[0]); });
+      }
+      else if($scope.mars)
+      {
+        var red = d3.rgb(255, 0, 0);
+        var blue = d3.rgb(0, 0, 255);
+        el.selectAll("rect")
+        .data(d3.zip($scope.mars.coreOwner,$scope.mars.core))
+        .attr("x", function(d,i) { return (i%$scope.memWidth)*$scope.cellWidth; })
+        .attr("y",  function(d,i) { return (Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
+        .attr("height",$scope.cellWidth*0.8)
+        .attr("width", $scope.cellWidth*0.8)
+        .style("fill", function(d) {
+          if(d[0] < 0)
+            return blue;
+          else
+           return red.darker(d[0]); });
+      }
+    }
+
+    $scope.load = function ()
+    {
+      $scope.running = false;
+      $scope.cycle = 0;
+      $scope.mars = new mars.MARS($scope.selectedMachine, {
+          eventTypes: {
+              detectWinner: true,
+              detectTie: true,
+              detectDeath: true
+          },
+          logTypes: {
+              warriorTasks: true,
+              warriorOwnerships: true
+          }
+      });
+      w1 = mars.redcode.assembleString($scope.warrior.code);
+      w2 = mars.redcode.assembleString($scope.debugAgainst.code);
+      $scope.mars.loadWarrior(w1);
+      $scope.mars.loadWarrior(w2);
+      $scope.memWidth = Math.floor(Math.sqrt($scope.mars.coreSize));
+      $scope.cellWidth = 100/$scope.memWidth;
+      $scope.loaded = true;
+      $scope.iteration++;
+    }
+
+    $scope.reset = function ()
+    {
+      $scope.running = false;
+      $scope.cycle = 0;
+      $scope.iteration = 0;
+    }
+
+    $scope.pause = function ()
+    {
+      $scope.running = false;
+    }
+
+    $scope.start = function ()
+    {
+      $scope.running = true;
+      $scope.run();
+    }
+
+    $scope.run = function()
+    {
+        if($scope.running)
+        {
+          $scope.step();
+          debugTimer = $timeout($scope.run,10);
+        }
+    }
+
+    $scope.step = function()
+    {
+      $scope.cycle += $scope.cyclesPerStep;
+    }
+
+    $scope.stepback = function()
+    {
+      if($scope.cycle >= $scope.cyclesPerStep)
+        $scope.cycle -= $scope.cyclesPerStep;
+      else
+        $scope.cycle = 0;
+    }
+
+    $scope.increaseCPS = function ()
+    {
+      $scope.cyclesPerStep++;
+    }
+
+    $scope.decreaseCPS = function ()
+    {
+      $scope.cyclesPerStep--;
+    }
 
     // Test & Submission
 

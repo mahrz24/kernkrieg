@@ -73,8 +73,25 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource', 'd3','$strap.dir
           testables: function(TestableWarriorIdLoader) {
             return TestableWarriorIdLoader();
           },
+          public_warriors: function(QueriedWarriorLoader, $q, $http)
+          {
+            return QueriedWarriorLoader({filters:[{name:"public",op:"eq",val:true}]});
+          },
+          own_warriors: function(QueriedWarriorLoader, $q, $http)
+          {
+            var delay = $q.defer();
+
+            $http.get('/api/user_id').success(function(data, status, headers, config) {
+              delay.resolve(QueriedWarriorLoader({filters:[{name:"owners__id",op:"any",val:data.user_id}]}));
+            });
+
+            return delay.promise;
+          },
           test_queues: function(TestQueueLoader) {
             return TestQueueLoader();
+          },
+          machines: function(MultiMachineLoader) {
+            return MultiMachineLoader();
           }
         }
       })

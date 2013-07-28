@@ -122,3 +122,14 @@ form ul li span {
 
       .errors {width: .8em;}
       .error { color: #822; }
+
+
+.formrow .bootstrap-select.btn-group, .bootstrap-select.btn-group[class*="span"]
+{
+  margin-bottom: 0;
+}
+
+.formrow input
+{
+  margin-bottom: 0;
+}
