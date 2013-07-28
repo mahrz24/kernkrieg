@@ -1,8 +1,8 @@
 angular.module('kkApp')
 .controller('DevelopEditCtrl',
-  ['$scope', '$http', '$location', '$window', 'warrior', 'Warrior',
+  ['$scope', '$http', '$location', '$window', '$timeout', 'warrior', 'Warrior',
   'testables', 'test_queues', 'SublQueueLoader',
-  function ($scope, $http, $location, $window, warrior,
+  function ($scope, $http, $location, $window, $timeout, warrior,
    Warrior, testables, test_queues, SublQueueLoader)
   {
     $scope.warrior = warrior;
@@ -10,11 +10,60 @@ angular.module('kkApp')
     $scope.testWarriorSelection = $scope.testables[0];
     $scope.testQueues = test_queues;
     $scope.testQueueSelection = test_queues[0];
+    $scope.savedCode = warrior.code;
+    $scope.errorInCode = false;
+    $scope.message = "";
+    $scope.messageTimeout = 0;
 
-    SublQueueLoader(warrior).then(function(s) {
-          $scope.sublQueues = s.results;
-          $scope.sublQueueSelection = s.results[0];
-    })
+    $scope.$watch('warrior.code', function(scope, newValue, oldValue)
+    {
+        try
+        {
+          mars.redcode.assembleString(warrior.code);
+          $scope.errorInCode = false;
+        }
+        catch(e)
+        {
+          $scope.errorInCode = true;
+          $scope.errorMessage = e;
+        }
+    });
+
+    $scope.makeMarker = function makeMarker() {
+      var marker = document.createElement("div");
+      marker.innerHTML = "✘";
+      marker.className = "error";
+      return marker;
+    }
+
+    $scope.updateError = function(cm)
+    {
+      cm.clearGutter("errors");
+      if($scope.errorInCode)
+      {
+        cm.setGutterMarker($scope.errorMessage.line-1, "errors", $scope.makeMarker());
+      }
+    }
+
+    $scope.timer = function()
+    {
+        $scope.messageTimeout--;
+        if($scope.messageTimeout < 0)
+          $scope.message = "";
+
+        if($scope.savedCode != $scope.warrior.code)
+        {
+          $scope.saveWarrior();
+          $scope.message = "Auto Saved Warrior";
+          $scope.messageTimeout = 1;
+        }
+
+        timer = $timeout($scope.timer,5000);
+    }
+
+    var timer = $timeout($scope.timer,5000);
+
+
 
     $scope.back = function()
     {
@@ -23,8 +72,33 @@ angular.module('kkApp')
 
     $scope.saveWarrior = function ()
     {
-      $scope.warrior.$update();
+      $scope.warrior.$update()
+      $scope.savedCode = warrior.code;
     }
+
+    // Debugger
+    $scope.selectedItem = "1";
+        $scope.selects = [
+      {
+        "id": "1",
+        "name": "foo"
+      },
+      {
+        "id": "2",
+        "name": "bar"
+      },
+      {
+        "id": "3",
+        "name": "baz"
+      }
+    ];
+
+    // Test & Submission
+
+    SublQueueLoader(warrior).then(function(s) {
+          $scope.sublQueues = s.results;
+          $scope.sublQueueSelection = s.results[0];
+    })
 
     $scope.changeTestWarriorSelection = function(testable)
     {

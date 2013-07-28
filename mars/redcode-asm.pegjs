@@ -22,11 +22,12 @@ line = l:(c:comment { return [[], c]} /
           i:instruction { return [i.instruction,[i.comment]]})
     { return l; }
 
-comment = ";" cmt:[^\n]* { return cmt.join(""); }
+comment =  ";" cmt:[^\n]* { return cmt.join(""); }
 
 instruction = lbl:label? " "* op:operation
                 aoperand:(" " " "* expr:mode_expr {return expr;})?
                 boperand:("," " "* expr:mode_expr {return expr;})?
+                " "*
                 cmt:comment?
     { return { instruction: new Instruction(lbl,
                                             op,

@@ -22,10 +22,7 @@ js_base = Bundle(
     'bower_components/sass-bootstrap/js/bootstrap-scrollspy.js',
     'bower_components/sass-bootstrap/js/bootstrap-collapse.js',
     'bower_components/sass-bootstrap/js/bootstrap-tab.js',
-    'bower_components/flatui/js/bootstrap-select.js',
-    'bower_components/flatui/js/bootstrap-switch.js',
-    #'bower_components/flatui/js/flatui-checkbox.js',
-    #'bower_components/flatui/js/flatui-radio.js',
+    'bower_components/bootstrap-select/bootstrap-select.js',
     #filters='jsmin',
     output='gen/packed_base.js')
 assets.register('js_base', js_base)
@@ -74,6 +71,7 @@ assets.register('js_angular', js_angular)
 
 css_base = Bundle(
     'bower_components/sass-bootstrap/bootstrap-2.3.2.css',
+    'bower_components/bootstrap-select/bootstrap-select.css',
     #'bower_components/flatui/css/flat-ui.css',
     'bower_components/ng-grid/ng-grid.min.css',
     'bower_components/CodeMirror/lib/codemirror.css',

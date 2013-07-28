@@ -72,6 +72,9 @@ class User(db.Model):
             return NotImplemented
         return not equal
 
+def removeLog(x):
+    x['log'] = ''
+    return x
 
 class Warrior(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -84,6 +87,7 @@ class Warrior(db.Model):
         subs = filter(lambda s: s.queue.qType == 0 and s.active, self.submissions)
         j = list(itertools.chain(*map(lambda s: s.attackerMatches, subs)))
         j = map(lambda x: dict(x._asdict().items() + {"opponent": x.participant2.name, "op_authors": x.participant2.authors}.items()), j)
+        j = map(removeLog, j)
         return j
 
     def nontest_submissions(self):

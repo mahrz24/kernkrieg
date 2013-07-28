@@ -115,6 +115,22 @@ def get_testables():
         result_array.append({'id': w.id, 'name': w.name, 'authors': w.authors()})
     return jsonify({'results': result_array})
 
+@app.route('/api/warrior/debuggable', methods=['GET'])
+def get_debuggables():
+    if not current_user.is_authenticated():
+        raise ProcessingException(message='Not Authorized',
+                                  status_code=401)
+    if current_user.admin:
+        result = Warrior.query.all()
+    else:
+        own_warriors = Warrior.query.filter(Warrior.owners.any(id=current_user.id))
+        public_warriors = Warrior.query.filter(Warrior.public==True)
+        result = own_warriors.union(testable_warriors, public_warriors).all()
+    result_array = []
+    for w in result:
+        result_array.append({'id': w.id, 'name': w.name, 'authors': w.authors()})
+    return jsonify({'results': result_array})
+
 @app.route('/api/queue/submittable', methods=['GET'])
 def get_submittables():
     if not current_user.is_authenticated():

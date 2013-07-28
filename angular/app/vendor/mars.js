@@ -1616,10 +1616,37 @@ window.mars = (function (modules) {
 			                }
 			                result4 = result4 !== null ? result4 : "";
 			                if (result4 !== null) {
-			                  result5 = parse_comment();
-			                  result5 = result5 !== null ? result5 : "";
+			                  result5 = [];
+			                  if (input.charCodeAt(pos.offset) === 32) {
+			                    result6 = " ";
+			                    advance(pos, 1);
+			                  } else {
+			                    result6 = null;
+			                    if (reportFailures === 0) {
+			                      matchFailed("\" \"");
+			                    }
+			                  }
+			                  while (result6 !== null) {
+			                    result5.push(result6);
+			                    if (input.charCodeAt(pos.offset) === 32) {
+			                      result6 = " ";
+			                      advance(pos, 1);
+			                    } else {
+			                      result6 = null;
+			                      if (reportFailures === 0) {
+			                        matchFailed("\" \"");
+			                      }
+			                    }
+			                  }
 			                  if (result5 !== null) {
-			                    result0 = [result0, result1, result2, result3, result4, result5];
+			                    result6 = parse_comment();
+			                    result6 = result6 !== null ? result6 : "";
+			                    if (result6 !== null) {
+			                      result0 = [result0, result1, result2, result3, result4, result5, result6];
+			                    } else {
+			                      result0 = null;
+			                      pos = clone(pos1);
+			                    }
 			                  } else {
 			                    result0 = null;
 			                    pos = clone(pos1);
@@ -1649,7 +1676,7 @@ window.mars = (function (modules) {
 			                                                    op,
 			                                                    aoperand,
 			                                                    boperand),
-			                        comment: cmt }; })(pos0.offset, pos0.line, pos0.column, result0[0], result0[2], result0[3], result0[4], result0[5]);
+			                        comment: cmt }; })(pos0.offset, pos0.line, pos0.column, result0[0], result0[2], result0[3], result0[4], result0[6]);
 			        }
 			        if (result0 === null) {
 			          pos = clone(pos0);

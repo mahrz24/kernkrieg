@@ -32,7 +32,9 @@ def run_match(match_id):
 
                 result = json.loads(match.log)['result']
 
-                if result['event']['event'] == "won":
+                if result == "syntaxerror" or result == "error":
+                    match.winner = -1
+                elif result['event']['event'] == "won":
                     match.winner = result['event']['winner']+1
                 elif result['event']['event'] == "tie":
                     match.winner = 0
