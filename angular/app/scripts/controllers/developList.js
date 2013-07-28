@@ -18,8 +18,8 @@ filter('owners', function() {
 
 angular.module('kkApp')
 .controller('DevelopListCtrl',
-  ['$scope', '$http', '$location', 'own_warriors', 'public_warriors', 'Warrior',
-  function ($scope, $http, $location, own_warriors, public_warriors, Warrior)
+  ['$scope', '$http', '$location', '$q', '$modal', 'own_warriors', 'public_warriors', 'Warrior',
+  function ($scope, $http, $location, $q, $modal, own_warriors, public_warriors, Warrior)
   {
 
     var actionCell = '<button class="btn btn-info" ng-click="editWarrior(row)"> Edit </button>' +
@@ -34,6 +34,9 @@ angular.module('kkApp')
 
     var ownerCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
       '<span ng-cell-text>{{COL_FIELD | owners }}</span></div>';
+
+    var modalPromise = $modal({template: 'app/views/elements/deleteWarrior.html',
+      persist: true, show: false, backdrop: 'static', scope: $scope});
 
     $http.get('/api/user_id').success(function(data, status, headers, config) {
         $scope.user_id =  data.user_id;
@@ -102,10 +105,18 @@ angular.module('kkApp')
 
     $scope.deleteWarrior = function (row)
     {
-      var warrior = new Warrior(row.entity);
+      modalPromise.row = row;
+      $q.when(modalPromise).then(function(modalEl) {
+        modalEl.modal('show');
+      });
+    }
+
+    $scope.doDeleteWarrior = function()
+    {
+      var warrior = new Warrior(modalPromise.row.entity);
       warrior.$delete(function ()
       {
-        $scope.ownWarriors = _.reject($scope.ownWarriors, {id: row.entity.id})
+        $scope.ownWarriors = _.reject($scope.ownWarriors, {id: modalPromise.row.entity.id})
       });
     }
 

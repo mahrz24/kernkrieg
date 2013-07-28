@@ -1,4 +1,4 @@
-angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource'])
+angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource','$strap.directives'])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {
