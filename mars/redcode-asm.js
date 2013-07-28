@@ -258,9 +258,12 @@ module.exports = (function(){
 
 
             var parsed;
-            try {
+            try
+            {
                 parsed =  _.unzip(redcode.parser.parse(programString));
-            } catch (e) {
+            }
+            catch(e)
+            {
                 e.line += skips;
                 throw e;
             }

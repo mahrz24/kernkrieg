@@ -32,8 +32,7 @@ try
 
     var warriors = [];
 
-    try
-    {
+
         _.each(argv._, function(filename)
         {
             program = filename;
@@ -44,14 +43,17 @@ try
 
                 program = fs.readFileSync(filename, { encoding : "utf8" });
             }
-            warriors.push(redcode.assembleString(program));
+            try
+            {
+                warriors.push(redcode.assembleString(program));
+            }
+            catch(e)
+            {
+                console.log(JSON.stringify({result: "syntaxerror", what: e.toString(), where: filename, line: e.line, column: e.column}));
+                process.exit(code=0)
+            }
         });
-    }
-    catch(e)
-    {
-        console.log(JSON.stringify({result: "syntaxerror", what: e.toString(), line: e.line, column: e.column}));
-        return;
-    }
+
 
     var initial;
 
