@@ -43,6 +43,8 @@ js_angular = Bundle(
     'bower_components/ng-grid/ng-grid-2.0.7.debug.js',
     'bower_components/ng-grid/plugins/ng-grid-flexible-height.js',
     'bower_components/CodeMirror/lib/codemirror.js',
+    'bower_components/d3/d3.js',
+    'bower_components/d3-angular/dist/angular-d3.js',
     'vendor/angular-strap.js',
     'vendor/redcode_cm.js',
     'vendor/mars.js',

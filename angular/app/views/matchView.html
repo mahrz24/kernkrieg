@@ -12,3 +12,21 @@
     </div>
   </div>
 </div>
+<div class="row">
+  <div class="span12 gbox">
+    <div class="gbox-content">
+      <div style="text-align:center;">
+        <h3> {{match.participant1.name}} vs. {{match.participant2.name}}</h3>
+        <h1> {{matchWinner()}} </h1>
+      </div>
+      <div ng-show="$scope.match.winner == -1 && match.done">
+        Error
+      </div>
+      <div ng-show="$scope.match.winner != -1 && match.done">
+      <svg style="width:900px; height:400px;" viewBox="0 0 300 200" preserveAspectRatio="xMidyMid">
+          <g d3 d3-data="log" d3-renderer="ownershipRenderer" ></g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>

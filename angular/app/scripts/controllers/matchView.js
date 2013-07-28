@@ -11,6 +11,7 @@ angular.module('kkApp')
     });
 
     $scope.match = match;
+    $scope.log = JSON.parse(match.log);
     $scope.own_warriors = own_warriors;
 
     $scope.matchIsOwn = function()
@@ -23,6 +24,31 @@ angular.module('kkApp')
     $scope.back = function()
     {
       $window.history.back();
+    }
+
+    $scope.matchWinner = function()
+    {
+      if(!$scope.match.done)
+        return "Match Running"
+      if($scope.match.winner == 1)
+        return $scope.match.participant1.name + " wins"
+      if($scope.match.winner == 2)
+        return $scope.match.participant2.name + " wins"
+      if($scope.match.winner == 0)
+        return "Tie"
+      if($scope.match.winner == -1)
+        return "Error"
+    }
+
+    $scope.ownershipRenderer = function(el, data) {
+      console.log("Rendering");
+
+      el.selectAll("rect")
+    .data(d3.zip(data.log.cycle,data.log.warriorOwnerships))
+  .enter().append("rect")
+    .attr("x", function(d) { return d[0]; })
+    .attr("y", 100).attr("height", function(d) { return d[1][0]}).attr("width", 10);
+
     }
 
 
