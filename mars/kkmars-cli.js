@@ -43,10 +43,11 @@ _.each(argv._, function(filename)
     });
 
 var initial;
-if(argv.ii !== MARS.random)
-    initial = redcode.assembleString(";redcode\n" + argv.ii).instructions[0];
-else
+
+if(argv.ii == MARS.random)
     initial = argv.ii;
+else
+    initial = redcode.assembleString(";redcode\n" + argv.ii).instructions[0];
 
 var mars = new MARS({
         coreSize: argv.core,

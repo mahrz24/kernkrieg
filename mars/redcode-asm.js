@@ -250,7 +250,7 @@ module.exports = (function(){
             {
                 line = _.head(lines);
                 lines = _.tail(lines);
-            } while(!line.beginsWith(";redcode"));
+            } while(line !== undefined && !line.beginsWith(";redcode"));
 
             programString = lines.join("\n");
 

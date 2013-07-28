@@ -111,6 +111,7 @@ class Machine(db.Model):
     coreSize = db.Column(db.Integer)
     pSpaceSize = db.Column(db.Integer)
     cyclesUntilTie = db.Column(db.Integer)
+    instructionLimit = db.Column(db.Integer)
     initialInstruction = db.Column(db.String)
     maxTasks = db.Column(db.Integer)
     minSep = db.Column(db.Integer)
