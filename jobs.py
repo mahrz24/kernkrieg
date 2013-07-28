@@ -15,7 +15,6 @@ def run_match(match_id):
             # Execution of match
             code1 = match.participant1.code
             code2 = match.participant2.code
-            print(match.queue.machine.coreSize)
             try:
                 match.log = subprocess.check_output(["./mars/kkmars-cli.js",
                     "--core", str(match.queue.machine.coreSize),
@@ -25,12 +24,14 @@ def run_match(match_id):
                     "--ii", str(match.queue.machine.initialInstruction),
                     "--maxt",  str(match.queue.machine.maxTasks),
                     "--minsep",  str(match.queue.machine.minSep),
-                    "--sep",  str(match.queue.machine.initialSep),
-                    "--readd",  str(match.queue.machine.readDist),
-                    "--writed",  str(match.queue.machine.readDist),
+                    "--sep=" + str(match.queue.machine.initialSep),
+                    "--readd=" +  str(match.queue.machine.readDist),
+                    "--writed=" + str(match.queue.machine.readDist),
+                    "--seed",  str(match.seed),
                     "--file","0",code1,code2])
+
                 result = json.loads(match.log)['result']
-                print(result)
+
                 if result['event']['event'] == "won":
                     match.winner = result['event']['winner']+1
                 elif result['event']['event'] == "tie":

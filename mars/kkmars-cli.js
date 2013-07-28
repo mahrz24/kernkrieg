@@ -5,6 +5,7 @@ var MARS = require('./mars.js');
 var fs = require('fs');
 var _ = require('lodash')._;
 
+
 var argv = require('optimist')
     .default('file', 1)
     .default('core', 8000)
@@ -68,6 +69,7 @@ var mars = new MARS({
         },
         logTypes: {
             warriorTasks: true,
+            warriorOwnerships: true
         }
     });
 

@@ -3,5 +3,5 @@
 ;author A.K.  Dewdney
 
 org start
-start: add #1, -1
+start: mov #0, #0
        jmp start

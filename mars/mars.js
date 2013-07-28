@@ -64,6 +64,7 @@ module.exports = (function(){
         this.activeWarriors = 0;
         this.currentWarrior = 0;
         this.taskQueues = [];
+        this.coreOwnership = [];
         this.pSpaces = [];
         this.curCycle = -1;
         this.minWarriors = runtimeSettings.minWarriors;
@@ -125,6 +126,7 @@ module.exports = (function(){
         }
 
         this.currentWarrior = this.loadedWarriors;
+        this.coreOwnership.push(0);
 
         for(var i=0;i<loadLength;i++)
         {
@@ -148,6 +150,7 @@ module.exports = (function(){
 
         this.loadedWarriorsLength += program.instructions.length;
         this.taskQueues.push([this.address(loadAddress+program.origin)]);
+
 
         if(this.curMaxTasks == 0)
             this.curMaxTasks = 1;
@@ -247,6 +250,7 @@ module.exports = (function(){
         this.cycle();
 
         this.logPerWarrior('warriorTasks', function(w) { return this.taskQueues[w].length; });
+        this.logPerWarrior('warriorOwnerships', function(w) { return this.coreOwnership[w]; });
 
         if (this.eventTypes.detectTie &&
             this.running && this.curCycle == this.cyclesUntilTie)
@@ -318,6 +322,7 @@ module.exports = (function(){
             pSpaces: this.pSpaces,
             curCycle: this.curCycle,
             coreOwner: this.coreOwner,
+            coreOwnership: this.coreOwnership,
             core: this.core,
             events: this.events
         };
@@ -343,13 +348,13 @@ module.exports = (function(){
 
     MARS.prototype.setInstruction = function(adr, instruction)
     {
-        this.coreOwner[this.address(adr)] = this.currentWarrior;
+        this.claimOwnership(adr, this.currentWarrior);
         this.core[this.address(adr)] = clone(instruction);
     }
 
     MARS.prototype.setOperand = function(adr, isAValue, value)
     {
-        this.coreOwner[this.address(adr)] = this.currentWarrior;
+        this.claimOwnership(adr, this.currentWarrior);
         if(isAValue)
             this.core[this.address(adr)].aoperand[1] = this.address(value);
         else
@@ -359,7 +364,7 @@ module.exports = (function(){
 
     MARS.prototype.decrementOperand = function(adr, isAValue)
     {
-        this.coreOwner[this.address(adr)] = this.currentWarrior;
+        this.claimOwnership(adr, this.currentWarrior);
         if(isAValue)
             this.core[this.address(adr)].aoperand[1]--;
         else
@@ -373,26 +378,34 @@ module.exports = (function(){
 
     MARS.prototype.incrementA = function(adr)
     {
-        this.coreOwner[this.address(adr)] = this.currentWarrior;
+        this.claimOwnership(adr, this.currentWarrior);
         return this.core[this.address(adr)].aoperand[1]++;
     }
 
     MARS.prototype.incrementB = function(adr)
     {
-        this.coreOwner[this.address(adr)] = this.currentWarrior;
+        this.claimOwnership(adr, this.currentWarrior);
         return this.core[this.address(adr)].boperand[1]++;
     }
 
     MARS.prototype.decrementA = function(adr)
     {
-        this.coreOwner[this.address(adr)] = this.currentWarrior;
+        this.claimOwnership(adr, this.currentWarrior);
         return this.core[this.address(adr)].aoperand[1]--;
     }
 
     MARS.prototype.decrementB = function(adr)
     {
-        this.coreOwner[this.address(adr)] = this.currentWarrior;
+        this.claimOwnership(adr, this.currentWarrior);
         return this.core[this.address(adr)].boperand[1]--;
+    }
+
+    MARS.prototype.claimOwnership = function(adr, warrior)
+    {
+        if(this.coreOwner[this.address(adr)] != -1)
+            this.coreOwnership[this.coreOwner[this.address(adr)]]--;
+        this.coreOwnership[warrior]++;
+        this.coreOwner[this.address(adr)] = warrior;
     }
 
 
@@ -586,7 +599,7 @@ module.exports = (function(){
                 if(writeA[i] == "instruction")
                 {
                     this.core[this.address(writePointer[i])] = avalue;
-                    this.coreOwner[this.address(writePointer[i])] = cw;
+                    this.claimOwnership(writePointer[i], cw);
                 }
                 else
                 {
