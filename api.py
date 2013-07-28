@@ -19,6 +19,8 @@ from datetime import datetime
 # Queue Handling
 from wqueue import *
 
+import itertools
+
 manager = APIManager(app, flask_sqlalchemy_db=db)
 
 
@@ -177,17 +179,31 @@ def post_queue_copytoava():
     if not ava_queue:
         abort(404)
 
-    # Check if test queue
-    if queue.qType != 0:
+    # Check if queue is a scheduled queue
+    if queue.qType != 2:
+        abort(403)
+
+    if ava_queue.qType != 1:
         abort(403)
 
     # Submit to queue using normal submission function
-    sub1 = frontend_submit_to_queue(queue, int(request.json['warrior1Id']))
-    sub2 = frontend_submit_to_queue(queue, int(request.json['warrior2Id']))
+    subs = queue.submissions
+    subs_to_remove = ava_queue.submissions
+    for sub in subs_to_remove:
+        db.session.delete(sub)
+    db.session.commit()
+    ava_subs = []
+    for sub in subs:
+        ava_sub = Submission()
+        ava_sub.ava_clone(sub, ava_queue)
+        db.session.add(ava_sub)
+        ava_subs.append(ava_sub)
+    db.session.commit()
     # Create match to be scheduled
-    match = schedule_match(queue, sub1, sub2, test=True)
+    for p, q in itertools.combinations(ava_subs,2):
+        match = schedule_match(ava_queue, p, q, test=False)
 
-    return jsonify({'done': true}), 201
+    return jsonify({'done': True}), 201
 
 
 @app.route('/api/queue/submit', methods=['POST'])

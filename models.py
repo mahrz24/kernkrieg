@@ -193,3 +193,12 @@ class Submission(db.Model, DictSerializable):
     warriorId = db.Column(db.Integer, db.ForeignKey('warrior.id'))
     warrior = db.relationship("Warrior", backref="submissions")
 
+    def ava_clone(self, source, ava_queue):
+        for c in Submission.__table__.c:
+            print(c)
+            if c.name != 'id' and c.name != 'queueId':
+                setattr(self, c.name, getattr(source, c.name))
+        self.mu = 25.0
+        self.sigma = 208.3
+        self.score = 25.0
+        self.queueId = ava_queue.id
