@@ -45,6 +45,9 @@ module.exports = (function(){
         if(config.writeDist == MARS.full || config.writeDist == -1)
             config.writeDist = config.coreSize;
 
+        if(config.initialSep == -1)
+            config.initialSep = MARS.random;
+
         this.coreSize = config.coreSize;
         this.pSpaceSize = config.pSpaceSize;
         this.cyclesUntilTie = config.cyclesUntilTie;

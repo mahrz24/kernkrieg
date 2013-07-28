@@ -72,7 +72,8 @@ angular.module('kkApp')
     $scope.reloadSubmissions = function()
     {
       if($scope.queueSelection)
-        QueriedSubmissionLoader({filters:[{name:"queueId",op:"eq",val:$scope.queueSelection.id}],
+        QueriedSubmissionLoader({filters:[{name:"queueId",op:"eq",val:$scope.queueSelection.id},
+                                          {name:"active",op:"eq",val:true}],
                                  order_by:[{field: "score", direction: "desc"}]
                                }).then(function(s) {
                                $scope.submissions = s;

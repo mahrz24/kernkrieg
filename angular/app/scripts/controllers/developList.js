@@ -16,6 +16,13 @@ filter('owners', function() {
   }
 });
 
+angular.module('kkApp').
+filter('submissions', function() {
+  return function(input) {
+   return _.map(input, function (x) { return x.queueName }).join(", ");
+  }
+});
+
 angular.module('kkApp')
 .controller('DevelopListCtrl',
   ['$scope', '$http', '$location', '$q', '$modal', 'own_warriors', 'public_warriors', 'Warrior',
@@ -32,10 +39,13 @@ angular.module('kkApp')
     var boolCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
       '<span ng-cell-text>{{COL_FIELD | bool }}</span></div>';
 
+    var submissionCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
+      '<span ng-cell-text>{{COL_FIELD | submissions }}</span></div>';
+
     var ownerCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
       '<span ng-cell-text>{{COL_FIELD | owners }}</span></div>';
 
-    var modalPromise = $modal({template: 'app/views/elements/deleteWarrior.html',
+    var modalPromise = $modal({template: 'app/views/elements/delete.html',
       persist: true, show: false, backdrop: 'static', scope: $scope});
 
     $http.get('/api/user_id').success(function(data, status, headers, config) {
@@ -58,6 +68,10 @@ angular.module('kkApp')
                     { field:'owners',
                       displayName:'Authors',
                       cellTemplate: ownerCell
+                    },
+                    { field:'nontest_submissions',
+                      displayName:'Submissions',
+                      cellTemplate: submissionCell
                     },
                     { field:'public',
                       displayName:'Public',
@@ -105,18 +119,19 @@ angular.module('kkApp')
 
     $scope.deleteWarrior = function (row)
     {
-      modalPromise.row = row;
+      $scope.delRow = row;
+      $scope.delObject = "Warrior";
       $q.when(modalPromise).then(function(modalEl) {
         modalEl.modal('show');
       });
     }
 
-    $scope.doDeleteWarrior = function()
+    $scope.doDelete = function()
     {
-      var warrior = new Warrior(modalPromise.row.entity);
+      var warrior = new Warrior($scope.delRow.entity);
       warrior.$delete(function ()
       {
-        $scope.ownWarriors = _.reject($scope.ownWarriors, {id: modalPromise.row.entity.id})
+        $scope.ownWarriors = _.reject($scope.ownWarriors, {id: $scope.delRow.entity.id})
       });
     }
 

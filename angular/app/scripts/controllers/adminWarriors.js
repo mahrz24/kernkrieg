@@ -13,6 +13,9 @@ angular.module('kkApp')
     var publicActionCell = '<button class="btn btn-info" ng-click="editWarrior(row)"> View </button>' +
       '<button class="btn btn-danger" ng-click="deleteWarrior(row)"> Edit Copy </button>';
 
+  var submissionCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
+      '<span ng-cell-text>{{COL_FIELD | submissions }}</span></div>';
+
 
     var boolCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
       '<span ng-cell-text>{{COL_FIELD | bool }}</span></div>';
@@ -34,6 +37,10 @@ angular.module('kkApp')
                     { field:'owners',
                       displayName:'Authors',
                       cellTemplate: ownerCell
+                    },
+                    { field:'nontest_submissions',
+                      displayName:'Submissions',
+                      cellTemplate: submissionCell
                     },
                     { field:'public',
                       displayName:'Public',

@@ -13,8 +13,8 @@ angular.module('kkApp')
 
 angular.module('kkApp')
 .controller('MachinesCtrl',
-  ['$scope', '$http', 'machines', 'Machine',
-  function ($scope, $http, machines, Machine) {
+  ['$scope', '$http', '$modal', '$q', 'machines', 'Machine',
+  function ($scope, $http, $modal, $q, machines, Machine) {
 
     var actionCell = '<button class="btn btn-danger" ng-click="deleteMachine(row)" ng-disabled="row.entity.id==machine_id"> Delete </button>';
 
@@ -24,6 +24,9 @@ angular.module('kkApp')
     var editCell = '<input type="text" ng-cell-input ng-class="\'colt\' + $index"' +
                    ' ng-input="COL_FIELD" ng-model="COL_FIELD" />';
 
+
+    var modalPromise = $modal({template: 'app/views/elements/delete.html',
+      persist: true, show: false, backdrop: 'static', scope: $scope});
 
     $scope.machines = machines;
     $scope.gridMachines =
@@ -130,10 +133,19 @@ angular.module('kkApp')
 
     $scope.deleteMachine = function (row)
     {
-      var machine = new Machine(row.entity);
+      $scope.delRow = row;
+      $scope.delObject = "Machine";
+      $q.when(modalPromise).then(function(modalEl) {
+        modalEl.modal('show');
+      });
+    }
+
+    $scope.doDelete = function()
+    {
+      var machine = new Machine($scope.delRow.entity);
       machine.$delete(function ()
       {
-        $scope.machines = _.reject($scope.machines, {id: row.entity.id})
+        $scope.machines = _.reject($scope.machines, {id: $scope.delRow.entity.id})
       });
     }
   }]);

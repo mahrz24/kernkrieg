@@ -13,8 +13,8 @@ angular.module('kkApp')
 
 angular.module('kkApp')
 .controller('AccountsCtrl',
-  ['$scope', '$http', 'accounts', 'User',
-  function ($scope, $http, accounts, User) {
+  ['$scope', '$http', '$modal', '$q', 'accounts', 'User',
+  function ($scope, $http, $modal, $q, accounts, User) {
     var passwordCell = '<div class="ngCellText" ng-class="col.colIndex()">' +
       '<span ng-cell-text>******</span></div>';
 
@@ -34,6 +34,9 @@ angular.module('kkApp')
     $http.get('/api/user_id').success(function(data, status, headers, config) {
         $scope.user_id =  data.user_id;
     });
+
+    var modalPromise = $modal({template: 'app/views/elements/delete.html',
+      persist: true, show: false, backdrop: 'static', scope: $scope});
 
     $scope.passwordTemp = {};
     _.each(accounts, function (a) { $scope.passwordTemp[a.id] = "" ;});
@@ -122,10 +125,19 @@ angular.module('kkApp')
 
     $scope.deleteUser = function (row)
     {
-      var user = new User(row.entity);
+      $scope.delRow = row;
+      $scope.delObject = "User";
+      $q.when(modalPromise).then(function(modalEl) {
+        modalEl.modal('show');
+      });
+    }
+
+    $scope.doDelete = function ()
+    {
+      var user = new User($scope.delRow.entity);
       user.$delete(function ()
       {
-        $scope.accounts = _.reject($scope.accounts, {id: row.entity.id})
+        $scope.accounts = _.reject($scope.accounts, {id: $scope.delRow.entity.id})
       });
     }
   }]);

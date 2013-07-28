@@ -45,9 +45,9 @@ def check_owner_single(instance_id=None, data=None, **kw):
         for owner in w.owners:
             if current_user.id == owner.id:
                 is_owner = True
-                if not is_owner:
-                    raise ProcessingException(message='Not Authorized for this Resource',
-                                              status_code=401)
+        if not is_owner:
+            raise ProcessingException(message='Not Authorized for this Resource',
+                                      status_code=401)
         return
     if data['public']:
         return

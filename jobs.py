@@ -16,7 +16,18 @@ def run_match(match_id):
             code1 = match.participant1.code
             code2 = match.participant2.code
             try:
-                match.log = subprocess.check_output(["./mars/kkmars-cli.js","--file","0",code1,code2])
+                match.log = subprocess.check_output(["./mars/kkmars-cli.js",
+                    "--core", str(match.queue.machine.coreSize),
+                    "--pspc", str(match.queue.machine.pSpaceSize),
+                    "--tiec", str(match.queue.machine.cyclesUntilTie),
+                    "--lim", str(match.queue.machine.instructionLimit),
+                    "--ii", match.queue.machine.initialInstruction,
+                    "--maxt",  str(match.queue.machine.maxTasks),
+                    "--minsep",  str(match.queue.machine.minSep),
+                    "--sep",  str(match.queue.machine.initialSep),
+                    "--readd",  str(match.queue.machine.readDist),
+                    "--writed",  str(match.queue.machine.readDist),
+                    "--file","0",code1,code2])
                 result = json.loads(match.log)['result']
                 print(result)
                 if result['event']['event'] == "won":

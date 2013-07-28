@@ -242,7 +242,14 @@ def post_queue_resubmit():
         abort(404)
 
     if not current_user.admin and not sub.submissionUserId == current_user.id:
-        abort(401)
+        if not sub.warrior:
+            abort(401)
+        is_owner = False
+        for owner in sub.warrior.owners:
+            if current_user.id == owner.id:
+                is_owner = True
+        if not is_owner:
+            abort(401)
 
     if not current_user.admin and not sub.active:
         abort(401)
@@ -264,7 +271,14 @@ def delete_queue_submission(submissionId):
         abort(404)
 
     if not current_user.admin and not sub.submissionUserId == current_user.id:
-        abort(401)
+        if not sub.warrior:
+            abort(401)
+        is_owner = False
+        for owner in sub.warrior.owners:
+            if current_user.id == owner.id:
+                is_owner = True
+        if not is_owner:
+            abort(401)
 
     if not current_user.admin and not sub.active:
         abort(401)

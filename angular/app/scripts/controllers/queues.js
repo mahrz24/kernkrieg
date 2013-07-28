@@ -13,8 +13,8 @@ angular.module('kkApp')
 
 angular.module('kkApp')
 .controller('QueuesCtrl',
-  ['$scope', '$http', 'queues', 'Queue', 'machines', 'Machine',
-  function ($scope, $http, queues, Queue, machines, Machine) {
+  ['$scope', '$http', '$modal', '$q', 'queues', 'Queue', 'machines', 'Machine',
+  function ($scope, $http, $modal, $q, queues, Queue, machines, Machine) {
 
     var actionCell = '<button class="btn btn-danger" ng-click="deleteQueue(row)" ng-disabled="row.entity.id==queue_id"> Delete </button>';
 
@@ -34,6 +34,8 @@ angular.module('kkApp')
     '</ul>'+
     '</div>';
 
+    var modalPromise = $modal({template: 'app/views/elements/delete.html',
+      persist: true, show: false, backdrop: 'static', scope: $scope});
 
     $scope.machines = machines;
     $scope.queues = queues;
@@ -120,12 +122,22 @@ angular.module('kkApp')
       });
     };
 
+
     $scope.deleteQueue = function (row)
     {
-      var queue = new Queue(row.entity);
+      $scope.delRow = row;
+      $scope.delObject = "Queue";
+      $q.when(modalPromise).then(function(modalEl) {
+        modalEl.modal('show');
+      });
+    }
+
+    $scope.doDelete = function ()
+    {
+      var queue = new Queue($scope.delRow.entity);
       queue.$delete(function ()
       {
-        $scope.queues = _.reject($scope.queues, {id: row.entity.id})
+        $scope.queues = _.reject($scope.queues, {id: $scope.delRow.entity.id})
       });
     }
 
