@@ -46,8 +46,8 @@ angular.module('kkApp')
       el.selectAll("rect")
     .data(d3.zip(data.log.cycle,data.log.warriorOwnerships))
   .enter().append("rect")
-    .attr("x", function(d) { return d[0]; })
-    .attr("y", 100).attr("height", function(d) { return d[1][0]}).attr("width", 10);
+    .attr("x", function(d) { return d[0]/4; })
+    .attr("y", 100).attr("height", function(d) { return d[1][0]/20}).attr("width", 10);
 
     }
 

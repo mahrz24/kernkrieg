@@ -246,15 +246,25 @@ module.exports = (function(){
             // Find the beginning of the program
             var lines = programString.split("\n");
             var line;
+            var skips = 0;
             do
             {
                 line = _.head(lines);
                 lines = _.tail(lines);
+                skips ++;
             } while(line !== undefined && !line.beginsWith(";redcode"));
 
             programString = lines.join("\n");
 
-            var parsed = _.unzip(redcode.parser.parse(programString));
+
+            var parsed;
+            try {
+                parsed =  _.unzip(redcode.parser.parse(programString));
+            } catch (e) {
+                e.line += skips;
+                throw e;
+            }
+
             var comments = _.filter(parsed[1], function(x) { return x != "";});
             var instructions = _.filter(parsed[0], function(x) { return x != "";});
             // Reduce the instructions (remove labels & eval expressions)

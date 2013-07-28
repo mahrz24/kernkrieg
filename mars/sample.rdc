@@ -1,7 +1,8 @@
+Hallo World
 ;redcode
 ;name   Imp
 ;author A.K.  Dewdney
 
 org start
-start: mov #0, #0
+start: mov #0,
        jmp start
