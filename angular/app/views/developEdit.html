@@ -117,10 +117,13 @@
       </button>
       <div class="btn-group" ng-disabled="!loaded">
         <button class="btn btn-info" ng-disabled="cycle <= 0 || !loaded" ng-click="stepback()">
-          <i class="icon-step-backward"></i>
-          </button>
+          <i class="icon-fast-backward"></i>
+        </button>
+        <button class="btn btn-info" ng-disabled="cycle <= 0 || !loaded" ng-click="singleStepback()">
+        <i class="icon-step-backward"></i>
+        </button>
         <button class="btn btn-danger" ng-disabled="!loaded">
-          <i class="icon-stop" ng-click="reset()"></i>
+          <i class="icon-stop" ng-click="stop()"></i>
           </button>
         <button class="btn btn-warning" ng-disabled="!running || !loaded" ng-click="pause()">
           <i class="icon-pause"></i>
@@ -128,8 +131,11 @@
         <button class="btn btn-success" ng-disabled="running || !loaded" ng-click="start()">
           <i class="icon-play"></i>
         </button>
-        <button class="btn btn-info" ng-disabled="!loaded" ng-click="step()">
+        <button class="btn btn-info" ng-disabled="!loaded" ng-click="singleStep()">
           <i class="icon-step-forward"></i>
+        </button>
+        <button class="btn btn-info" ng-disabled="!loaded" ng-click="step()">
+          <i class="icon-fast-forward"></i>
         </button>
       </div>
       Cycle:
@@ -148,7 +154,7 @@
   <div class="span6 gbox">
     <div class="gbox-content">
       <svg style="width:400px; height:800px;" viewBox="0 0 100 200" preserveAspectRatio="xMidyMid">
-        <g d3 d3-data="iteration" d3-renderer="coreRenderer" ></g>
+        <g id="core-view"></g>
       </svg>
     </div>
   </div>

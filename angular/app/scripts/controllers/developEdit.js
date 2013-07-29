@@ -100,28 +100,31 @@ angular.module('kkApp')
     $scope.running = false;
     $scope.loaded = false;
     $scope.cycle = 0;
-    $scope.iteration = 0;
+    $scope.updateData = false;
     $scope.lastCycle;
     $scope.cyclesPerStep = 1;
     var debugTimer;
 
-    $scope.$watch('cycle', function(scope, newValue, oldValue)
+    $scope.$watch('cycle', function(newValue, oldValue)
     {
       $scope.lastCycle = oldValue;
       if($scope.loaded)
       {
+        console.log("Run to " + newValue);
         $scope.mars.runTo(newValue, false);
-        $scope.iteration++;
+        $scope.coreRenderer();
       }
     });
 
-    $scope.coreRenderer = function(el, data)
+    $scope.initCoreView = function()
     {
-      if($scope.mars && $scope.iteration == 1)
+      if($scope.mars)
       {
         var red = d3.rgb(255, 0, 0);
         var blue = d3.rgb(0, 0, 255);
-        el.selectAll("rect")
+
+        d3.select("g#core-view").selectAll("rect").remove()
+        d3.select("g#core-view").selectAll("rect")
         .data(d3.zip($scope.mars.coreOwner,$scope.mars.core))
         .enter().append("rect")
         .attr("x", function(d,i) { return (i%$scope.memWidth)*$scope.cellWidth; })
@@ -134,11 +137,15 @@ angular.module('kkApp')
           else
            return red.darker(d[0]); });
       }
-      else if($scope.mars)
+    }
+
+    $scope.coreRenderer = function()
+    {
+      if($scope.mars)
       {
         var red = d3.rgb(255, 0, 0);
         var blue = d3.rgb(0, 0, 255);
-        el.selectAll("rect")
+         d3.select("g#core-view").selectAll("rect")
         .data(d3.zip($scope.mars.coreOwner,$scope.mars.core))
         .attr("x", function(d,i) { return (i%$scope.memWidth)*$scope.cellWidth; })
         .attr("y",  function(d,i) { return (Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
@@ -174,14 +181,14 @@ angular.module('kkApp')
       $scope.memWidth = Math.floor(Math.sqrt($scope.mars.coreSize));
       $scope.cellWidth = 100/$scope.memWidth;
       $scope.loaded = true;
-      $scope.iteration++;
+      $scope.initCoreView();
     }
 
-    $scope.reset = function ()
+    $scope.stop = function ()
     {
+      $timeout.cancel(debugTimer);
       $scope.running = false;
       $scope.cycle = 0;
-      $scope.iteration = 0;
     }
 
     $scope.pause = function ()
@@ -191,6 +198,7 @@ angular.module('kkApp')
 
     $scope.start = function ()
     {
+      $scope.reset = false;
       $scope.running = true;
       $scope.run();
     }
@@ -215,6 +223,17 @@ angular.module('kkApp')
         $scope.cycle -= $scope.cyclesPerStep;
       else
         $scope.cycle = 0;
+    }
+
+    $scope.singleStep = function()
+    {
+      $scope.cycle++;
+    }
+
+    $scope.singleStepback = function()
+    {
+      if($scope.cycle >= 1)
+        $scope.cycle--;
     }
 
     $scope.increaseCPS = function ()
