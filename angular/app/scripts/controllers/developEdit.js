@@ -141,7 +141,8 @@ angular.module('kkApp')
         .data(data)
         .enter().append("g");
 
-        g.append("rect").attr("class", "owner");
+        g.append("rect").attr("class", "base");
+        g.append("circle").attr("class", "owner");
         g.append("rect").attr("class", "cmd");
         $scope.coreInner(g, 0);
       }
@@ -153,56 +154,93 @@ angular.module('kkApp')
       {
         var data = d3.zip($scope.mars.coreOwner,$scope.mars.core);
         var offset = $scope.memWidth*$scope.memoryOffset;
-        data = data.slice(offset, offset+ $scope.visibleSize);
+        var max = offset+$scope.visibleSize;
+        if(max > $scope.mars.coreSize)
+          max = $scope.mars.coreSize-1;
+        data = data.slice(offset, max);
 
-        var g = d3.select("g#core-view").selectAll("g").data(data)
-        $scope.coreInner(g,offset)
+        var g = d3.select("g#core-view").selectAll("g").data(data);
+        $scope.coreInner(g,offset);
       }
     }
 
     $scope.coreInner = function(el, offset)
     {
-      var red = d3.rgb(255, 0, 0);
-      var blue = d3.rgb(180, 180, 180);
-      var green = d3.rgb(0, 255, 0);
+      var owner = d3.rgb(200, 100, 100);
+      var bkg = d3.rgb(180, 180, 180);
+      var selected = d3.rgb(210, 210, 219);
+      var selectedGrid = d3.rgb(200, 200, 200);
+      var grid = d3.rgb(190, 190, 190);
+      var cellSize = Math.floor($scope.cellWidth)-1;
 
-      el.select("rect.owner").attr("x", function(d,i) { return 0.5+(i%$scope.memWidth)*$scope.cellWidth; })
-        .attr("y",  function(d,i) { return 0.5+(Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
-        .attr("height",Math.floor($scope.cellWidth*0.7))
-        .attr("width", Math.floor($scope.cellWidth*0.7))
-        .attr("rx", 2)
-        .attr("ry", 2)
-        .on("click", function(d,i)
+      var locx = function(i)
+      {
+         return 0.5+(i%$scope.memWidth)*$scope.cellWidth;
+      };
+
+      var locy = function(i)
+      {
+         return 0.5+(Math.floor(i/$scope.memWidth)*$scope.cellWidth);
+      };
+
+      var clickable = function(el)
+      {
+        el.on("click", function(d,i)
+        {
+          console.log(i);
+          if(!$scope.memorySelectionInProgress)
           {
-            if(!$scope.memorySelectionInProgress)
-            {
-              $scope.memorySelectionInProgress = true;
+            $scope.memorySelectionInProgress = true;
+            $scope.memorySelection[0] = i+offset;
+            $scope.memorySelection[1] = i+offset;
+          }
+          else
+          {
+            $scope.memorySelectionInProgress = false;
+            if(i+offset < $scope.memorySelection[1])
               $scope.memorySelection[0] = i+offset;
-              $scope.memorySelection[1] = i+offset;
-            }
             else
-            {
-              $scope.memorySelectionInProgress = false;
-              if(i+offset < $scope.memorySelection[1])
-                $scope.memorySelection[0] = i+offset;
-              else
-                $scope.memorySelection[1] = i+offset;
-            }
-            $scope.coreRenderer();
+              $scope.memorySelection[1] = i+offset;
+          }
+          $scope.coreRenderer();
 
-          })
+        })
+      };
+
+      clickable(el.select("rect.base"));
+      clickable(el.select("circle.owner"));
+//      clickable(el.select("circle.owner"));
+
+      el.select("rect.base").attr("x", function(d,i) { return locx(i); })
+      .attr("y",  function(d,i) { return locy(i); })
+      .attr("height", cellSize)
+      .attr("width", cellSize)
+      .style("fill", function(d,i)
+      {
+        if(i+offset >= $scope.memorySelection[0] && i+offset <= $scope.memorySelection[1] )
+          return selected;
+        else
+         return bkg;
+     })
+      .style("stroke-width", 1)
+      .style("stroke", function(d,i)
+      {
+        if(i+offset >= $scope.memorySelection[0] && i+offset <= $scope.memorySelection[1] )
+          return selectedGrid;
+        else
+         return grid;
+     });
+
+      el.select("circle.owner").attr("cx", function(d,i) { return locx(i)+3; })
+        .attr("cy",  function(d,i) { return locy(i)+3; })
+        .attr("r", 2)
         .style("fill", function(d) {
           if(d[0] < 0)
-            return blue;
+            return owner;
           else
-           return red.darker(d[0]); })
-        .style("stroke", function(d,i) {
-          if(i+offset >= $scope.memorySelection[0] && i+offset <= $scope.memorySelection[1] )
-            return green;
-          else
-           return d3.rgb(80, 80, 80); })
-
-            el.select("rect.cmd").attr("x", function(d,i) { return 0.5+(i%$scope.memWidth)*$scope.cellWidth; })
+           return owner.darker(d[0]+1); });
+/*
+      el.select("rect.cmd").attr("x", function(d,i) { return 0.5+(i%$scope.memWidth)*$scope.cellWidth; })
         .attr("y",  function(d,i) { return 0.5+(Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
         .attr("height",Math.floor($scope.cellWidth*0.3))
         .attr("width", Math.floor($scope.cellWidth*0.3))
@@ -236,7 +274,7 @@ angular.module('kkApp')
           if(i+offset >= $scope.memorySelection[0] && i+offset <= $scope.memorySelection[1] )
             return green;
           else
-           return d3.rgb(80, 80, 80); })
+           return d3.rgb(80, 80, 80); }) */
     }
 
     $scope.load = function ()
