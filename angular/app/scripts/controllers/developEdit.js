@@ -103,6 +103,8 @@ angular.module('kkApp')
     $scope.updateData = false;
     $scope.lastCycle;
     $scope.cyclesPerStep = 1;
+    $scope.memoryOffset = 0;
+    $scope.visibleSize = 0;
     var debugTimer;
 
     $scope.$watch('cycle', function(newValue, oldValue)
@@ -110,11 +112,19 @@ angular.module('kkApp')
       $scope.lastCycle = oldValue;
       if($scope.loaded)
       {
-        console.log("Run to " + newValue);
         $scope.mars.runTo(newValue, false);
         $scope.coreRenderer();
       }
     });
+
+    $scope.$watch('memoryOffset', function(newValue, oldValue)
+    {
+      if($scope.loaded)
+      {
+        $scope.coreRenderer();
+      }
+    });
+
 
     $scope.initCoreView = function()
     {
@@ -122,10 +132,12 @@ angular.module('kkApp')
       {
         var red = d3.rgb(255, 0, 0);
         var blue = d3.rgb(0, 0, 255);
+        var data = d3.zip($scope.mars.coreOwner,$scope.mars.core);
+        data = data.slice(0, 0 + $scope.visibleSize);
 
-        d3.select("g#core-view").selectAll("rect").remove()
+        d3.select("g#core-view").selectAll("rect").remove();
         d3.select("g#core-view").selectAll("rect")
-        .data(d3.zip($scope.mars.coreOwner,$scope.mars.core))
+        .data(data)
         .enter().append("rect")
         .attr("x", function(d,i) { return (i%$scope.memWidth)*$scope.cellWidth; })
         .attr("y",  function(d,i) { return (Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
@@ -145,8 +157,13 @@ angular.module('kkApp')
       {
         var red = d3.rgb(255, 0, 0);
         var blue = d3.rgb(0, 0, 255);
+
+        var data = d3.zip($scope.mars.coreOwner,$scope.mars.core);
+        var offset = $scope.memWidth*$scope.memoryOffset;
+        data = data.slice(offset, offset+ $scope.visibleSize);
+
          d3.select("g#core-view").selectAll("rect")
-        .data(d3.zip($scope.mars.coreOwner,$scope.mars.core))
+        .data(data)
         .attr("x", function(d,i) { return (i%$scope.memWidth)*$scope.cellWidth; })
         .attr("y",  function(d,i) { return (Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
         .attr("height",$scope.cellWidth*0.8)
@@ -178,7 +195,11 @@ angular.module('kkApp')
       w2 = mars.redcode.assembleString($scope.debugAgainst.code);
       $scope.mars.loadWarrior(w1);
       $scope.mars.loadWarrior(w2);
-      $scope.memWidth = Math.floor(Math.sqrt($scope.mars.coreSize));
+      $scope.memoryOffset = 0;
+      $scope.visibleSize = $scope.mars.coreSize;
+      if($scope.visibleSize > 1600)
+        $scope.visibleSize = 1600;
+      $scope.memWidth = Math.ceil(Math.sqrt($scope.visibleSize));
       $scope.cellWidth = 100/$scope.memWidth;
       $scope.loaded = true;
       $scope.initCoreView();
@@ -244,6 +265,16 @@ angular.module('kkApp')
     $scope.decreaseCPS = function ()
     {
       $scope.cyclesPerStep--;
+    }
+
+    $scope.increaseMO = function ()
+    {
+      $scope.memoryOffset+=$scope.memWidth;
+    }
+
+    $scope.decreaseMO = function ()
+    {
+      $scope.memoryOffset-=$scope.memWidth;
     }
 
     // Test & Submission
