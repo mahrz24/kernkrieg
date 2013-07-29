@@ -375,6 +375,8 @@ window.mars = (function (modules) {
 			        for(var i=0;i<this.pSpaceSize;i++)
 			            pSpace.push(pSpaceZero);
 			        this.pSpaces.push(pSpace);
+
+			        return [this.address(loadAddress), this.address(loadAddress+loadLength-1)];
 			    };
 
 			    MARS.prototype.run = function()

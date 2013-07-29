@@ -104,6 +104,9 @@ angular.module('kkApp')
     $scope.lastCycle;
     $scope.cyclesPerStep = 1;
     $scope.memoryOffset = 0;
+    $scope.memorySelectionInProgress = false;
+    $scope.memorySelection = [0,0];
+    $scope.maxSize = 900;
     $scope.visibleSize = 0;
     var debugTimer;
 
@@ -130,24 +133,17 @@ angular.module('kkApp')
     {
       if($scope.mars)
       {
-        var red = d3.rgb(255, 0, 0);
-        var blue = d3.rgb(0, 0, 255);
         var data = d3.zip($scope.mars.coreOwner,$scope.mars.core);
         data = data.slice(0, 0 + $scope.visibleSize);
 
-        d3.select("g#core-view").selectAll("rect").remove();
-        d3.select("g#core-view").selectAll("rect")
+        d3.select("g#core-view").selectAll("g").remove();
+        var g = d3.select("g#core-view").selectAll("g")
         .data(data)
-        .enter().append("rect")
-        .attr("x", function(d,i) { return (i%$scope.memWidth)*$scope.cellWidth; })
-        .attr("y",  function(d,i) { return (Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
-        .attr("height",$scope.cellWidth*0.8)
-        .attr("width", $scope.cellWidth*0.8)
-        .style("fill", function(d) {
-          if(d[0] < 0)
-            return blue;
-          else
-           return red.darker(d[0]); });
+        .enter().append("g");
+
+        g.append("rect").attr("class", "owner");
+        g.append("rect").attr("class", "cmd");
+        $scope.coreInner(g, 0);
       }
     }
 
@@ -155,25 +151,92 @@ angular.module('kkApp')
     {
       if($scope.mars)
       {
-        var red = d3.rgb(255, 0, 0);
-        var blue = d3.rgb(0, 0, 255);
-
         var data = d3.zip($scope.mars.coreOwner,$scope.mars.core);
         var offset = $scope.memWidth*$scope.memoryOffset;
         data = data.slice(offset, offset+ $scope.visibleSize);
 
-         d3.select("g#core-view").selectAll("rect")
-        .data(data)
-        .attr("x", function(d,i) { return (i%$scope.memWidth)*$scope.cellWidth; })
-        .attr("y",  function(d,i) { return (Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
-        .attr("height",$scope.cellWidth*0.8)
-        .attr("width", $scope.cellWidth*0.8)
+        var g = d3.select("g#core-view").selectAll("g").data(data)
+        $scope.coreInner(g,offset)
+      }
+    }
+
+    $scope.coreInner = function(el, offset)
+    {
+      var red = d3.rgb(255, 0, 0);
+      var blue = d3.rgb(180, 180, 180);
+      var green = d3.rgb(0, 255, 0);
+
+      el.select("rect.owner").attr("x", function(d,i) { return 0.5+(i%$scope.memWidth)*$scope.cellWidth; })
+        .attr("y",  function(d,i) { return 0.5+(Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
+        .attr("height",Math.floor($scope.cellWidth*0.7))
+        .attr("width", Math.floor($scope.cellWidth*0.7))
+        .attr("rx", 2)
+        .attr("ry", 2)
+        .on("click", function(d,i)
+          {
+            if(!$scope.memorySelectionInProgress)
+            {
+              $scope.memorySelectionInProgress = true;
+              $scope.memorySelection[0] = i+offset;
+              $scope.memorySelection[1] = i+offset;
+            }
+            else
+            {
+              $scope.memorySelectionInProgress = false;
+              if(i+offset < $scope.memorySelection[1])
+                $scope.memorySelection[0] = i+offset;
+              else
+                $scope.memorySelection[1] = i+offset;
+            }
+            $scope.coreRenderer();
+
+          })
         .style("fill", function(d) {
           if(d[0] < 0)
             return blue;
           else
-           return red.darker(d[0]); });
-      }
+           return red.darker(d[0]); })
+        .style("stroke", function(d,i) {
+          if(i+offset >= $scope.memorySelection[0] && i+offset <= $scope.memorySelection[1] )
+            return green;
+          else
+           return d3.rgb(80, 80, 80); })
+
+            el.select("rect.cmd").attr("x", function(d,i) { return 0.5+(i%$scope.memWidth)*$scope.cellWidth; })
+        .attr("y",  function(d,i) { return 0.5+(Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
+        .attr("height",Math.floor($scope.cellWidth*0.3))
+        .attr("width", Math.floor($scope.cellWidth*0.3))
+        .attr("rx", 2)
+        .attr("ry", 2)
+        .on("click", function(d,i)
+          {
+            if(!$scope.memorySelectionInProgress)
+            {
+              $scope.memorySelectionInProgress = true;
+              $scope.memorySelection[0] = i+offset;
+              $scope.memorySelection[1] = i+offset;
+            }
+            else
+            {
+              $scope.memorySelectionInProgress = false;
+              if(i+offset < $scope.memorySelection[1])
+                $scope.memorySelection[0] = i+offset;
+              else
+                $scope.memorySelection[1] = i+offset;
+            }
+            $scope.coreRenderer();
+
+          })
+        .style("fill", function(d) {
+          if(d[0] < 0)
+            return blue;
+          else
+           return red.darker(d[0]); })
+        .style("stroke", function(d,i) {
+          if(i+offset >= $scope.memorySelection[0] && i+offset <= $scope.memorySelection[1] )
+            return green;
+          else
+           return d3.rgb(80, 80, 80); })
     }
 
     $scope.load = function ()
@@ -193,14 +256,14 @@ angular.module('kkApp')
       });
       w1 = mars.redcode.assembleString($scope.warrior.code);
       w2 = mars.redcode.assembleString($scope.debugAgainst.code);
-      $scope.mars.loadWarrior(w1);
+      $scope.memorySelection = $scope.mars.loadWarrior(w1);
       $scope.mars.loadWarrior(w2);
       $scope.memoryOffset = 0;
       $scope.visibleSize = $scope.mars.coreSize;
-      if($scope.visibleSize > 1600)
-        $scope.visibleSize = 1600;
+      if($scope.visibleSize > $scope.maxSize)
+        $scope.visibleSize = $scope.maxSize;
       $scope.memWidth = Math.ceil(Math.sqrt($scope.visibleSize));
-      $scope.cellWidth = 100/$scope.memWidth;
+      $scope.cellWidth = Math.floor(430/$scope.memWidth);
       $scope.loaded = true;
       $scope.initCoreView();
     }
