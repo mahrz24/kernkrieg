@@ -4,7 +4,7 @@
       <button class="btn" ng-click="back()">
         Back
       </button>
-      <button class="btn btn-primary" ng-click="saveWarrior()" ng-disabled="savedCode==warrior.code">
+      <button class="btn btn-primary" ng-click="saveWarrior()" ng-disabled="!dirtyWarrior">
         Save
       </button>
       <span ng-show="message.length!=0"> {{message}} </span>
@@ -27,15 +27,17 @@
     <div class="gbox-content">
       <ul class="nav nav-tabs" id="sidepaneTab">
         <li><a href="#info" data-toggle="tab">Info</a></li>
-        <li><a href="#test" data-toggle="tab">Test</a></li>
-        <li><a href="#submissions" data-toggle="tab">Submissions</a></li>
+        <li ng-show="!hideTests"><a href="#test" data-toggle="tab">Test</a></li>
+        <li ng-show="!hideMatches"><a href="#submissions" data-toggle="tab">Submissions</a></li>
       </ul>
       <div class="tab-content" style=" height: 100%px;">
 
         <div class="tab-pane active" id="info">
-          Name: <input type="text" name="name" ng-model="warrior.name"/>
-          Public: <input type="checkbox" name="public" ng-model="warrior.public"/>
-          Testable: <input type="checkbox" name="testable" ng-model="warrior.testable"/>
+          Name: <input type="text" name="name" ng-model="warrior.name"/><br/>
+          Public: <input type="checkbox" name="public" ng-model="warrior.public"/><br/>
+          <span ng-show="!hideTests">
+          Testable: <input type="checkbox" name="testable" ng-model="warrior.testable"/></span><br/>
+          Co-Author:  <select id="debugCode" class="span2" ng-model="coauthor" ng-options="value.id as value.username for (key, value) in users" data-style="btn" bs-select></select>
         </div>
 
         <div class="tab-pane" id="test">

@@ -8,4 +8,7 @@ angular.module('kkNavigation', [])
     $http.get('/api/user_id').success(function(data, status, headers, config) {
         $scope.user_id =  data.user_id;
     });
+    $http.get('/api/hide_matches').success(function(data, status, headers, config) {
+        $scope.hide_matches =  data.hide_matches;
+    });
   });

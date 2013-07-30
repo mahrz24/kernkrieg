@@ -449,11 +449,16 @@ module.exports = (function(){
         if(!this.taskQueues.length)
             return;
 
+
         // Get the current task pointer
         var cw = this.currentWarrior;
-        var pc = this.taskQueues[cw].shift();
-        var instruction = this.getInstruction(pc);
 
+        if(!this.taskQueues[cw].length)
+            return;
+
+        var pc = this.taskQueues[cw].shift();
+
+        var instruction = this.getInstruction(pc);
         // Evaluate A-Operand
         var apointer = this.evaluateOperand(pc, instruction.aoperand);
         var ainstruction = this.getInstruction(apointer);

@@ -109,7 +109,7 @@ angular.module('kkApp')
 
     $scope.addNewWarrior = function ()
     {
-      var warrior = new Warrior({ name: "Untitled warrior", code: "",
+      var warrior = new Warrior({ name: "Untitled warrior", code: ";redcode\ndat #0,#0",
         public: false, testable: false, owners : [{id: $scope.user_id}]});
 
       warrior.$save( function(warrior) {

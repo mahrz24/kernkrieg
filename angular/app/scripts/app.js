@@ -92,6 +92,20 @@ angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource', 'd3','$strap.dir
           },
           machines: function(MultiMachineLoader) {
             return MultiMachineLoader();
+          },
+          users: function(MultiUserLoader) {
+            return MultiUserLoader();
+          },
+          user_id: function($http) {
+            return $http.get('/api/user_id');
+          },
+          hide_matches: function($http)
+          {
+            return $http.get('/api/hide_matches');
+          },
+          hide_tests: function($http)
+          {
+            return $http.get('/api/hide_tests');
           }
         }
       })

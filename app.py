@@ -11,6 +11,8 @@ app.config['SECRET_KEY'] = "KERNKRIEGFTW"
 app.config['QUEUE_DIR'] = "/tmp/kk-queues"
 app.config['MATCHES_PER_QUEUE_UPDATE'] = -1
 app.config['SECONDS_PER_QUEUE_UPDATE'] = 30
+app.config['HIDE_MATCHES'] = True
+app.config['HIDE_TESTS'] = True
 
 db = SQLAlchemy(app)
 

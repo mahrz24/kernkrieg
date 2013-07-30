@@ -26,9 +26,9 @@ manager = APIManager(app, flask_sqlalchemy_db=db)
 
 manager.create_api(User, methods=['GET', 'POST', 'PUT', 'DELETE'],
                    results_per_page=None,
-                   exclude_columns=['passwdHash', 'warriors'],
-                   preprocessors={'GET_SINGLE': [check_admin_or_user],
-                                  'GET_MANY':   [check_admin],
+                   exclude_columns=['passwdHash', 'warriors', 'submissions'],
+                   preprocessors={'GET_SINGLE': [check_auth],
+                                  'GET_MANY':   [check_auth],
                                   'PUT_SINGLE': [check_admin_or_user,
                                                  pre_hash],
                                   'PUT_MANY':   [check_admin,
@@ -314,3 +314,11 @@ def get_user_id():
 @app.route('/api/is_admin', methods=['GET'])
 def get_is_admin():
     return jsonify({'is_admin': current_user.admin})
+
+@app.route('/api/hide_matches', methods=['GET'])
+def get_hide_matches():
+    return jsonify({'hide_matches': app.config['HIDE_MATCHES'] and not current_user.admin})
+
+@app.route('/api/hide_tests', methods=['GET'])
+def get_hide_tests():
+    return jsonify({'hide_tests': app.config['HIDE_TESTS'] and not current_user.admin})
