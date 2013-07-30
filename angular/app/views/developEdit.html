@@ -124,7 +124,7 @@
         <button class="btn btn-info" ng-disabled="cycle <= 0 || !loaded" ng-click="singleStepback()">
         <i class="icon-step-backward"></i>
         </button>
-        <button class="btn btn-danger" ng-disabled="!loaded">
+        <button class="btn btn-danger" ng-disabled="running || !loaded">
           <i class="icon-stop" ng-click="stop()"></i>
           </button>
         <button class="btn btn-warning" ng-disabled="!running || !loaded" ng-click="pause()">
@@ -148,6 +148,13 @@
         <button class="btn btn-info" ng-disabled="cyclesPerStep <= 1" ng-click="decreaseCPS()"><i class="icon-minus"></i></button>
         <button class="btn btn-info" ng-click="increaseCPS()"><i class="icon-plus"></i></button>
       </div>
+
+      Core View Size:
+      <input style="width:50px;" type="number" ng-model="zoom">
+      <div class="btn-group">
+        <button class="btn btn-info" ng-disabled="zoom<=0" ng-click="decreaseMS()"><i class="icon-minus"></i></button>
+        <button class="btn btn-info" ng-disabled="zoom>=10" ng-click="increaseMS()"><i class="icon-plus"></i></button>
+      </div>
     </div>
   </div>
 </div>
@@ -166,7 +173,8 @@
   </div>
   <div class="span6 gbox">
     <div class="gbox-content">
-     Memory Detail
+     <ul id="detail-view">
+     </ul>
     </div>
   </div>
 </div>

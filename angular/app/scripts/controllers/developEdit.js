@@ -41,7 +41,12 @@ angular.module('kkApp')
         return ok;
     });
     $scope.debugAgainst = $scope.debuggables[0];
-    $scope.machines = machines;
+    $scope.machines = _.map(machines, function(m) {
+      if(m.initialInstruction != "random")
+        m.initialInstruction = mars.redcode.assembleString(";redcode\n" + m.initialInstruction).instructions[0];
+      return m;
+
+    });
     $scope.selectedMachine = $scope.machines[0];
 
     $scope.$watch('coauthor', function(newValue, oldValue)
@@ -134,17 +139,28 @@ angular.module('kkApp')
     $scope.memoryOffset = 0;
     $scope.memorySelectionInProgress = false;
     $scope.memorySelection = [0,0];
-    $scope.maxSize = 300;
+    $scope.maxSize = 400;
+    $scope.zoom = 3;
     $scope.visibleSize = 0;
     var debugTimer;
+
+    $scope.$watch('memorySelection', function(newValue)
+    {
+      d3.select("#detail-view").selectAll("li").remove();
+      if($scope.mars)
+        d3.select("#detail-view").selectAll("li").data($scope.mars.core.slice(newValue[0], newValue[1]+1)).enter().append("li").text(function(d) { return d.toString(); });
+    }, true);
 
     $scope.$watch('cycle', function(newValue, oldValue)
     {
       $scope.lastCycle = oldValue;
       if($scope.loaded)
       {
-        $scope.mars.runTo(newValue, false);
-        $scope.coreRenderer();
+        if(newValue)
+        {
+          $scope.mars.runTo(newValue, false);
+          $scope.coreRenderer();
+        }
       }
     });
 
@@ -161,20 +177,45 @@ angular.module('kkApp')
     {
       if($scope.mars)
       {
+        $scope.memoryOffset = 0;
+        $scope.visibleSize = $scope.mars.coreSize;
+        if($scope.visibleSize > $scope.maxSize)
+          $scope.visibleSize = $scope.maxSize;
+        $scope.memWidth = Math.ceil(Math.sqrt($scope.visibleSize));
+        $scope.cellWidth = Math.floor(430/$scope.memWidth);
+
         var data = d3.zip($scope.mars.coreOwner,$scope.mars.core);
         data = data.slice(0, 0 + $scope.visibleSize);
 
         d3.select("g#core-view").selectAll("g").remove();
-        var g = d3.select("g#core-view").selectAll("g")
-        .data(data)
-        .enter().append("g");
 
-        g.append("path").attr("class", "aop");
-        g.append("path").attr("class", "bop");
-        g.append("path").attr("class", "cmd");
-        g.append("rect").attr("class", "frame");
+        var g = $scope.appendRenderer(data);
         $scope.coreInner(g, 0);
       }
+    }
+
+    $scope.appendRenderer = function(data)
+    {
+      var g;
+      if($scope.memoryOffset >= $scope.mars.coreSize/$scope.memWidth-$scope.memWidth &&
+         $scope.mars.coreSize > $scope.maxSize)
+      {
+        g = d3.select("g#core-view").selectAll("g")
+          .data(data)
+          .exit().remove();
+      }
+      else
+      {
+        g = d3.select("g#core-view").selectAll("g")
+          .data(data)
+          .enter().append("g");
+
+          g.append("path").attr("class", "aop");
+          g.append("path").attr("class", "bop");
+          g.append("path").attr("class", "cmd");
+          g.append("rect").attr("class", "frame");
+      }
+      return g;
     }
 
     $scope.coreRenderer = function()
@@ -188,8 +229,12 @@ angular.module('kkApp')
           max = $scope.mars.coreSize-1;
         data = data.slice(offset, max);
 
+        $scope.appendRenderer(data);
+
         var g = d3.select("g#core-view").selectAll("g").data(data);
         $scope.coreInner(g,offset);
+
+        d3.select("#detail-view").selectAll("li").data($scope.mars.core.slice($scope.memorySelection[0], $scope.memorySelection[1]+1)).text(function(d) { return d.toString(); });
       }
     }
 
@@ -212,6 +257,14 @@ angular.module('kkApp')
       var gridPCOther = d3.rgb(90, 210, 210);
       var cellSize = Math.floor($scope.cellWidth)-4;
 
+      var tooltip = d3.select("body")
+      .append("div")
+      .style("background", d3.rgb(240,240,240))
+      .style("padding", 10)
+      .style("position", "absolute")
+      .style("z-index", "10")
+      .style("visibility", "hidden");
+
       var locx = function(i)
       {
          return 2.5+(i%$scope.memWidth)*$scope.cellWidth;
@@ -226,7 +279,6 @@ angular.module('kkApp')
       {
         el.on("click", function(d,i)
         {
-          console.log(i);
           if(!$scope.memorySelectionInProgress)
           {
             $scope.memorySelectionInProgress = true;
@@ -242,7 +294,6 @@ angular.module('kkApp')
               $scope.memorySelection[1] = i+offset;
           }
           $scope.coreRenderer();
-
         })
       };
 
@@ -280,8 +331,8 @@ angular.module('kkApp')
         return grid;
      });
 
-      el.select("path.aop").
-      attr('d', function(d,i) {
+      el.select("path.aop")
+      .attr('d', function(d,i) {
         var x = locx(i), y = locy(i);
         return 'M ' + x +' '+ y + ' l 0 ' + cellSize + ' l ' + cellSize + ' 0 z';
       }).style("fill", function(d,i)
@@ -290,7 +341,9 @@ angular.module('kkApp')
           return selectedValueI(d[1].aoperand[1]/$scope.mars.coreSize);
         else
           return valueI(d[1].aoperand[1]/$scope.mars.coreSize);
-      });
+      }).on("mouseover", function(d){return tooltip.text(d[1].toString()).style("visibility", "visible");})
+      .on("mousemove", function(d){return tooltip.text(d[1].toString()).style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+      .on("mouseout", function(d){return tooltip.style("visibility", "hidden");});
 
       el.select("path.bop").
       attr('d', function(d,i) {
@@ -302,7 +355,9 @@ angular.module('kkApp')
           return selectedValueI(d[1].boperand[1]/$scope.mars.coreSize);
         else
           return valueI(d[1].boperand[1]/$scope.mars.coreSize);
-      });
+      }).on("mouseover", function(d){return tooltip.text(d[1].toString()).style("visibility", "visible");})
+      .on("mousemove", function(d){return tooltip.text(d[1].toString()).style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+      .on("mouseout", function(d){return tooltip.style("visibility", "hidden");});;
 
       el.select("path.cmd").
       attr('d', function(d,i) {
@@ -318,50 +373,15 @@ angular.module('kkApp')
       {
           return cmd;
       });
-
-
-/*
-      el.select("rect.cmd").attr("x", function(d,i) { return 0.5+(i%$scope.memWidth)*$scope.cellWidth; })
-        .attr("y",  function(d,i) { return 0.5+(Math.floor(i/$scope.memWidth)*$scope.cellWidth); })
-        .attr("height",Math.floor($scope.cellWidth*0.3))
-        .attr("width", Math.floor($scope.cellWidth*0.3))
-        .attr("rx", 2)
-        .attr("ry", 2)
-        .on("click", function(d,i)
-          {
-            if(!$scope.memorySelectionInProgress)
-            {
-              $scope.memorySelectionInProgress = true;
-              $scope.memorySelection[0] = i+offset;
-              $scope.memorySelection[1] = i+offset;
-            }
-            else
-            {
-              $scope.memorySelectionInProgress = false;
-              if(i+offset < $scope.memorySelection[1])
-                $scope.memorySelection[0] = i+offset;
-              else
-                $scope.memorySelection[1] = i+offset;
-            }
-            $scope.coreRenderer();
-
-          })
-        .style("fill", function(d) {
-          if(d[0] < 0)
-            return blue;
-          else
-           return red.darker(d[0]); })
-        .style("stroke", function(d,i) {
-          if(i+offset >= $scope.memorySelection[0] && i+offset <= $scope.memorySelection[1] )
-            return green;
-          else
-           return d3.rgb(80, 80, 80); }) */
     }
 
     $scope.load = function ()
     {
       $scope.running = false;
       $scope.cycle = 0;
+
+
+
       $scope.mars = new mars.MARS($scope.selectedMachine, {
           eventTypes: {
               detectWinner: true,
@@ -377,20 +397,13 @@ angular.module('kkApp')
       w2 = mars.redcode.assembleString($scope.debugAgainst.code);
       $scope.memorySelection = $scope.mars.loadWarrior(w1);
       $scope.mars.loadWarrior(w2);
-      $scope.memoryOffset = 0;
-      $scope.visibleSize = $scope.mars.coreSize;
-      if($scope.visibleSize > $scope.maxSize)
-        $scope.visibleSize = $scope.maxSize;
-      $scope.memWidth = Math.ceil(Math.sqrt($scope.visibleSize));
-      $scope.cellWidth = Math.floor(430/$scope.memWidth);
+
       $scope.loaded = true;
       $scope.initCoreView();
     }
 
     $scope.stop = function ()
     {
-      $timeout.cancel(debugTimer);
-      $scope.running = false;
       $scope.cycle = 0;
     }
 
@@ -458,6 +471,23 @@ angular.module('kkApp')
     {
       $scope.memoryOffset-=$scope.memWidth;
     }
+
+
+    $scope.increaseMS = function ()
+    {
+      $scope.zoom+=1;
+    }
+
+    $scope.decreaseMS = function ()
+    {
+      $scope.zoom-=1;
+    }
+
+    $scope.$watch('zoom', function(newValue)
+    {
+      $scope.maxSize = [100,225,324,400,576,729,841,900,961,1024,1156][newValue];
+      $scope.initCoreView();
+    });
 
     // Test & Submission
 
