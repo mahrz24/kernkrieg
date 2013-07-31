@@ -146,9 +146,12 @@ angular.module('kkApp')
 
     $scope.$watch('memorySelection', function(newValue)
     {
-      d3.select("#detail-view").selectAll("li").remove();
+      d3.select("#detail-view").selectAll("tr").remove();
       if($scope.mars)
-        d3.select("#detail-view").selectAll("li").data($scope.mars.core.slice(newValue[0], newValue[1]+1)).enter().append("li").text(function(d) { return d.toString(); });
+      {
+        var row = d3.select("#detail-view").selectAll("tr").data($scope.mars.core.slice(newValue[0], newValue[1]+1)).enter().append("tr")
+        $scope.detailRow(row);
+      }
     }, true);
 
     $scope.$watch('cycle', function(newValue, oldValue)
@@ -234,8 +237,25 @@ angular.module('kkApp')
         var g = d3.select("g#core-view").selectAll("g").data(data);
         $scope.coreInner(g,offset);
 
-        d3.select("#detail-view").selectAll("li").data($scope.mars.core.slice($scope.memorySelection[0], $scope.memorySelection[1]+1)).text(function(d) { return d.toString(); });
+        var row = d3.select("#detail-view").selectAll("tr").data($scope.mars.core.slice($scope.memorySelection[0], $scope.memorySelection[1]+1));
+        row.selectAll("td").remove();
+        $scope.detailRow(row);
+
+
       }
+    }
+
+    $scope.detailRow = function(row)
+    {
+      row.append("td").text(function(d) { return d.opcode; });
+      row.append("td").text(function(d) { if(d.modifier) return "."; else return "";});
+      row.append("td").style("width", "30px").text(function(d) { return d.modifier; });
+      row.append("td").text(function(d) { return d.aoperand[0]; });
+      row.append("td").style("text-align", "right").text(function(d) { return d.aoperand[1]; });
+      row.append("td").style("width", "30px").text(",");
+      row.append("td").text(function(d) { return d.boperand[0]; });
+      row.append("td").style("text-align", "right").text(function(d) { return d.boperand[1]; });
+
     }
 
     $scope.coreInner = function(el, offset)
@@ -259,11 +279,15 @@ angular.module('kkApp')
 
       var tooltip = d3.select("body")
       .append("div")
-      .style("background", d3.rgb(240,240,240))
-      .style("padding", 10)
+      .style("background", d3.rgb(220,220,220))
       .style("position", "absolute")
       .style("z-index", "10")
-      .style("visibility", "hidden");
+      .style("visibility", "hidden")
+      .style("padding", "5px")
+      .style("border-width", "1px")
+      .style("border-style", "solid")
+      .style("border-color", d3.rgb(90,90,90))
+      .style("border-radius", "4px");
 
       var locx = function(i)
       {
@@ -277,6 +301,9 @@ angular.module('kkApp')
 
       var clickable = function(el)
       {
+        var tooltiptext = function(d) {
+          return d[1].toString();
+        }
         el.on("click", function(d,i)
         {
           if(!$scope.memorySelectionInProgress)
@@ -294,12 +321,21 @@ angular.module('kkApp')
               $scope.memorySelection[1] = i+offset;
           }
           $scope.coreRenderer();
-        })
+          return tooltip.style("visibility", "hidden");
+        }).on("mouseover", function(d){return tooltip.text(tooltiptext(d)).style("visibility", "visible");})
+        .on("mousemove", function(d){return tooltip.text(tooltiptext(d)).style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+        .on("mouseout", function(d){return tooltip.style("visibility", "hidden");});
       };
 
-      clickable(el.select("path.aop"));
-      clickable(el.select("path.bop"));
-      clickable(el.select("rect.frame"));
+
+
+      var sels = ["path.aop", "path.bop", "rect.frame", "cmd"];
+
+      _.each(sels, function(s)
+      {
+        var sel = el.select(s);
+        clickable(sel);
+      });
 
       el.select("rect.frame").attr("x", function(d,i) { return locx(i); })
       .attr("y",  function(d,i) { return locy(i); })
@@ -341,9 +377,7 @@ angular.module('kkApp')
           return selectedValueI(d[1].aoperand[1]/$scope.mars.coreSize);
         else
           return valueI(d[1].aoperand[1]/$scope.mars.coreSize);
-      }).on("mouseover", function(d){return tooltip.text(d[1].toString()).style("visibility", "visible");})
-      .on("mousemove", function(d){return tooltip.text(d[1].toString()).style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-      .on("mouseout", function(d){return tooltip.style("visibility", "hidden");});
+      })
 
       el.select("path.bop").
       attr('d', function(d,i) {
@@ -355,9 +389,7 @@ angular.module('kkApp')
           return selectedValueI(d[1].boperand[1]/$scope.mars.coreSize);
         else
           return valueI(d[1].boperand[1]/$scope.mars.coreSize);
-      }).on("mouseover", function(d){return tooltip.text(d[1].toString()).style("visibility", "visible");})
-      .on("mousemove", function(d){return tooltip.text(d[1].toString()).style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-      .on("mouseout", function(d){return tooltip.style("visibility", "hidden");});;
+      });
 
       el.select("path.cmd").
       attr('d', function(d,i) {
