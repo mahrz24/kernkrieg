@@ -100,4 +100,4 @@ if __name__ == '__main__':
         q.job = schedule_queue(q)
     db.session.commit()
 
-    app.run(debug=True)#host='0.0.0.0', port=1234) #
+    app.run(host='0.0.0.0', port=1234, debug=True)

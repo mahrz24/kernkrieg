@@ -191,6 +191,7 @@ angular.module('kkApp')
         data = data.slice(0, 0 + $scope.visibleSize);
 
         d3.select("g#core-view").selectAll("g").remove();
+        d3.select("#tt").selectAll("div").remove();
 
         var g = $scope.appendRenderer(data);
         $scope.coreInner(g, 0);
@@ -237,6 +238,8 @@ angular.module('kkApp')
         var g = d3.select("g#core-view").selectAll("g").data(data);
         $scope.coreInner(g,offset);
 
+        d3.select("#tt").selectAll("div").style("visibility", "hidden");
+
         var row = d3.select("#detail-view").selectAll("tr").data($scope.mars.core.slice($scope.memorySelection[0], $scope.memorySelection[1]+1));
         row.selectAll("td").remove();
         $scope.detailRow(row);
@@ -277,7 +280,7 @@ angular.module('kkApp')
       var gridPCOther = d3.rgb(90, 210, 210);
       var cellSize = Math.floor($scope.cellWidth)-4;
 
-      var tooltip = d3.select("body")
+      var tooltip = d3.select("#tt")
       .append("div")
       .style("background", d3.rgb(220,220,220))
       .style("position", "absolute")

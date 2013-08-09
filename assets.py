@@ -75,7 +75,7 @@ css_base = Bundle(
     #'bower_components/flatui/css/flat-ui.css',
     'bower_components/ng-grid/ng-grid.min.css',
     'bower_components/CodeMirror/lib/codemirror.css',
-    'bower_components/CodeMirror/theme/monokai.css',
+    'bower_components/CodeMirror/theme/eclipse.css',
     filters='cssmin',
     output='gen/packed_base.css')
 assets.register('css_base', css_base)
