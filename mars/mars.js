@@ -628,7 +628,7 @@ module.exports = (function(){
                     pushToQueue = false;
                     break;
                 }
-                this.setOperand(writePointer[i],writeA[i], bvalue[i]/avalue[i]);
+                this.setOperand(writePointer[i],writeA[i], Math.floor(bvalue[i]/avalue[i]));
                 break;
             case "mod":
                 if(avalue[i] === 0)
