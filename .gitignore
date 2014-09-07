@@ -2,3 +2,4 @@
 mars/client
 **/gen/*
 **/.webassets-cache/*
+angular/app/bower_components/
