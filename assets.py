@@ -8,7 +8,7 @@ assets.init_app(app)
 # Assets
 js_base = Bundle(
     'bower_components/jquery/jquery.js',
-    'bower_components/lodash/lodash.js',
+    'bower_components/lodash/dist/lodash.js',
     'bower_components/bootstrap-sass/js/bootstrap-affix.js',
     'bower_components/bootstrap-sass/js/bootstrap-alert.js',
     'bower_components/bootstrap-sass/js/bootstrap-dropdown.js',
