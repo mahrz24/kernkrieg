@@ -1,10 +1,12 @@
-from flask.ext.wtf import Form, TextField, PasswordField, BooleanField, validators
+from flask.ext.wtf import Form
+from wtforms.fields import TextField, PasswordField, BooleanField
+from wtforms.validators import Required
 from models import User
 
 
 class LoginForm(Form):
-    username = TextField('username', [validators.Required()])
-    password = PasswordField('password', [validators.Required()])
+    username = TextField('username', [Required()])
+    password = PasswordField('password', [Required()])
     remember = BooleanField('remember')
 
     def __init__(self, *args, **kwargs):
