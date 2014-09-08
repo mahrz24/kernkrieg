@@ -1,3 +1,4 @@
+;
 angular.module('kkApp', ['kkNavigation','ngGrid', 'ngResource', 'd3', '$strap.directives'])
   .config(function ($routeProvider) {
     $routeProvider

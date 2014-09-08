@@ -1,0 +1,52 @@
+{
+  "name": "angular-d3",
+  "version": "0.0.1",
+  "main": "angular-d3.js",
+  "description": "d3 for Angular.js",
+  "homepage": "https://github.com/gdi2290/angular-d3",
+  "bugs": "https://github.com/gdi2290/angular-d3/issues",
+  "author": {
+    "name": "Patrick Stapleton",
+    "email": "patrick@gdi2290.com",
+    "url": "www.gdi2290.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:gdi2290/angular-d3.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT"
+    }
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "load-grunt-tasks": "~0.1.0",
+    "time-grunt": "~0.1.0",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt-contrib-watch": "~0.5.0"
+  },
+  "readme": "# angular-d3\n",
+  "_id": "angular-d3@0.0.1",
+  "dist": {
+    "shasum": "c9d4a458f6b4a7947142e48b50e6fa9de2a203c9",
+    "tarball": "http://registry.npmjs.org/angular-d3/-/angular-d3-0.0.1.tgz"
+  },
+  "_npmVersion": "1.1.63",
+  "_npmUser": {
+    "name": "gdi2290",
+    "email": "npm@gdi2290.com"
+  },
+  "maintainers": [
+    {
+      "name": "gdi2290",
+      "email": "npm@gdi2290.com"
+    }
+  ],
+  "directories": {},
+  "_shasum": "c9d4a458f6b4a7947142e48b50e6fa9de2a203c9",
+  "_from": "angular-d3@*",
+  "_resolved": "https://registry.npmjs.org/angular-d3/-/angular-d3-0.0.1.tgz"
+}
